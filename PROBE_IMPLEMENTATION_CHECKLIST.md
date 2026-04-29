@@ -77,11 +77,13 @@
 - 设置必要 env：`WIKI_PROBE_DB`、`WIKI_ADMIN_TOKEN`。
 
 验收：
+- 部署前验证：`docker compose config`
 - `docker compose build`
+- 确认 `probe-hub` 未配置 `ports:`，只通过 compose 网络供 nginx 访问。
 - 本地 compose 启动后：`curl http://127.0.0.1:3320/api/public/probes/snapshot`
 - 线上部署后：`https://wiki.kele.my/api/public/probes/snapshot` 返回 200，且无敏感字段。
 
-状态：未开始。
+状态：已完成，未部署。
 
 ## 批次 D：Probe Agent
 

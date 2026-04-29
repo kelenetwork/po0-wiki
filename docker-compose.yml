@@ -3,5 +3,21 @@ services:
     build: .
     container_name: wiki-kele
     restart: unless-stopped
+    depends_on:
+      - probe-hub
     ports:
       - "3320:80"
+
+  probe-hub:
+    build: ./server
+    container_name: wiki-kele-probe-hub
+    restart: unless-stopped
+    environment:
+      WIKI_PROBE_ADDR: :3331
+      WIKI_PROBE_DB: /data/probe.db
+      WIKI_ADMIN_TOKEN: ${WIKI_ADMIN_TOKEN:-dev-token}
+    volumes:
+      - probe-data:/data
+
+volumes:
+  probe-data:
