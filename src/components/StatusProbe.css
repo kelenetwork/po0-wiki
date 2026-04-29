@@ -536,3 +536,134 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+.dot.offline { background: #ef4444; }
+.node-status--offline { color: #dc2626; background: rgba(239, 68, 68, 0.13); }
+
+.latency-card {
+  display: grid;
+  grid-template-rows: minmax(2.4em, auto) 3.2rem 1.5rem minmax(1.4rem, auto);
+  align-content: start;
+  gap: 8px;
+  min-height: 174px;
+}
+
+.latency-card__location {
+  display: -webkit-box;
+  min-height: 2.4em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.latency-card__value {
+  display: inline-flex !important;
+  align-items: baseline;
+  gap: 0.26em;
+  min-width: 0;
+  margin: 0 !important;
+  white-space: nowrap;
+}
+
+.latency-card__value .unit,
+.probe-row .unit {
+  flex: 0 0 auto;
+  font-size: 0.46em;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.latency-card--pending .latency-card__value {
+  color: #64748b;
+  font-size: clamp(1.34rem, 3vw, 1.72rem);
+  letter-spacing: -0.04em;
+}
+
+.latency-card p {
+  overflow: hidden;
+  color: var(--kele-ink, #101827);
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.latency-card__meta {
+  align-self: end;
+  gap: 10px;
+  min-height: 1.4rem;
+}
+
+.latency-card__meta small {
+  white-space: nowrap;
+}
+
+.latency-chart {
+  display: block;
+  min-height: 320px;
+}
+
+.chart-grid {
+  stroke: var(--kele-line, rgba(25, 38, 65, 0.12));
+  stroke-width: 1;
+}
+
+.chart-grid--vertical {
+  stroke-dasharray: 3 6;
+  opacity: 0.68;
+}
+
+.chart-axis,
+.chart-empty {
+  fill: var(--kele-muted, #64748b);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.chart-axis-title {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.chart-jitter {
+  opacity: 0.23;
+  stroke-linecap: round;
+  stroke-width: 8;
+}
+
+.chart-line {
+  fill: none;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 8px 14px rgba(15, 23, 42, 0.16));
+}
+
+.chart-loss-bin {
+  rx: 2px;
+}
+
+.chart-hit-area {
+  cursor: crosshair;
+  fill: transparent;
+}
+
+.chart-tooltip {
+  pointer-events: none;
+}
+
+.chart-tooltip rect {
+  fill: rgba(15, 23, 42, 0.92);
+  stroke: rgba(255, 255, 255, 0.16);
+}
+
+.chart-tooltip text {
+  fill: #e2e8f0;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.chart-hover-line {
+  stroke: rgba(148, 163, 184, 0.42);
+  stroke-dasharray: 4 4;
+  stroke-width: 1;
+}
