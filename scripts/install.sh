@@ -135,6 +135,13 @@ install_lg_tools() {
       if curl -fsSL "${nt_url}" -o /usr/bin/nexttrace.tmp; then
         chmod 0755 /usr/bin/nexttrace.tmp
         mv /usr/bin/nexttrace.tmp /usr/bin/nexttrace
+        # nexttrace needs raw socket / TTL manipulation; without these caps it
+        # warns and runs as a degraded ICMP traceroute.
+        if command -v setcap >/dev/null 2>&1; then
+          setcap cap_net_raw,cap_net_admin+eip /usr/bin/nexttrace || log "warning: setcap on nexttrace failed (will warn at runtime)"
+        else
+          log "warning: setcap not available; nexttrace will warn about missing caps"
+        fi
         # Clean up any old copy under /usr/local/bin so PATH lookup is unambiguous.
         rm -f /usr/local/bin/nexttrace
       else
