@@ -100,6 +100,53 @@ WantedBy=multi-user.target
 UNIT
 chmod 0644 "$UNIT_PATH"
 
+install_lg_tools() {
+  local pkgs="" pm=""
+  if command -v apt-get >/dev/null 2>&1; then
+    pm="apt"
+    pkgs="mtr-tiny traceroute iputils-ping"
+  elif command -v apk >/dev/null 2>&1; then
+    pm="apk"
+    pkgs="mtr iputils traceroute"
+  elif command -v dnf >/dev/null 2>&1; then
+    pm="dnf"
+    pkgs="mtr traceroute iputils"
+  elif command -v yum >/dev/null 2>&1; then
+    pm="yum"
+    pkgs="mtr traceroute iputils"
+  else
+    log "skipping LG tool install: unknown package manager"
+    return 0
+  fi
+  log "installing LG tools via ${pm}: ${pkgs}"
+  case "$pm" in
+    apt) DEBIAN_FRONTEND=noninteractive apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq $pkgs ;;
+    apk) apk add --no-cache $pkgs ;;
+    dnf) dnf install -y -q $pkgs ;;
+    yum) yum install -y -q $pkgs ;;
+  esac || log "warning: LG tool install returned non-zero (continuing)"
+  if ! command -v nexttrace >/dev/null 2>&1; then
+    case "$arch" in
+      amd64|arm64)
+        local nt_url="https://github.com/sjlleo/nexttrace/releases/latest/download/nexttrace_linux_${arch}"
+        log "downloading nexttrace from ${nt_url}"
+        if curl -fsSL "${nt_url}" -o /usr/local/bin/nexttrace; then
+          chmod +x /usr/local/bin/nexttrace
+        else
+          log "warning: nexttrace download failed (LG nexttrace tool will be unavailable)"
+          rm -f /usr/local/bin/nexttrace
+        fi
+        ;;
+      *) log "skipping nexttrace: unsupported arch ${arch}" ;;
+    esac
+  fi
+}
+
+case "${SKIP_LG_TOOLS:-}" in
+  1|true|TRUE|yes|YES) log "SKIP_LG_TOOLS set; not installing LG tools" ;;
+  *) install_lg_tools ;;
+esac
+
 log "starting ${SERVICE_NAME}"
 systemctl daemon-reload
 systemctl enable "$SERVICE_NAME" >/dev/null 2>&1 || true
