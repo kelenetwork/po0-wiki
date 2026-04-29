@@ -1,0 +1,44 @@
+import StatusProbe from '../src/components/StatusProbe';
+
+# 可乐 Wiki
+
+<div className="hero-panel">
+  <div>
+    <p className="eyebrow">wiki.kele.my</p>
+    <h2>一个干净、可持续扩展的中文知识库</h2>
+    <p>
+      用于沉淀项目文档、运维手册、服务说明与后续二次开发。当前基于 Rspress 构建，静态产物可由 Nginx 直接托管。
+    </p>
+    <div className="hero-actions">
+      <a href="/guide/getting-started">开始阅读</a>
+      <a href="/status" className="secondary">查看状态页</a>
+    </div>
+  </div>
+  <StatusProbe compact />
+</div>
+
+## 内容入口
+
+<div className="feature-grid">
+  <a className="feature-card" href="/guide/getting-started">
+    <span>01</span>
+    <h3>快速开始</h3>
+    <p>了解目录结构、本地开发和新增页面的基本方式。</p>
+  </a>
+  <a className="feature-card" href="/guide/content-guide">
+    <span>02</span>
+    <h3>内容规范</h3>
+    <p>统一文档命名、语气、链接和运维记录格式。</p>
+  </a>
+  <a className="feature-card" href="/guide/deployment">
+    <span>03</span>
+    <h3>部署说明</h3>
+    <p>使用 Docker + Nginx 运行静态站点，并预留 CF Tunnel 暴露方式。</p>
+  </a>
+</div>
+
+## 当前定位
+
+- **知识库**：记录项目说明、常见问题、操作流程与排障经验。
+- **运维入口**：后续可接入 TCPing、HTTP 探测、延迟图表与告警摘要。
+- **静态优先**：默认构建为静态文件，部署简单、可缓存、易迁移。

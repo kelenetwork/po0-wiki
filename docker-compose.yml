@@ -1,0 +1,7 @@
+services:
+  wiki-kele:
+    build: .
+    container_name: wiki-kele
+    restart: unless-stopped
+    ports:
+      - "3320:80"

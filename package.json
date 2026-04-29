@@ -1,0 +1,18 @@
+{
+  "name": "wiki-kele",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "rspress dev --host 0.0.0.0",
+    "build": "rspress build",
+    "preview": "rspress preview --host 0.0.0.0 --port 3320"
+  },
+  "dependencies": {
+    "@rspress/core": "latest",
+    "@rspress/plugin-sitemap": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest"
+  }
+}
