@@ -3,147 +3,114 @@ pageType: custom
 title: Po0 Atlas
 ---
 
-<div className="kele-home kele-home--cockpit">
-  <div className="atlas-shell">
-    <header className="atlas-topbar" aria-label="首页导航">
-      <a className="atlas-brand" href="/">
-        <span className="atlas-logo" />
-        <span>
-          <small>PO0.WIKI · PROBE ATLAS</small>
-          <strong>Po0 Atlas</strong>
-        </span>
-      </a>
-      <div className="atlas-topbar__right">
-        <span className="atlas-live"><i />LIVE <b>系统运行正常</b></span>
-        <a className="atlas-search" href="/guide/getting-started">搜索文档、路径、节点…<kbd>⌘K</kbd></a>
-        <a className="atlas-console" href="/admin/sources">控制台</a>
-      </div>
-    </header>
+<div className="po0-next">
+  <div className="po0-cursor-glow" />
+  <div className="po0-hud po0-hud--left">
+    SYS.REQ // PO0.WIKI<br />
+    COORD: 31.2304° N, 121.4737° E<br />
+    STATUS: <span>ONLINE</span>
+  </div>
+  <div className="po0-hud po0-hud--right">
+    PWR: 100%<br />
+    LINK: SECURE<br />
+    V. ATLAS
+  </div>
 
-    <section className="atlas-hero" aria-label="Po0 Atlas 首页">
-      <div className="atlas-copy">
-        <p className="atlas-kicker">Network Intelligence</p>
-        <h1>Po0 Atlas</h1>
-        <h2>网络探测 · 链路洞察 · 智能运维</h2>
-        <p>
-          把节点、线路、故障记录和运维手册收进同一个清爽入口。信息密度够高，但不把页面做成说明书。
+  <nav className="po0-nav" aria-label="Po0 Atlas navigation">
+    <a className="po0-logo" href="/">
+      PO0<span>.</span>WIKI
+    </a>
+    <a className="po0-console" href="/admin/sources">CONSOLE <i /></a>
+  </nav>
+
+  <main className="po0-main">
+    <section className="po0-hero" aria-label="Po0 Atlas">
+      <div className="po0-hero__content">
+        <p className="po0-tag">ENTER THE ROUTING PARADIGM</p>
+        <h1>
+          <span>BEYOND</span>
+          <span className="po0-glitch" data-text="LATENCY.">LATENCY.</span>
+        </h1>
+        <p className="po0-subtitle">
+          Po0 Atlas 将节点、线路、探测、故障记录与运维知识沉淀在同一个实时入口。它不是普通 Wiki，而是面向网络路径的可观测控制层。
         </p>
-        <div className="atlas-actions">
-          <a className="atlas-button atlas-button--primary" href="/guide/getting-started"><span />进入文档</a>
-          <a className="atlas-button" href="/status"><span />服务状态</a>
-          <a className="atlas-button" href="/looking-glass"><span />Looking Glass</a>
-        </div>
-        <div className="atlas-scan" aria-hidden="true">
-          <span>System Scan</span>
-          <i />
+        <div className="po0-actions">
+          <a className="po0-cyber-btn" href="/status">OPEN STATUS</a>
+          <a className="po0-cyber-btn po0-cyber-btn--ghost" href="/looking-glass">RUN LOOKING GLASS</a>
         </div>
       </div>
 
-      <aside className="atlas-route-panel" aria-label="实时路径">
-        <div className="atlas-panel-corners" />
-        <div className="atlas-panel-head">
-          <div>
-            <h2>实时路径</h2>
-            <span>Realtime Paths</span>
-          </div>
-          <strong><i />Live Monitoring</strong>
+      <aside className="po0-path-card" aria-label="实时路径小组件">
+        <header>
+          <span>REALTIME PATHS</span>
+          <strong><i />LIVE</strong>
+        </header>
+        <div className="po0-path-map">
+          <svg viewBox="0 0 560 230" role="presentation">
+            <path d="M26 158 C120 54 178 98 255 70 S414 38 524 84" />
+            <path d="M38 190 C148 122 202 162 288 126 S424 132 532 154" />
+            <path d="M70 58 C144 118 214 66 316 168 S440 206 536 188" />
+          </svg>
+          <span className="node n1" />
+          <span className="node n2" />
+          <span className="node n3" />
+          <span className="node n4" />
         </div>
-
-        <div className="atlas-route-body">
-          <div className="atlas-map" aria-hidden="true">
-            <span className="atlas-map-dot atlas-map-dot--a" />
-            <span className="atlas-map-dot atlas-map-dot--b" />
-            <span className="atlas-map-dot atlas-map-dot--c" />
-            <span className="atlas-map-dot atlas-map-dot--d" />
-            <svg viewBox="0 0 360 260" role="presentation">
-              <defs>
-                <linearGradient id="atlas-route-glow" x1="0" x2="1">
-                  <stop offset="0" stopColor="#2cf6ff" stopOpacity="0.15" />
-                  <stop offset="0.45" stopColor="#42ffd0" stopOpacity="1" />
-                  <stop offset="1" stopColor="#4d80ff" stopOpacity="0.4" />
-                </linearGradient>
-              </defs>
-              <path className="atlas-route-line atlas-route-line--one" d="M35 174 C88 78 122 118 172 78 S260 72 322 42" />
-              <path className="atlas-route-line atlas-route-line--two" d="M42 198 C104 128 144 166 194 134 S284 128 328 94" />
-              <path className="atlas-route-line atlas-route-line--three" d="M58 62 C108 126 152 94 212 160 S282 198 334 176" />
-            </svg>
-          </div>
-
-          <div className="atlas-route-list">
-            <article className="atlas-route-card atlas-route-card--best">
-              <span className="atlas-route-dot" />
-              <div>
-                <strong>🇨🇳 Po0-Tencent</strong>
-                <small>Po0 上海 → Po0-Tencent</small>
-              </div>
-              <em>23.83 ms<b>优秀</b></em>
-            </article>
-            <article className="atlas-route-card">
-              <span className="atlas-route-dot" />
-              <div>
-                <strong>🇨🇳 Po0-Tencent</strong>
-                <small>Po0 广州 → Po0-Tencent</small>
-              </div>
-              <em>6.40 ms<b>极佳</b></em>
-            </article>
-            <article className="atlas-route-card atlas-route-card--warn">
-              <span className="atlas-route-dot" />
-              <div>
-                <strong>🇨🇳 RFC CTC</strong>
-                <small>Po0 上海 → RFC CTC</small>
-              </div>
-              <em>24.59 ms<b>良好</b></em>
-            </article>
-          </div>
-        </div>
-
-        <div className="atlas-route-stats">
-          <span><b>128</b>源节点</span>
-          <span><b>98</b>在线节点</span>
-          <span><b>18.67 ms</b>平均延迟</span>
-          <span><b>0.01%</b>丢包率</span>
+        <div className="po0-path-list">
+          <article><b>Po0 上海 → Tencent</b><em>23.83 ms</em></article>
+          <article><b>Po0 广州 → Tencent</b><em>6.40 ms</em></article>
+          <article><b>Po0 上海 → RFC CTC</b><em>24.59 ms</em></article>
         </div>
       </aside>
     </section>
 
-    <section className="atlas-telemetry" aria-label="实时遥测底座">
-      <div className="atlas-telemetry__grid">
-        <article>
-          <span>Online Nodes</span>
-          <strong>98</strong>
-          <small>active / 128 total</small>
-        </article>
-        <article>
-          <span>Probe Runs</span>
-          <strong>12.8k</strong>
-          <small>24h dispatch</small>
-        </article>
-        <article>
-          <span>Avg Latency</span>
-          <strong>18.67ms</strong>
-          <small>global median</small>
-        </article>
-        <article>
-          <span>Packet Loss</span>
-          <strong>0.01%</strong>
-          <small>stable window</small>
-        </article>
-        <article>
-          <span>Alerts</span>
-          <strong>03</strong>
-          <small>watching jitter</small>
-        </article>
-      </div>
+    <section className="po0-marquee" aria-label="能力滚动条">
+      <div>// PO0 GLOBAL PROBE // LOOKING GLASS DISPATCH // PUBLIC SNAPSHOT API // ROUTE OBSERVABILITY // KNOWLEDGE CORE // AGENT MESH // PO0 GLOBAL PROBE // LOOKING GLASS DISPATCH</div>
+    </section>
 
-      <div className="atlas-event-stream" aria-label="事件流">
-        <span>Event Stream</span>
-        <div className="atlas-event-track">
-          <p>07:28 src-shanghai → Po0-Tencent · 23.83ms · stable</p>
-          <p>07:27 src-guangzhou → Po0-Tencent · 6.40ms · excellent</p>
-          <p>07:26 RFC CTC jitter +2.1ms · watching</p>
-          <p>07:25 agent heartbeat received · 98 online</p>
-        </div>
+    <section className="po0-section" aria-label="架构能力">
+      <h2>Architecture <br /><span>Engineered</span></h2>
+      <div className="po0-divider"><i /></div>
+      <div className="po0-grid-cards">
+        <article>
+          <span>01</span>
+          <h3>Agent Mesh</h3>
+          <p>真实源节点主动出站，Hub 只派发任务。每条路径都来自实际 agent 执行结果。</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>Route Intelligence</h3>
+          <p>延迟、丢包、抖动、MTR 与 Nexttrace 汇入同一张路径视图，快速定位链路变化。</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Knowledge Core</h3>
+          <p>Rspress 保持文档可读性，状态和工具台负责实时操作，长期知识与实时数据不混杂。</p>
+        </article>
       </div>
     </section>
-  </div>
+
+    <section className="po0-telemetry" aria-label="实时遥测">
+      <div>
+        <h2>Real-Time<br /><span>Telemetry</span></h2>
+        <p>把每一次探测、每一个 agent 心跳和每条路径的健康度，压缩成可持续观察的网络态势。</p>
+        <div className="po0-metrics">
+          <div><span>ONLINE AGENTS</span><b>98 / 128</b><i style={{'--w': '76%'}} /></div>
+          <div><span>GLOBAL SUCCESS RATE</span><b>99.9%</b><i style={{'--w': '99%'}} /></div>
+        </div>
+      </div>
+      <div className="po0-server-rack">
+        <span /> <span /> <span /> <span /> <span /> <span /> <span /> <span />
+      </div>
+      <aside className="po0-implementation">
+        <span>IMPLEMENTATION PATH</span>
+        <ol>
+          <li>Agent online</li>
+          <li>Dispatch probe</li>
+          <li>Snapshot sync</li>
+          <li>Observe route</li>
+        </ol>
+      </aside>
+    </section>
+  </main>
 </div>
