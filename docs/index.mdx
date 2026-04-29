@@ -105,5 +105,45 @@ title: Po0 Atlas
         </div>
       </aside>
     </section>
+
+    <section className="atlas-telemetry" aria-label="实时遥测底座">
+      <div className="atlas-telemetry__grid">
+        <article>
+          <span>Online Nodes</span>
+          <strong>98</strong>
+          <small>active / 128 total</small>
+        </article>
+        <article>
+          <span>Probe Runs</span>
+          <strong>12.8k</strong>
+          <small>24h dispatch</small>
+        </article>
+        <article>
+          <span>Avg Latency</span>
+          <strong>18.67ms</strong>
+          <small>global median</small>
+        </article>
+        <article>
+          <span>Packet Loss</span>
+          <strong>0.01%</strong>
+          <small>stable window</small>
+        </article>
+        <article>
+          <span>Alerts</span>
+          <strong>03</strong>
+          <small>watching jitter</small>
+        </article>
+      </div>
+
+      <div className="atlas-event-stream" aria-label="事件流">
+        <span>Event Stream</span>
+        <div className="atlas-event-track">
+          <p>07:28 src-shanghai → Po0-Tencent · 23.83ms · stable</p>
+          <p>07:27 src-guangzhou → Po0-Tencent · 6.40ms · excellent</p>
+          <p>07:26 RFC CTC jitter +2.1ms · watching</p>
+          <p>07:25 agent heartbeat received · 98 online</p>
+        </div>
+      </div>
+    </section>
   </div>
 </div>

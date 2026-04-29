@@ -1258,3 +1258,138 @@ body:has(.kele-home--cockpit),
 body:has(.kele-home--cockpit) #root {
   background: #030814 !important;
 }
+
+/* Bottom telemetry dock: fills lower homepage without bringing back entry cards */
+.atlas-telemetry {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
+  border: 1px solid rgba(78, 222, 255, 0.22);
+  border-radius: 24px;
+  padding: 14px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 0, rgba(56, 247, 255, 0.12), transparent 18rem),
+    radial-gradient(circle at 82% 100%, rgba(77, 128, 255, 0.12), transparent 18rem),
+    linear-gradient(135deg, rgba(8, 20, 36, 0.76), rgba(5, 13, 25, 0.55));
+  box-shadow: inset 0 0 0 1px rgba(114, 235, 255, 0.05), 0 0 40px rgba(34, 197, 255, 0.08);
+  backdrop-filter: blur(18px);
+  animation: atlasRise 0.7s 0.28s ease both;
+}
+
+.atlas-telemetry::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.42;
+  background:
+    linear-gradient(90deg, transparent, rgba(56, 247, 255, 0.14), transparent),
+    repeating-linear-gradient(90deg, transparent 0 38px, rgba(56, 247, 255, 0.06) 38px 39px, transparent 39px 78px);
+  transform: translateX(-60%);
+  animation: atlasDockSweep 5.8s linear infinite;
+}
+
+.atlas-telemetry__grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid rgba(78, 222, 255, 0.14);
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(78, 222, 255, 0.13);
+}
+
+.atlas-telemetry article {
+  min-height: 92px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  padding: 16px 18px;
+  background: rgba(3, 8, 20, 0.62);
+}
+
+.atlas-telemetry article span {
+  color: #6e97aa;
+  font-family: var(--kele-mono);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.atlas-telemetry article strong {
+  color: #effbff;
+  font-family: var(--kele-mono);
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  line-height: 1;
+  text-shadow: 0 0 18px rgba(56, 247, 255, 0.32);
+}
+
+.atlas-telemetry article small {
+  color: #63869a;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.atlas-event-stream {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  border: 1px solid rgba(78, 222, 255, 0.14);
+  border-radius: 16px;
+  padding: 9px 12px;
+  overflow: hidden;
+  background: rgba(3, 8, 20, 0.48);
+}
+
+.atlas-event-stream > span {
+  color: var(--atlas-green);
+  font-family: var(--kele-mono);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.atlas-event-track {
+  display: flex;
+  width: max-content;
+  gap: 32px;
+  color: #8db5c7;
+  font-family: var(--kele-mono);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  animation: atlasTicker 24s linear infinite;
+}
+
+.atlas-event-track p {
+  margin: 0;
+}
+
+@keyframes atlasDockSweep {
+  to { transform: translateX(60%); }
+}
+
+@keyframes atlasTicker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (max-width: 920px) {
+  .atlas-telemetry__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .atlas-event-stream {
+    grid-template-columns: 1fr;
+  }
+}
