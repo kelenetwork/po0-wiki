@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -43,7 +44,7 @@ func runLGJob(parent context.Context, job LGJob) (string, string) {
 
 func runLGCommand(ctx context.Context, name string, args []string) (string, error) {
 	if _, err := exec.LookPath(name); err != nil {
-		return "", fmt.Errorf("agent host missing tool: %s, please install", name)
+		return "", fmt.Errorf("agent host missing tool: %s (PATH=%s, LookPath=%v)", name, os.Getenv("PATH"), err)
 	}
 	cmd := exec.CommandContext(ctx, name, args...)
 	data, err := cmd.CombinedOutput()
