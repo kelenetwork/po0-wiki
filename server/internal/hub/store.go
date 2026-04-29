@@ -379,19 +379,25 @@ func (s *Store) Snapshot(ctx context.Context) (Snapshot, error) {
 }
 
 func (s *Store) ListSources(ctx context.Context) ([]Source, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, region, tags, status, updated_at FROM sources ORDER BY id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT s.id, s.display_name, s.region, s.tags, s.status, s.updated_at, COALESCE(a.last_reported_at, '') FROM sources s LEFT JOIN agents a ON a.id = s.id ORDER BY s.id`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	var sources []Source
+	now := time.Now().UTC()
 	for rows.Next() {
 		var source Source
 		var tags string
-		if err := rows.Scan(&source.ID, &source.DisplayName, &source.Region, &tags, &source.Status, &source.UpdatedAt); err != nil {
+		var lastReportedAt string
+		if err := rows.Scan(&source.ID, &source.DisplayName, &source.Region, &tags, &source.Status, &source.UpdatedAt, &lastReportedAt); err != nil {
 			return nil, err
 		}
 		source.Tags = decodeTags(tags)
+		source.Status = derivedSourceStatus(lastReportedAt, now)
+		if strings.TrimSpace(lastReportedAt) != "" {
+			source.UpdatedAt = lastReportedAt
+		}
 		sources = append(sources, source)
 	}
 	return sources, rows.Err()
@@ -971,10 +977,6 @@ func (s *Store) RecordAgentResults(ctx context.Context, agentID string, results 
 		if err != nil {
 			return accepted, err
 		}
-		_, err = tx.ExecContext(ctx, `UPDATE sources SET status = 'online', updated_at = ? WHERE id = ?`, now, agentID)
-		if err != nil {
-			return accepted, err
-		}
 	}
 	if err := tx.Commit(); err != nil {
 		return accepted, err
@@ -1165,6 +1167,28 @@ func agentConfigJSON(agentID, token, hubURL string) string {
   "tcp_timeout_ms": 3000,
   "insecure_skip_verify": false
 }`, agentID, hubURL, token)
+}
+
+func derivedSourceStatus(lastReportedAt string, now time.Time) string {
+	value := strings.TrimSpace(lastReportedAt)
+	if value == "" {
+		return "pending"
+	}
+	reportedAt, err := time.Parse(time.RFC3339, value)
+	if err != nil {
+		return "offline"
+	}
+	age := now.Sub(reportedAt)
+	if age < 0 {
+		age = 0
+	}
+	if age < 90*time.Second {
+		return "online"
+	}
+	if age < 5*time.Minute {
+		return "warn"
+	}
+	return "offline"
 }
 
 func defaultStatus(status string) string {
