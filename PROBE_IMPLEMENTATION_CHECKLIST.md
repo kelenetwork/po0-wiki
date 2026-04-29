@@ -120,7 +120,7 @@
 - Public snapshot 只显示别名和监控指标。
 - Agent 接入命令可复制使用。
 
-状态：未开始。
+状态：已由批次 E（新版）覆盖，待验收。
 
 ## 批次 F：Looking Glass 手动任务
 
@@ -159,5 +159,52 @@
   - 顶层包含 `sources`、`targets`、`checks`、`series`。
   - check 项含 `source_id`、`target_id`、`latency_ms`、`loss_pct`、`jitter_ms`、`updated_at`。
   - 不出现 `host`、`ip`、`address`、`port`。
+
+状态：已完成，待验收。
+
+## 批次 E（新版）：管理后台 + Agent 接入命令
+
+范围：
+- 新增 admin UI：登录页、源机器/目标/任务/Agent 四个管理页
+- 扩展 hub admin 端点：targets/checks 创建编辑、agent token 重置、生成 agent 安装脚本
+- 在 Rspress 中挂 `/admin` 路由
+
+允许修改：
+- `src/components/admin/*`、`src/pages/admin/*`、`src/styles/*`
+- `docs/admin*.mdx`（如需）
+- `rspress.config.ts`
+- `server/internal/hub/*.go`、`server/main.go`
+- `PROBE_IMPLEMENTATION_CHECKLIST.md`
+
+禁止修改：
+- `Dockerfile`、`docker-compose.yml`、`nginx/default.conf`、`server/Dockerfile`
+- `agent/`
+- 既有 `/status` 与 `/looking-glass`（不动现有公开页面行为）
+
+要求：
+1. 登录页 `/admin`：用户输入 admin token，存 localStorage；token 不写进 bundle。
+2. 源机器管理 `/admin/sources`：列表 / 新增 / 编辑（display_name、region、tags），不需要 host/port。
+3. 目标管理 `/admin/targets`：列表 / 新增 / 编辑（display_name、region、tags、真实 host、真实 port）；host/port 仅 admin 可见。
+4. 任务管理 `/admin/checks`：列表 / 新增 / 编辑，选 source × target、interval_seconds、tags、enabled。
+5. Agent 管理 `/admin/agents`：列表（仅展示 token 前缀、last_seen、hostname）、重置 token、复制接入命令。
+6. Hub 增补必要端点：
+   - `POST/PUT /api/admin/targets`、`POST/PUT /api/admin/checks`
+   - `POST /api/admin/agents/{id}/reset-token` 重新生成明文 token（仅一次返回）
+   - `GET /api/admin/agents/{id}/install` 返回 agent 安装片段（systemd 版），含一次性 token；调用一次后 token 失效或仅在 reset 后能再取
+7. 安全：
+   - admin 端点全部 `Authorization: Bearer $WIKI_ADMIN_TOKEN`
+   - admin token 不写进前端 bundle，仅 localStorage
+   - public snapshot 严禁返回 host/port
+   - 安装脚本里 token 明文仅显示一次，刷新页面消失
+
+验收：
+- `npm run build` 通过
+- `go test ./... && go build ./...`（server 目录）通过
+- 临时本地起 hub：
+  - 未带 admin token 访问 `/api/admin/*` 返回 401
+  - 带 token 能创建 source/target/check
+  - 创建 agent 能拿到一次性明文 token
+  - 复位 token 后旧 token 失效
+- public snapshot 仍无 `host/ip/address/port`
 
 状态：已完成，待验收。

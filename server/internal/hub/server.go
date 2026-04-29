@@ -27,15 +27,38 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("GET /api/public/probes/stream", s.publicStream)
 	mux.HandleFunc("GET /api/admin/sources", s.adminSources)
 	mux.HandleFunc("POST /api/admin/sources", s.adminSources)
+	mux.HandleFunc("PUT /api/admin/sources/{id}", s.adminSource)
 	mux.HandleFunc("GET /api/admin/targets", s.adminTargets)
 	mux.HandleFunc("POST /api/admin/targets", s.adminTargets)
+	mux.HandleFunc("PUT /api/admin/targets/{id}", s.adminTarget)
 	mux.HandleFunc("GET /api/admin/checks", s.adminChecks)
 	mux.HandleFunc("POST /api/admin/checks", s.adminChecks)
+	mux.HandleFunc("PUT /api/admin/checks/{id}", s.adminCheck)
 	mux.HandleFunc("GET /api/admin/agents", s.adminAgents)
 	mux.HandleFunc("POST /api/admin/agents", s.adminAgents)
+	mux.HandleFunc("POST /api/admin/agents/{id}/reset-token", s.adminAgentResetToken)
+	mux.HandleFunc("GET /api/admin/agents/{id}/install", s.adminAgentInstall)
 	mux.HandleFunc("POST /api/agent/poll", s.agentPoll)
 	mux.HandleFunc("POST /api/agent/report", s.agentReport)
 	return mux
+}
+
+func (s *Server) adminSource(w http.ResponseWriter, r *http.Request) {
+	if !s.authorized(r) {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	var req UpdateSourceRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	item, err := s.store.UpdateSource(r.Context(), r.PathValue("id"), req)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, item)
 }
 
 func (s *Server) healthz(w http.ResponseWriter, _ *http.Request) {
@@ -123,7 +146,7 @@ func (s *Server) adminTargets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method == http.MethodGet {
-		items, err := s.store.ListTargets(r.Context())
+		items, err := s.store.ListAdminTargets(r.Context())
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "targets unavailable")
 			return
@@ -136,12 +159,33 @@ func (s *Server) adminTargets(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	item, err := s.store.CreateTarget(r.Context(), req)
+	created, err := s.store.CreateTarget(r.Context(), req)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	endpoint, _ := targetEndpoint(req)
+	host, port, _ := splitEndpoint(endpoint)
+	item := AdminTarget{ID: created.ID, DisplayName: created.DisplayName, Region: created.Region, Tags: created.Tags, Status: created.Status, Host: host, Port: port, UpdatedAt: created.UpdatedAt}
 	writeJSON(w, http.StatusCreated, item)
+}
+
+func (s *Server) adminTarget(w http.ResponseWriter, r *http.Request) {
+	if !s.authorized(r) {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	var req CreateTargetRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	item, err := s.store.UpdateTarget(r.Context(), r.PathValue("id"), req)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, item)
 }
 
 func (s *Server) adminChecks(w http.ResponseWriter, r *http.Request) {
@@ -150,7 +194,7 @@ func (s *Server) adminChecks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method == http.MethodGet {
-		items, err := s.store.ListChecks(r.Context())
+		items, err := s.store.ListAdminChecks(r.Context())
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "checks unavailable")
 			return
@@ -169,6 +213,24 @@ func (s *Server) adminChecks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusCreated, item)
+}
+
+func (s *Server) adminCheck(w http.ResponseWriter, r *http.Request) {
+	if !s.authorized(r) {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	var req CreateCheckRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	item, err := s.store.UpdateCheck(r.Context(), r.PathValue("id"), req)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, item)
 }
 
 func (s *Server) adminAgents(w http.ResponseWriter, r *http.Request) {
@@ -196,6 +258,36 @@ func (s *Server) adminAgents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusCreated, created)
+}
+
+func (s *Server) adminAgentResetToken(w http.ResponseWriter, r *http.Request) {
+	if !s.authorized(r) {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	created, err := s.store.ResetAgentToken(r.Context(), r.PathValue("id"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, created)
+}
+
+func (s *Server) adminAgentInstall(w http.ResponseWriter, r *http.Request) {
+	if !s.authorized(r) {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	install, err := s.store.ConsumeAgentInstall(r.Context(), r.PathValue("id"), "https://wiki.kele.my/api/agent")
+	if err != nil {
+		if strings.Contains(err.Error(), "reset token") {
+			writeError(w, http.StatusConflict, err.Error())
+			return
+		}
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, install)
 }
 
 func (s *Server) agentPoll(w http.ResponseWriter, r *http.Request) {
