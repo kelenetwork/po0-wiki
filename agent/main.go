@@ -3,17 +3,25 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"sync"
 	"time"
 )
 
-const version = "v0.2.0"
+// version is injected at build time via -ldflags "-X main.version=...".
+// Default is "dev" so local go run still works.
+var version = "dev"
 
 func main() {
 	configPath := flag.String("config", "/etc/wiki-probe-agent.json", "path to JSON config")
+	showVersion := flag.Bool("version", false, "print version and exit")
 	flag.Parse()
+	if *showVersion {
+		fmt.Println(version)
+		return
+	}
 	cfg, err := loadConfig(*configPath)
 	if err != nil {
 		log.Fatalf("load config: %v", err)
