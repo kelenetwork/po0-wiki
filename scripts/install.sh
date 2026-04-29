@@ -126,21 +126,24 @@ install_lg_tools() {
     dnf) dnf install -y -q $pkgs ;;
     yum) yum install -y -q $pkgs ;;
   esac || log "warning: LG tool install returned non-zero (continuing)"
-  if ! command -v nexttrace >/dev/null 2>&1; then
-    case "$arch" in
-      amd64|arm64)
-        local nt_url="https://github.com/sjlleo/nexttrace/releases/latest/download/nexttrace_linux_${arch}"
-        log "downloading nexttrace from ${nt_url}"
-        if curl -fsSL "${nt_url}" -o /usr/local/bin/nexttrace; then
-          chmod +x /usr/local/bin/nexttrace
-        else
-          log "warning: nexttrace download failed (LG nexttrace tool will be unavailable)"
-          rm -f /usr/local/bin/nexttrace
-        fi
-        ;;
-      *) log "skipping nexttrace: unsupported arch ${arch}" ;;
-    esac
-  fi
+  # Always (re)install nexttrace to /usr/bin so it lives on the default PATH
+  # even under strict systemd sandboxing (ProtectSystem=strict, DynamicUser).
+  case "$arch" in
+    amd64|arm64)
+      local nt_url="https://github.com/sjlleo/nexttrace/releases/latest/download/nexttrace_linux_${arch}"
+      log "downloading nexttrace from ${nt_url}"
+      if curl -fsSL "${nt_url}" -o /usr/bin/nexttrace.tmp; then
+        chmod +x /usr/bin/nexttrace.tmp
+        mv /usr/bin/nexttrace.tmp /usr/bin/nexttrace
+        # Clean up any old copy under /usr/local/bin so PATH lookup is unambiguous.
+        rm -f /usr/local/bin/nexttrace
+      else
+        log "warning: nexttrace download failed (LG nexttrace tool will be unavailable)"
+        rm -f /usr/bin/nexttrace.tmp
+      fi
+      ;;
+    *) log "skipping nexttrace: unsupported arch ${arch}" ;;
+  esac
 }
 
 case "${SKIP_LG_TOOLS:-}" in
