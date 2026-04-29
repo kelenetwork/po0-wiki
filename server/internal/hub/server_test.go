@@ -270,6 +270,63 @@ func assertNoForbiddenKeys(t *testing.T, value any, forbidden map[string]bool) {
 	}
 }
 
+func TestSlugifyAndGeneratedIDs(t *testing.T) {
+	cases := []struct {
+		name string
+		want string
+	}{
+		{name: "New Source 01", want: "src-new-source-01"},
+		{name: "  ", want: "src-item"},
+		{name: "香港入口", want: "src-item"},
+		{name: "A_B ! C", want: "src-a-b-c"},
+	}
+	for _, tc := range cases {
+		if got := slugify("src", tc.name); got != tc.want {
+			t.Fatalf("slugify(%q) = %q, want %q", tc.name, got, tc.want)
+		}
+	}
+}
+
+func TestAdminPostAcceptsNameAndGeneratesUniqueIDs(t *testing.T) {
+	server := newTestServer(t)
+
+	for index, want := range []string{"src-new-source", "src-new-source-2"} {
+		body := strings.NewReader(`{"name":"New Source","region":"test","tags":["auto"]}`)
+		req := httptest.NewRequest(http.MethodPost, "/api/admin/sources", body)
+		req.Header.Set("Authorization", "Bearer test-token")
+		rec := httptest.NewRecorder()
+		server.Routes().ServeHTTP(rec, req)
+		if rec.Code != http.StatusCreated {
+			t.Fatalf("create source %d status = %d body = %s", index, rec.Code, rec.Body.String())
+		}
+		var source Source
+		if err := json.Unmarshal(rec.Body.Bytes(), &source); err != nil {
+			t.Fatalf("decode source: %v", err)
+		}
+		if source.ID != want || source.DisplayName != "New Source" {
+			t.Fatalf("source = %+v, want id %q display New Source", source, want)
+		}
+	}
+
+	targetBody := strings.NewReader(`{"name":"Wiki Target"}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/admin/targets", targetBody)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec := httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusCreated || !strings.Contains(rec.Body.String(), `"id":"tgt-wiki-target"`) {
+		t.Fatalf("create target status = %d body = %s", rec.Code, rec.Body.String())
+	}
+
+	checkBody := strings.NewReader(`{"name":"New Source to Wiki Target","enabled":true}`)
+	req = httptest.NewRequest(http.MethodPost, "/api/admin/checks", checkBody)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusCreated || !strings.Contains(rec.Body.String(), `"id":"chk-new-source-to-wiki-target"`) {
+		t.Fatalf("create check status = %d body = %s", rec.Code, rec.Body.String())
+	}
+}
+
 func TestAgentPollReportUpdatesPublicSnapshot(t *testing.T) {
 	server := newTestServer(t)
 

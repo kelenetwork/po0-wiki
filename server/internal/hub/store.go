@@ -11,7 +11,9 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -101,6 +103,7 @@ type Snapshot struct {
 
 type CreateSourceRequest struct {
 	ID          string   `json:"id"`
+	Name        string   `json:"name"`
 	DisplayName string   `json:"display_name"`
 	Region      string   `json:"region"`
 	Tags        []string `json:"tags"`
@@ -110,6 +113,7 @@ type CreateSourceRequest struct {
 
 type CreateTargetRequest struct {
 	ID          string   `json:"id"`
+	Name        string   `json:"name"`
 	DisplayName string   `json:"display_name"`
 	Region      string   `json:"region"`
 	Tags        []string `json:"tags"`
@@ -121,6 +125,7 @@ type CreateTargetRequest struct {
 
 type CreateCheckRequest struct {
 	ID              string   `json:"id"`
+	Name            string   `json:"name"`
 	DisplayName     string   `json:"display_name"`
 	SourceID        string   `json:"source_id"`
 	TargetID        string   `json:"target_id"`
@@ -476,6 +481,12 @@ func (s *Store) ListSeriesSummary(ctx context.Context) ([]SeriesSummary, error) 
 }
 
 func (s *Store) CreateSource(ctx context.Context, req CreateSourceRequest) (Source, error) {
+	prepared, err := s.prepareCreateID(ctx, "sources", "src", req.ID, req.Name, req.DisplayName)
+	if err != nil {
+		return Source{}, err
+	}
+	req.ID = prepared.ID
+	req.DisplayName = prepared.DisplayName
 	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
 	if err := insertSource(ctx, s.db, req, now); err != nil {
 		return Source{}, err
@@ -484,6 +495,12 @@ func (s *Store) CreateSource(ctx context.Context, req CreateSourceRequest) (Sour
 }
 
 func (s *Store) CreateTarget(ctx context.Context, req CreateTargetRequest) (Target, error) {
+	prepared, err := s.prepareCreateID(ctx, "targets", "tgt", req.ID, req.Name, req.DisplayName)
+	if err != nil {
+		return Target{}, err
+	}
+	req.ID = prepared.ID
+	req.DisplayName = prepared.DisplayName
 	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
 	if err := insertTarget(ctx, s.db, req, now); err != nil {
 		return Target{}, err
@@ -532,6 +549,12 @@ func (s *Store) UpdateTarget(ctx context.Context, id string, req CreateTargetReq
 }
 
 func (s *Store) CreateCheck(ctx context.Context, req CreateCheckRequest) (Check, error) {
+	prepared, err := s.prepareCreateID(ctx, "checks", "chk", req.ID, req.Name, req.DisplayName)
+	if err != nil {
+		return Check{}, err
+	}
+	req.ID = prepared.ID
+	req.DisplayName = prepared.DisplayName
 	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
 	if err := insertCheck(ctx, s.db, req, now); err != nil {
 		return Check{}, err
@@ -560,6 +583,77 @@ func (s *Store) UpdateCheck(ctx context.Context, id string, req CreateCheckReque
 		return AdminCheck{}, errors.New("check not found")
 	}
 	return AdminCheck{ID: id, DisplayName: req.DisplayName, SourceID: req.SourceID, TargetID: req.TargetID, Tags: req.Tags, Status: defaultCheckStatus(req.Status), LatencyMS: req.LatencyMS, LossPct: req.LossPct, JitterMS: req.JitterMS, IntervalSeconds: interval, Enabled: enabled != 0, UpdatedAt: now}, nil
+}
+
+type preparedCreateID struct {
+	ID          string
+	DisplayName string
+}
+
+var legalIDPattern = regexp.MustCompile(`^[a-z0-9-]+$`)
+
+func (s *Store) prepareCreateID(ctx context.Context, table string, prefix string, id string, name string, displayName string) (preparedCreateID, error) {
+	display := strings.TrimSpace(displayName)
+	if display == "" {
+		display = strings.TrimSpace(name)
+	}
+	if display == "" {
+		display = "未命名"
+	}
+	if id != "" {
+		if !legalIDPattern.MatchString(id) {
+			return preparedCreateID{}, errors.New("id must contain only lowercase letters, numbers, and hyphens")
+		}
+		return preparedCreateID{ID: id, DisplayName: display}, nil
+	}
+	generated, err := s.nextSlugID(ctx, table, prefix, display)
+	if err != nil {
+		return preparedCreateID{}, err
+	}
+	return preparedCreateID{ID: generated, DisplayName: display}, nil
+}
+
+func (s *Store) nextSlugID(ctx context.Context, table string, prefix string, name string) (string, error) {
+	base := slugify(prefix, name)
+	for index := 1; ; index++ {
+		candidate := base
+		if index > 1 {
+			candidate = fmt.Sprintf("%s-%d", base, index)
+		}
+		var exists int
+		query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE id = ?", table)
+		if err := s.db.QueryRowContext(ctx, query, candidate).Scan(&exists); err != nil {
+			return "", err
+		}
+		if exists == 0 {
+			return candidate, nil
+		}
+	}
+}
+
+func slugify(prefix string, name string) string {
+	value := strings.ToLower(strings.TrimSpace(name))
+	var builder strings.Builder
+	previousHyphen := false
+	for _, r := range value {
+		allowed := (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9')
+		if allowed {
+			builder.WriteRune(r)
+			previousHyphen = false
+			continue
+		}
+		if r == '-' || r == '_' || r == ' ' || r == '\t' || r == '\n' || r == '\r' {
+			if builder.Len() > 0 && !previousHyphen {
+				builder.WriteByte('-')
+				previousHyphen = true
+			}
+		}
+	}
+	slug := strings.Trim(builder.String(), "-")
+	if slug == "" {
+		slug = "item"
+	}
+	return prefix + "-" + slug
 }
 
 func (s *Store) DeleteSource(ctx context.Context, id string) error {
@@ -665,9 +759,9 @@ func (s *Store) CreateAgent(ctx context.Context, req CreateAgentRequest) (Create
 	}
 	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
 	agent := Agent{ID: req.ID, SourceID: req.ID, TokenPrefix: tokenPrefix(token), CreatedAt: now}
-	_, err = s.db.ExecContext(ctx, `INSERT INTO agents (id, token_hash, token_prefix, created_at, pending_token) VALUES (?, ?, ?, ?, '')
-			ON CONFLICT(id) DO UPDATE SET token_hash = excluded.token_hash, token_prefix = excluded.token_prefix, created_at = excluded.created_at, last_seen_at = '', last_reported_at = '', version = '', hostname = '', pending_token = ''`,
-		req.ID, hashToken(token), agent.TokenPrefix, now)
+	_, err = s.db.ExecContext(ctx, `INSERT INTO agents (id, token_hash, token_prefix, created_at, pending_token) VALUES (?, ?, ?, ?, ?)
+			ON CONFLICT(id) DO UPDATE SET token_hash = excluded.token_hash, token_prefix = excluded.token_prefix, created_at = excluded.created_at, last_seen_at = '', last_reported_at = '', version = '', hostname = '', pending_token = excluded.pending_token`,
+		req.ID, hashToken(token), agent.TokenPrefix, now, token)
 	if err != nil {
 		return CreateAgentResponse{}, err
 	}
@@ -840,17 +934,21 @@ func insertTarget(ctx context.Context, execer sqlExecer, req CreateTargetRequest
 	if req.ID == "" || req.DisplayName == "" {
 		return errors.New("id and display_name are required")
 	}
-	endpoint, err := targetEndpoint(req)
-	if err != nil {
-		return err
+	endpoint := req.Endpoint
+	if endpoint == "" && (req.Host != "" || req.Port != 0) {
+		var err error
+		endpoint, err = targetEndpoint(req)
+		if err != nil {
+			return err
+		}
 	}
-	_, err = execer.ExecContext(ctx, `INSERT INTO targets (id, display_name, region, tags, status, endpoint, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, req.ID, req.DisplayName, req.Region, encodeTags(req.Tags), defaultStatus(req.Status), endpoint, updatedAt)
+	_, err := execer.ExecContext(ctx, `INSERT INTO targets (id, display_name, region, tags, status, endpoint, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, req.ID, req.DisplayName, req.Region, encodeTags(req.Tags), defaultStatus(req.Status), endpoint, updatedAt)
 	return err
 }
 
 func insertCheck(ctx context.Context, execer sqlExecer, req CreateCheckRequest, updatedAt string) error {
-	if req.ID == "" || req.DisplayName == "" || req.SourceID == "" || req.TargetID == "" {
-		return errors.New("id, display_name, source_id, and target_id are required")
+	if req.ID == "" || req.DisplayName == "" {
+		return errors.New("id and display_name are required")
 	}
 	interval := req.IntervalSeconds
 	if interval <= 0 {

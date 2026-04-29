@@ -254,3 +254,84 @@
 - public snapshot 仍无 host/ip/address/port。
 
 状态：已完成。
+
+## 批次 E.2：admin UI 整体重构
+
+目标：把现有四屏分散的管理页改成「以源机器为主轴的一站式管理」，并把操作体验、错误处理、ID 生成都做对。
+
+允许修改：
+- `src/components/admin/*`、`src/pages/admin/*`、`src/styles/*`
+- `server/internal/hub/*.go`、`server/internal/hub/server_test.go`、`server/main.go`
+- `PROBE_IMPLEMENTATION_CHECKLIST.md`
+- `rspress.config.ts`（仅 nav/sidebar/admin 路由必要时）
+
+禁止修改：
+- `Dockerfile`、`docker-compose.yml`、`nginx/default.conf`、`server/Dockerfile`
+- `agent/`、`StatusProbe.tsx`、`LookingGlass.tsx`、`probeSnapshot.ts`
+
+要求：
+
+A. 源机器与 Agent 合并
+- 取消独立的 `/admin/agents` 页（路由可保留 301 到 `/admin/sources`）。
+- `/admin/sources` 既管源机器，也管它的 Agent。
+- 列表每行展开后显示：Agent token 前缀、最近上报、主机名、版本、操作按钮。
+- 操作按钮：编辑、删除、生成/重置 Token、查看接入命令、复制一行安装命令。
+- 「新增源机器」→ 用户只填名称、地区、标签；后端自动 slugify 生成稳定 ID。
+- 创建成功后弹出抽屉，里面就是 Agent 接入命令（systemd unit + config.json + 一行 install），明文 token 仅此一次显示。
+
+B. 删除/编辑/创建一律 refetch
+- 任意成功 mutation 后都立刻 GET 列表覆盖本地 state。
+- 不再依赖局部 splice。
+
+C. 抽屉式表单
+- 列表上方一个「新增」按钮。
+- 新增/编辑都打开右侧 / 底部抽屉表单，不再常驻表单。
+- 关闭抽屉等于取消。
+- 编辑模式下 ID 字段隐藏或灰色只读，标题为「编辑：xxx」。
+
+D. ID 自动生成
+- 后端新增 `slugify(name)` 生成 ID：拼音/英文小写、空白和特殊字符替换为 `-`、加前缀 `src-` / `tgt-` / `chk-`，冲突时追加 `-2`、`-3`。
+- 前端表单不再显示 ID 字段；列表里以「次要展示」（淡色小字）显示 ID。
+- 仍保留旧 demo 数据原 ID。
+
+E. 「源 × 目标」交叉表
+- `/admin/checks` 改造为交叉表：横轴 sources，纵轴 targets，单元格显示 check 状态/最近指标。
+- 空单元格点击 → 抽屉表单创建新 check（自动绑定该 source/target，自动生成 ID）。
+- 已存在的 check 单元格显示状态色块、最近 latency_ms，点击 → 抽屉里编辑/删除/查看历史。
+- 上方仍保留传统表格 toggle，方便审视全量数据。
+
+F. 错误与提示
+- 全局 `useApi`/`adminFetch` 在非 2xx 时把后端 JSON `error` 字段抛出来。
+- 顶部 toast 区域用 `notice`（成功）和 `errorBanner`（失败），失败 alert 不会自动消失，要用户点 X。
+- 409 关联保护、422 校验、401/403 都按错误信息原样展示中文。
+
+G. 顶部全局 Header
+- 显示当前登录态（masked admin token 末四位）和「退出登录」按钮。
+- 点退出登录清除 localStorage，跳回登录页。
+- 「侧边栏」固定四项：源机器、目标、任务、退出。
+
+H. 通用细节
+- 表头不大写。
+- 空字段显示 `—`。
+- 时间字段统一格式化 `YYYY-MM-DD HH:mm:ss`（UTC+8 显示）。
+- 标签输入框支持回车追加 chip + 点 X 删 chip（或直接逗号分隔，避免过度复杂）。
+- 表格行 hover 高亮，操作按钮放右侧 sticky 列。
+
+I. 后端补齐
+- `POST /api/admin/sources` 接受 `{name, region, tags}` 并自动生成 ID；返回完整 source。
+- 同理 `POST /api/admin/targets` 用 `{name,...}`、`POST /api/admin/checks` 自动生成 chk-ID。
+- 关联保护错误 message 为 `error: "请先删除关联任务"`，前端原样展示。
+- 仍可接受外部传入 `id`，向后兼容。
+
+验收：
+- `npm run build` 通过。
+- `cd server && go test ./... && go build ./...` 通过。
+- 本地端到端：
+  - 加源机器只填名称即可，列表能立即看到。
+  - 创建后弹出 Agent 接入命令，含 systemd unit、config.json、一行 install 命令；token 明文仅显示一次。
+  - 编辑后 PUT，列表 refetch 看到更新；不会有重复行。
+  - 删除返回 409 时 UI 显示「请先删除关联任务」红色 banner。
+  - 任务交叉表可点空格创建任务、点已有任务格编辑/删除。
+  - public snapshot 仍无 host/ip/address/port。
+
+状态：已完成，待验收。
