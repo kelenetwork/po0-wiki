@@ -133,7 +133,7 @@ install_lg_tools() {
       local nt_url="https://github.com/sjlleo/nexttrace/releases/latest/download/nexttrace_linux_${arch}"
       log "downloading nexttrace from ${nt_url}"
       if curl -fsSL "${nt_url}" -o /usr/bin/nexttrace.tmp; then
-        chmod +x /usr/bin/nexttrace.tmp
+        chmod 0755 /usr/bin/nexttrace.tmp
         mv /usr/bin/nexttrace.tmp /usr/bin/nexttrace
         # Clean up any old copy under /usr/local/bin so PATH lookup is unambiguous.
         rm -f /usr/local/bin/nexttrace
