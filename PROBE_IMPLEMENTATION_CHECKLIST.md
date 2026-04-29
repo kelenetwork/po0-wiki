@@ -532,3 +532,72 @@ I. 后端补齐
 - /status、/looking-glass 这些 doc 页样式不受影响。
 
 状态：已完成，待验收。
+
+## 批次 D.2：公开仓 GitHub Release + 一键安装脚本
+
+目标：项目源代码 push 到公仓 `kelenetwork/po0-wiki`；agent 二进制托管 GitHub Release；大陆机器一行 curl 即可安装。wiki.kele.my 不再托管二进制，hub 不做安装代理。
+
+### 仓库
+- 公仓：`https://github.com/kelenetwork/po0-wiki`
+- 主分支：`main`
+- License：暂略，后续再加。
+
+### Release & 安装链接
+- 推 tag `v*` → `.github/workflows/release.yml` 触发：
+  - 矩阵 `linux-amd64 | linux-arm64 | linux-armv7`。
+  - `cd agent && CGO_ENABLED=0 GOOS=linux GOARCH=<arch> go build -ldflags '-s -w' -o ../wiki-probe-agent-linux-<arch> .`。
+  - 计算 sha256。
+  - 上传至 GitHub Release：`scripts/install.sh`、`scripts/uninstall.sh`、各架构 binary + sha256。
+- 公仓 release asset 公开 URL：
+  - `https://github.com/kelenetwork/po0-wiki/releases/latest/download/install.sh`
+  - `https://github.com/kelenetwork/po0-wiki/releases/latest/download/wiki-probe-agent-linux-amd64`
+  - `https://github.com/kelenetwork/po0-wiki/releases/latest/download/wiki-probe-agent-linux-amd64.sha256`
+
+### scripts/install.sh
+- POSIX bash + `set -euo pipefail`。
+- 接收必填 env：`AGENT_ID`、`TOKEN`。
+- 可选 env：`HUB_URL`（默认 `https://wiki.kele.my/api/agent`）、`RELEASE_TAG`（默认 `latest`）、`BIN_PATH`、`CONFIG_PATH`、`SERVICE_NAME`、`RELEASE_BASE_URL`。
+- 自动检测 arch：`amd64 | arm64 | armv7`，否则 fail。
+- 从 GitHub Release 下载 `wiki-probe-agent-linux-${arch}` 与 `.sha256`，用 `sha256sum -c` 校验。
+- 写 binary（0755）/ config（0600）/ systemd unit（0644）。
+- `systemctl daemon-reload && systemctl enable --now ${SERVICE_NAME}`。
+- 5 秒后检查 `systemctl is-active`，不 active 则打印最近 50 行 journal 后退出 1。
+
+### scripts/uninstall.sh
+- `systemctl disable --now ${SERVICE_NAME}` 容错。
+- 删除 unit / binary / config。
+- `systemctl daemon-reload`。
+
+### Hub
+- `GET /api/admin/agents/{id}/install` 新增字段：
+  - `one_line`：`curl -fsSL https://github.com/kelenetwork/po0-wiki/releases/latest/download/install.sh | sudo AGENT_ID=$ID TOKEN=$TOKEN HUB_URL=https://wiki.kele.my/api/agent bash`。
+  - `one_line_uninstall`：`curl -fsSL https://github.com/kelenetwork/po0-wiki/releases/latest/download/uninstall.sh | sudo bash`。
+  - 保留 `systemd_unit`、`config_json`、`install_command`。
+- 可通过 `WIKI_RELEASE_BASE_URL` 覆盖 release asset base URL。
+- 不需要 `WIKI_INSTALL_TOKEN`、不需要 `WIKI_RELEASE_PAT`、不需要安装代理 endpoint。
+
+### 前端 admin
+- 「查看安装命令」抽屉默认大字显示 `one_line`，单独复制按钮。
+- 折叠区显示 systemd unit + config json + 旧 install command + 一行 uninstall。
+- 卸载命令复制用 `one_line_uninstall`。
+- 复制优先 `navigator.clipboard`，失败 fallback `document.execCommand`，成功 toast。
+
+### agent/README、systemd 注释
+- 更新文档：推荐一键 install / uninstall；高级用法保留。
+
+### 验收
+- `npm run build` 通过。
+- `cd server && go test ./... && go build ./...` 通过。
+- `cd agent && go test ./... && go build ./...` 通过。
+- `scripts/install.sh` / `scripts/uninstall.sh` 语法检查通过。
+- admin install endpoint 返回 `one_line`、`one_line_uninstall`，URL 指向 `github.com/kelenetwork/po0-wiki/releases/latest/download/...`。
+- public snapshot 仍无 host/ip/address/port。
+
+### 状态（2026-04-30 D.2）
+- 已完成：GitHub Release workflow、`scripts/install.sh` / `scripts/uninstall.sh`、admin install one-line 字段与前端安装抽屉。
+- 已调整：hub 仅返回公开 release 安装 URL，不新增安装代理 token 或代理下载端点。
+- 已验收：构建测试、脚本语法、临时 hub install endpoint、public snapshot 字段检查均通过。
+
+### 不在本批
+- agent 自动升级。
+- public 状态页历史折线。

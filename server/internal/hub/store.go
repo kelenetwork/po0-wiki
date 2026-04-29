@@ -151,12 +151,14 @@ type UpdateSourceRequest struct {
 }
 
 type AgentInstallResponse struct {
-	AgentID        string `json:"agent_id"`
-	Token          string `json:"token"`
-	HubURL         string `json:"hub_url"`
-	SystemdUnit    string `json:"systemd_unit"`
-	ConfigJSON     string `json:"config_json"`
-	InstallCommand string `json:"install_command"`
+	AgentID          string `json:"agent_id"`
+	Token            string `json:"token"`
+	HubURL           string `json:"hub_url"`
+	SystemdUnit      string `json:"systemd_unit"`
+	ConfigJSON       string `json:"config_json"`
+	InstallCommand   string `json:"install_command"`
+	OneLine          string `json:"one_line"`
+	OneLineUninstall string `json:"one_line_uninstall"`
 }
 
 type Agent struct {
@@ -815,7 +817,7 @@ func (s *Store) ResetAgentToken(ctx context.Context, id string) (CreateAgentResp
 	return CreateAgentResponse{Agent: agent, Token: token}, nil
 }
 
-func (s *Store) AgentInstall(ctx context.Context, id, hubURL string) (AgentInstallResponse, error) {
+func (s *Store) AgentInstall(ctx context.Context, id, hubURL, releaseBaseURL string) (AgentInstallResponse, error) {
 	var token string
 	if err := s.db.QueryRowContext(ctx, `SELECT token_plain FROM agents WHERE id = ?`, id).Scan(&token); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -827,7 +829,7 @@ func (s *Store) AgentInstall(ctx context.Context, id, hubURL string) (AgentInsta
 		return AgentInstallResponse{}, errors.New("请先重置 Token 以生成接入凭据")
 	}
 	config := agentConfigJSON(id, token, hubURL)
-	return AgentInstallResponse{AgentID: id, Token: token, HubURL: hubURL, SystemdUnit: agentSystemdUnit(), ConfigJSON: config, InstallCommand: agentInstallCommand()}, nil
+	return AgentInstallResponse{AgentID: id, Token: token, HubURL: hubURL, SystemdUnit: agentSystemdUnit(), ConfigJSON: config, InstallCommand: agentInstallCommand(), OneLine: agentOneLineInstall(id, token, hubURL, releaseBaseURL), OneLineUninstall: agentOneLineUninstall(releaseBaseURL)}, nil
 }
 
 func (s *Store) ListAgents(ctx context.Context) ([]Agent, error) {
@@ -1104,6 +1106,20 @@ WantedBy=multi-user.target
 
 func agentInstallCommand() string {
 	return `sudo install -m 0644 wiki-probe-agent.service /etc/systemd/system/wiki-probe-agent.service && sudo install -m 0600 wiki-probe-agent.json /etc/wiki-probe-agent.json && sudo systemctl daemon-reload && sudo systemctl enable --now wiki-probe-agent.service`
+}
+
+func agentOneLineInstall(agentID, token, hubURL, releaseBaseURL string) string {
+	releaseBaseURL = strings.TrimRight(releaseBaseURL, "/")
+	return fmt.Sprintf("curl -fsSL %s | sudo AGENT_ID=%s TOKEN=%s HUB_URL=%s bash", shellQuote(releaseBaseURL+"/install.sh"), shellQuote(agentID), shellQuote(token), shellQuote(hubURL))
+}
+
+func agentOneLineUninstall(releaseBaseURL string) string {
+	releaseBaseURL = strings.TrimRight(releaseBaseURL, "/")
+	return fmt.Sprintf("curl -fsSL %s | sudo bash", shellQuote(releaseBaseURL+"/uninstall.sh"))
+}
+
+func shellQuote(value string) string {
+	return "'" + strings.ReplaceAll(value, "'", "'\\''") + "'"
 }
 
 func agentConfigJSON(agentID, token, hubURL string) string {

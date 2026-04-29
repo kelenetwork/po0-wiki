@@ -1,5 +1,6 @@
 [Unit]
 Description=Wiki Kele outbound probe agent
+# Installed automatically by scripts/install.sh; advanced users may copy this unit manually.
 After=network-online.target
 Wants=network-online.target
 
@@ -9,8 +10,8 @@ ExecStart=/usr/local/bin/wiki-probe-agent -config /etc/wiki-probe-agent.json
 Restart=always
 RestartSec=5s
 DynamicUser=yes
-# ICMP checks require extra setup; see README. Keep disabled by default.
-# Option A: set net.ipv4.ping_group_range. Option B: enable CAP_NET_RAW below.
+# Installed by scripts/install.sh for one-line GitHub Release installs.
+# ICMP checks still require extra setup; see README. Keep capabilities disabled by default.
 # AmbientCapabilities=CAP_NET_RAW
 # CapabilityBoundingSet=CAP_NET_RAW
 NoNewPrivileges=yes

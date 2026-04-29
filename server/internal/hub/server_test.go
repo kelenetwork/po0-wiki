@@ -403,8 +403,14 @@ func TestAgentPollReportUpdatesPublicSnapshot(t *testing.T) {
 	req.Header.Set("Authorization", "Bearer test-token")
 	rec = httptest.NewRecorder()
 	server.Routes().ServeHTTP(rec, req)
-	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), created.Token) || !strings.Contains(rec.Body.String(), "systemd_unit") || !strings.Contains(rec.Body.String(), "config_json") || !strings.Contains(rec.Body.String(), "install_command") {
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), created.Token) || !strings.Contains(rec.Body.String(), "systemd_unit") || !strings.Contains(rec.Body.String(), "config_json") || !strings.Contains(rec.Body.String(), "install_command") || !strings.Contains(rec.Body.String(), "one_line") || !strings.Contains(rec.Body.String(), "one_line_uninstall") {
 		t.Fatalf("install response status = %d body = %s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "https://github.com/kelenetwork/po0-wiki/releases/latest/download/install.sh") || !strings.Contains(rec.Body.String(), "https://github.com/kelenetwork/po0-wiki/releases/latest/download/uninstall.sh") {
+		t.Fatalf("install response did not use public release URLs: %s", rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "AGENT_ID='src-shanghai-ctc'") || !strings.Contains(rec.Body.String(), "TOKEN='"+created.Token+"'") || !strings.Contains(rec.Body.String(), "HUB_URL='https://wiki.kele.my/api/agent'") || strings.Contains(rec.Body.String(), "INSTALL_TOKEN") || strings.Contains(rec.Body.String(), "/api/install/") {
+		t.Fatalf("install response one-line command is invalid: %s", rec.Body.String())
 	}
 
 	pollBody := strings.NewReader(`{"agent_id":"src-shanghai-ctc","version":"test","hostname":"unit"}`)

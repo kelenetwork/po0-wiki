@@ -10,6 +10,24 @@
 - In mainland China deployments, the source machine does not need any inbound firewall opening; it only actively polls and reports to the hub.
 - The agent receives private target `kind`/`host`/`port`/`path` only from authenticated `/api/agent/poll`; public APIs must not expose host, port, or path.
 
+## Quick install
+
+Recommended installation is the one-line command shown in Wiki Probe Admin under `源机器（含 Agent）` -> `查看安装命令`. The agent binary is downloaded from the public GitHub Release assets; `wiki.kele.my` does not proxy installers or host binaries.
+
+Example shape:
+
+```bash
+curl -fsSL https://github.com/kelenetwork/po0-wiki/releases/latest/download/install.sh | sudo AGENT_ID=src-xxx TOKEN=AGENT_TOKEN HUB_URL=https://wiki.kele.my/api/agent bash
+```
+
+To remove the agent, use the `复制卸载命令` command from the same admin drawer or run:
+
+```bash
+curl -fsSL https://github.com/kelenetwork/po0-wiki/releases/latest/download/uninstall.sh | sudo bash
+```
+
+Advanced users may override `RELEASE_TAG`, `RELEASE_BASE_URL`, `BIN_PATH`, `CONFIG_PATH`, and `SERVICE_NAME`, or manually download `wiki-probe-agent-linux-amd64`, `wiki-probe-agent-linux-arm64`, or `wiki-probe-agent-linux-armv7` plus the matching `.sha256`.
+
 ## Config
 
 Default path: `/etc/wiki-probe-agent.json`. Override with `-config`.
@@ -57,7 +75,7 @@ CapabilityBoundingSet=CAP_NET_RAW
 wiki-probe-agent -config /etc/wiki-probe-agent.json
 ```
 
-A systemd template is provided at `wiki-probe-agent.service`; it is not installed automatically.
+A systemd template is provided at `wiki-probe-agent.service`; the one-line installer writes an equivalent unit automatically.
 
 ## Debug
 

@@ -78,3 +78,16 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
 .status-pending { background: #f2f4f7 !important; }
 @media (prefers-color-scheme: dark) { .admin-layout { background: #0f172a; color: #e5e7eb; } .admin-card, .admin-shell table, .admin-shell td, .admin-drawer { background: #111827; } .admin-shell th, .admin-detail td, .admin-shell tr:hover td { background: #1f2937; } .admin-actions { background: #111827 !important; box-shadow: -12px 0 24px rgba(0, 0, 0, .28); } .admin-kicker, .admin-auth, .admin-form label, .admin-stat span, .admin-shell small, .matrix-empty { color: #9ca3af !important; } .admin-form input, .admin-form select, .admin-shell button { background: #0f172a; color: #e5e7eb; border-color: rgba(229, 231, 235, .18); } .admin-shell button:hover, .admin-shell button.active { background: #e5e7eb; color: #111827; } .install-view code, .status-pending { background: #1f2937 !important; color: #e5e7eb; } }
 @media (max-width: 860px) { .admin-layout { display: block; } .admin-sidebar { position: static; height: auto; } .admin-sidebar nav { grid-template-columns: repeat(2, minmax(0, 1fr)); } .admin-header { align-items: flex-start; flex-direction: column; } .admin-auth { white-space: normal; } .admin-drawer-backdrop { align-items: flex-end; } .admin-drawer { width: 100%; height: min(86vh, 720px); border-radius: 24px 24px 0 0; } }
+.install-primary { border: 1px solid rgba(45, 111, 255, .20); border-radius: 18px; padding: 14px; background: rgba(45, 111, 255, .06); }
+.install-primary header, .install-block header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.install-primary pre { font-size: 16px; line-height: 1.6; }
+.install-details { margin-top: 18px; }
+.install-details summary { cursor: pointer; color: #2454b8; font-weight: 800; }
+.install-hero { display: grid; gap: 12px; margin: 18px 0 20px; padding: 16px; border: 1px solid rgba(45, 111, 255, .22); border-radius: 20px; background: rgba(45, 111, 255, .08); }
+.install-hero h3 { font-size: 22px; }
+.install-hero p { margin: 4px 0 0; color: #667085; font-weight: 700; }
+.install-hero button { justify-self: start; }
+.install-hero pre { width: 100%; box-sizing: border-box; margin: 0; font-size: 16px; line-height: 1.55; }
+.install-advanced { margin-top: 12px; }
+.install-advanced summary { cursor: pointer; font-weight: 900; color: #2454b8; }
+@media (prefers-color-scheme: dark) { .install-hero { background: rgba(45, 111, 255, .14); border-color: rgba(147, 197, 253, .22); } .install-hero p { color: #9ca3af; } .install-advanced summary { color: #93c5fd; } }

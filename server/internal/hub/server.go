@@ -6,17 +6,26 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
 
+const defaultReleaseBaseURL = "https://github.com/kelenetwork/po0-wiki/releases/latest/download"
+
 type Server struct {
-	store      *Store
-	adminToken string
+	store          *Store
+	adminToken     string
+	agentHubURL    string
+	releaseBaseURL string
 }
 
 func NewServer(store *Store, adminToken string) *Server {
-	return &Server{store: store, adminToken: adminToken}
+	releaseBaseURL := strings.TrimRight(strings.TrimSpace(os.Getenv("WIKI_RELEASE_BASE_URL")), "/")
+	if releaseBaseURL == "" {
+		releaseBaseURL = defaultReleaseBaseURL
+	}
+	return &Server{store: store, adminToken: adminToken, agentHubURL: "https://wiki.kele.my/api/agent", releaseBaseURL: releaseBaseURL}
 }
 
 func (s *Server) Routes() http.Handler {
@@ -325,7 +334,7 @@ func (s *Server) adminAgentInstall(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	install, err := s.store.AgentInstall(r.Context(), r.PathValue("id"), "https://wiki.kele.my/api/agent")
+	install, err := s.store.AgentInstall(r.Context(), r.PathValue("id"), s.agentHubURL, s.releaseBaseURL)
 	if err != nil {
 		if strings.Contains(err.Error(), "重置 Token") {
 			writeError(w, http.StatusConflict, err.Error())
