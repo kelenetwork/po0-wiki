@@ -40,6 +40,7 @@ type Target struct {
 	Region      string   `json:"region"`
 	Tags        []string `json:"tags"`
 	Status      string   `json:"status"`
+	Kind        string   `json:"kind"`
 	UpdatedAt   string   `json:"updated_at"`
 }
 
@@ -49,8 +50,10 @@ type AdminTarget struct {
 	Region      string   `json:"region"`
 	Tags        []string `json:"tags"`
 	Status      string   `json:"status"`
+	Kind        string   `json:"kind"`
 	Host        string   `json:"host"`
 	Port        int      `json:"port"`
+	Path        string   `json:"path"`
 	UpdatedAt   string   `json:"updated_at"`
 }
 
@@ -119,8 +122,10 @@ type CreateTargetRequest struct {
 	Tags        []string `json:"tags"`
 	Status      string   `json:"status"`
 	Endpoint    string   `json:"endpoint"`
+	Kind        string   `json:"kind"`
 	Host        string   `json:"host"`
 	Port        int      `json:"port"`
+	Path        string   `json:"path"`
 }
 
 type CreateCheckRequest struct {
@@ -145,16 +150,18 @@ type UpdateSourceRequest struct {
 }
 
 type AgentInstallResponse struct {
-	AgentID     string `json:"agent_id"`
-	Token       string `json:"token"`
-	HubURL      string `json:"hub_url"`
-	SystemdUnit string `json:"systemd_unit"`
-	ConfigJSON  string `json:"config_json"`
+	AgentID        string `json:"agent_id"`
+	Token          string `json:"token"`
+	HubURL         string `json:"hub_url"`
+	SystemdUnit    string `json:"systemd_unit"`
+	ConfigJSON     string `json:"config_json"`
+	InstallCommand string `json:"install_command"`
 }
 
 type Agent struct {
 	ID             string `json:"id"`
 	SourceID       string `json:"source_id"`
+	Token          string `json:"token"`
 	TokenPrefix    string `json:"token_prefix"`
 	CreatedAt      string `json:"created_at"`
 	LastSeenAt     string `json:"last_seen_at,omitempty"`
@@ -177,6 +184,8 @@ type AgentCheck struct {
 	DisplayName     string `json:"display_name"`
 	Host            string `json:"host"`
 	Port            int    `json:"port"`
+	Kind            string `json:"kind"`
+	Path            string `json:"path"`
 	IntervalSeconds int    `json:"interval_seconds"`
 }
 
@@ -229,6 +238,8 @@ CREATE TABLE IF NOT EXISTS targets (
   tags TEXT NOT NULL DEFAULT '[]',
   status TEXT NOT NULL,
   endpoint TEXT NOT NULL DEFAULT '',
+  kind TEXT NOT NULL DEFAULT 'tcp',
+  path TEXT NOT NULL DEFAULT '',
   updated_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS checks (
@@ -261,8 +272,9 @@ CREATE TABLE IF NOT EXISTS agents (
   last_seen_at TEXT NOT NULL DEFAULT '',
   last_reported_at TEXT NOT NULL DEFAULT '',
   version TEXT NOT NULL DEFAULT '',
-  hostname TEXT NOT NULL DEFAULT ''
-  ,pending_token TEXT NOT NULL DEFAULT ''
+  hostname TEXT NOT NULL DEFAULT '',
+  pending_token TEXT NOT NULL DEFAULT '',
+  token_plain TEXT NOT NULL DEFAULT ''
 );
 `)
 	if err != nil {
@@ -270,7 +282,10 @@ CREATE TABLE IF NOT EXISTS agents (
 	}
 	_, _ = s.db.ExecContext(ctx, `ALTER TABLE checks ADD COLUMN interval_seconds INTEGER NOT NULL DEFAULT 30`)
 	_, _ = s.db.ExecContext(ctx, `ALTER TABLE checks ADD COLUMN enabled INTEGER NOT NULL DEFAULT 1`)
+	_, _ = s.db.ExecContext(ctx, `ALTER TABLE targets ADD COLUMN kind TEXT NOT NULL DEFAULT 'tcp'`)
+	_, _ = s.db.ExecContext(ctx, `ALTER TABLE targets ADD COLUMN path TEXT NOT NULL DEFAULT ''`)
 	_, _ = s.db.ExecContext(ctx, `ALTER TABLE agents ADD COLUMN pending_token TEXT NOT NULL DEFAULT ''`)
+	_, _ = s.db.ExecContext(ctx, `ALTER TABLE agents ADD COLUMN token_plain TEXT NOT NULL DEFAULT ''`)
 	return nil
 }
 
@@ -372,7 +387,7 @@ func (s *Store) ListSources(ctx context.Context) ([]Source, error) {
 }
 
 func (s *Store) ListTargets(ctx context.Context) ([]Target, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, region, tags, status, updated_at FROM targets ORDER BY id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, region, tags, status, kind, updated_at FROM targets ORDER BY id`)
 	if err != nil {
 		return nil, err
 	}
@@ -381,17 +396,18 @@ func (s *Store) ListTargets(ctx context.Context) ([]Target, error) {
 	for rows.Next() {
 		var target Target
 		var tags string
-		if err := rows.Scan(&target.ID, &target.DisplayName, &target.Region, &tags, &target.Status, &target.UpdatedAt); err != nil {
+		if err := rows.Scan(&target.ID, &target.DisplayName, &target.Region, &tags, &target.Status, &target.Kind, &target.UpdatedAt); err != nil {
 			return nil, err
 		}
 		target.Tags = decodeTags(tags)
+		target.Kind = normalizeTargetKind(target.Kind)
 		targets = append(targets, target)
 	}
 	return targets, rows.Err()
 }
 
 func (s *Store) ListAdminTargets(ctx context.Context) ([]AdminTarget, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, region, tags, status, endpoint, updated_at FROM targets ORDER BY id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, region, tags, status, endpoint, kind, path, updated_at FROM targets ORDER BY id`)
 	if err != nil {
 		return nil, err
 	}
@@ -401,11 +417,13 @@ func (s *Store) ListAdminTargets(ctx context.Context) ([]AdminTarget, error) {
 		var target AdminTarget
 		var tags string
 		var endpoint string
-		if err := rows.Scan(&target.ID, &target.DisplayName, &target.Region, &tags, &target.Status, &endpoint, &target.UpdatedAt); err != nil {
+		if err := rows.Scan(&target.ID, &target.DisplayName, &target.Region, &tags, &target.Status, &endpoint, &target.Kind, &target.Path, &target.UpdatedAt); err != nil {
 			return nil, err
 		}
 		target.Tags = decodeTags(tags)
-		target.Host, target.Port, _ = splitEndpoint(endpoint)
+		target.Kind = normalizeTargetKind(target.Kind)
+		target.Path = normalizeTargetPath(target.Kind, target.Path)
+		target.Host, target.Port, _ = splitEndpointForKind(endpoint, target.Kind)
 		targets = append(targets, target)
 	}
 	return targets, rows.Err()
@@ -505,7 +523,7 @@ func (s *Store) CreateTarget(ctx context.Context, req CreateTargetRequest) (Targ
 	if err := insertTarget(ctx, s.db, req, now); err != nil {
 		return Target{}, err
 	}
-	return Target{ID: req.ID, DisplayName: req.DisplayName, Region: req.Region, Tags: req.Tags, Status: defaultStatus(req.Status), UpdatedAt: now}, nil
+	return Target{ID: req.ID, DisplayName: req.DisplayName, Region: req.Region, Tags: req.Tags, Status: defaultStatus(req.Status), Kind: normalizeTargetKind(req.Kind), UpdatedAt: now}, nil
 }
 
 func (s *Store) UpdateSource(ctx context.Context, id string, req UpdateSourceRequest) (Source, error) {
@@ -533,19 +551,19 @@ func (s *Store) UpdateTarget(ctx context.Context, id string, req CreateTargetReq
 	if id == "" || req.DisplayName == "" {
 		return AdminTarget{}, errors.New("id and display_name are required")
 	}
-	endpoint, err := targetEndpoint(req)
+	prepared, err := prepareTarget(req)
 	if err != nil {
 		return AdminTarget{}, err
 	}
 	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
-	result, err := s.db.ExecContext(ctx, `UPDATE targets SET display_name = ?, region = ?, tags = ?, status = ?, endpoint = ?, updated_at = ? WHERE id = ?`, req.DisplayName, req.Region, encodeTags(req.Tags), defaultStatus(req.Status), endpoint, now, id)
+	result, err := s.db.ExecContext(ctx, `UPDATE targets SET display_name = ?, region = ?, tags = ?, status = ?, endpoint = ?, kind = ?, path = ?, updated_at = ? WHERE id = ?`, req.DisplayName, req.Region, encodeTags(req.Tags), defaultStatus(req.Status), prepared.Endpoint, prepared.Kind, prepared.Path, now, id)
 	if err != nil {
 		return AdminTarget{}, err
 	}
 	if rows, _ := result.RowsAffected(); rows == 0 {
 		return AdminTarget{}, errors.New("target not found")
 	}
-	return AdminTarget{ID: id, DisplayName: req.DisplayName, Region: req.Region, Tags: req.Tags, Status: defaultStatus(req.Status), Host: req.Host, Port: req.Port, UpdatedAt: now}, nil
+	return AdminTarget{ID: id, DisplayName: req.DisplayName, Region: req.Region, Tags: req.Tags, Status: defaultStatus(req.Status), Kind: prepared.Kind, Host: prepared.Host, Port: prepared.Port, Path: prepared.Path, UpdatedAt: now}, nil
 }
 
 func (s *Store) CreateCheck(ctx context.Context, req CreateCheckRequest) (Check, error) {
@@ -758,10 +776,10 @@ func (s *Store) CreateAgent(ctx context.Context, req CreateAgentRequest) (Create
 		return CreateAgentResponse{}, err
 	}
 	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
-	agent := Agent{ID: req.ID, SourceID: req.ID, TokenPrefix: tokenPrefix(token), CreatedAt: now}
-	_, err = s.db.ExecContext(ctx, `INSERT INTO agents (id, token_hash, token_prefix, created_at, pending_token) VALUES (?, ?, ?, ?, ?)
-			ON CONFLICT(id) DO UPDATE SET token_hash = excluded.token_hash, token_prefix = excluded.token_prefix, created_at = excluded.created_at, last_seen_at = '', last_reported_at = '', version = '', hostname = '', pending_token = excluded.pending_token`,
-		req.ID, hashToken(token), agent.TokenPrefix, now, token)
+	agent := Agent{ID: req.ID, SourceID: req.ID, Token: token, TokenPrefix: tokenPrefix(token), CreatedAt: now}
+	_, err = s.db.ExecContext(ctx, `INSERT INTO agents (id, token_hash, token_prefix, token_plain, created_at, pending_token) VALUES (?, ?, ?, ?, ?, ?)
+			ON CONFLICT(id) DO UPDATE SET token_hash = excluded.token_hash, token_prefix = excluded.token_prefix, token_plain = excluded.token_plain, created_at = excluded.created_at, last_seen_at = '', last_reported_at = '', version = '', hostname = '', pending_token = excluded.pending_token`,
+		req.ID, hashToken(token), agent.TokenPrefix, token, now, token)
 	if err != nil {
 		return CreateAgentResponse{}, err
 	}
@@ -777,38 +795,34 @@ func (s *Store) ResetAgentToken(ctx context.Context, id string) (CreateAgentResp
 		return CreateAgentResponse{}, err
 	}
 	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
-	result, err := s.db.ExecContext(ctx, `UPDATE agents SET token_hash = ?, token_prefix = ?, created_at = ?, pending_token = ?, last_seen_at = '', last_reported_at = '', version = '', hostname = '' WHERE id = ?`, hashToken(token), tokenPrefix(token), now, token, id)
+	result, err := s.db.ExecContext(ctx, `UPDATE agents SET token_hash = ?, token_prefix = ?, token_plain = ?, created_at = ?, pending_token = ?, last_seen_at = '', last_reported_at = '', version = '', hostname = '' WHERE id = ?`, hashToken(token), tokenPrefix(token), token, now, token, id)
 	if err != nil {
 		return CreateAgentResponse{}, err
 	}
 	if rows, _ := result.RowsAffected(); rows == 0 {
 		return CreateAgentResponse{}, errors.New("agent not found")
 	}
-	agent := Agent{ID: id, SourceID: id, TokenPrefix: tokenPrefix(token), CreatedAt: now}
+	agent := Agent{ID: id, SourceID: id, Token: token, TokenPrefix: tokenPrefix(token), CreatedAt: now}
 	return CreateAgentResponse{Agent: agent, Token: token}, nil
 }
 
-func (s *Store) ConsumeAgentInstall(ctx context.Context, id, hubURL string) (AgentInstallResponse, error) {
+func (s *Store) AgentInstall(ctx context.Context, id, hubURL string) (AgentInstallResponse, error) {
 	var token string
-	if err := s.db.QueryRowContext(ctx, `SELECT pending_token FROM agents WHERE id = ?`, id).Scan(&token); err != nil {
+	if err := s.db.QueryRowContext(ctx, `SELECT token_plain FROM agents WHERE id = ?`, id).Scan(&token); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return AgentInstallResponse{}, errors.New("agent not found")
 		}
 		return AgentInstallResponse{}, err
 	}
 	if token == "" {
-		return AgentInstallResponse{}, errors.New("reset token before requesting install command")
-	}
-	_, err := s.db.ExecContext(ctx, `UPDATE agents SET pending_token = '' WHERE id = ?`, id)
-	if err != nil {
-		return AgentInstallResponse{}, err
+		return AgentInstallResponse{}, errors.New("请先重置 Token 以生成接入凭据")
 	}
 	config := agentConfigJSON(id, token, hubURL)
-	return AgentInstallResponse{AgentID: id, Token: token, HubURL: hubURL, SystemdUnit: agentSystemdUnit(), ConfigJSON: config}, nil
+	return AgentInstallResponse{AgentID: id, Token: token, HubURL: hubURL, SystemdUnit: agentSystemdUnit(), ConfigJSON: config, InstallCommand: agentInstallCommand()}, nil
 }
 
 func (s *Store) ListAgents(ctx context.Context) ([]Agent, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT id, id, token_prefix, created_at, last_seen_at, last_reported_at, version, hostname FROM agents ORDER BY id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT id, id, token_plain, token_prefix, created_at, last_seen_at, last_reported_at, version, hostname FROM agents ORDER BY id`)
 	if err != nil {
 		return nil, err
 	}
@@ -816,7 +830,7 @@ func (s *Store) ListAgents(ctx context.Context) ([]Agent, error) {
 	var agents []Agent
 	for rows.Next() {
 		var agent Agent
-		if err := rows.Scan(&agent.ID, &agent.SourceID, &agent.TokenPrefix, &agent.CreatedAt, &agent.LastSeenAt, &agent.LastReportedAt, &agent.Version, &agent.Hostname); err != nil {
+		if err := rows.Scan(&agent.ID, &agent.SourceID, &agent.Token, &agent.TokenPrefix, &agent.CreatedAt, &agent.LastSeenAt, &agent.LastReportedAt, &agent.Version, &agent.Hostname); err != nil {
 			return nil, err
 		}
 		agents = append(agents, agent)
@@ -839,7 +853,7 @@ func (s *Store) AgentChecks(ctx context.Context, agentID, version, hostname stri
 	if err != nil {
 		return nil, err
 	}
-	rows, err := s.db.QueryContext(ctx, `SELECT c.id, c.display_name, t.endpoint, c.interval_seconds FROM checks c JOIN targets t ON t.id = c.target_id WHERE c.source_id = ? AND c.enabled = 1 ORDER BY c.id`, agentID)
+	rows, err := s.db.QueryContext(ctx, `SELECT c.id, c.display_name, t.endpoint, t.kind, t.path, c.interval_seconds FROM checks c JOIN targets t ON t.id = c.target_id WHERE c.source_id = ? AND c.enabled = 1 AND t.kind = 'tcp' ORDER BY c.id`, agentID)
 	if err != nil {
 		return nil, err
 	}
@@ -848,10 +862,12 @@ func (s *Store) AgentChecks(ctx context.Context, agentID, version, hostname stri
 	for rows.Next() {
 		var endpoint string
 		var check AgentCheck
-		if err := rows.Scan(&check.CheckID, &check.DisplayName, &endpoint, &check.IntervalSeconds); err != nil {
+		if err := rows.Scan(&check.CheckID, &check.DisplayName, &endpoint, &check.Kind, &check.Path, &check.IntervalSeconds); err != nil {
 			return nil, err
 		}
-		host, port, err := splitEndpoint(endpoint)
+		check.Kind = normalizeTargetKind(check.Kind)
+		check.Path = normalizeTargetPath(check.Kind, check.Path)
+		host, port, err := splitEndpointForKind(endpoint, check.Kind)
 		if err != nil {
 			return nil, err
 		}
@@ -934,18 +950,13 @@ func insertTarget(ctx context.Context, execer sqlExecer, req CreateTargetRequest
 	if req.ID == "" || req.DisplayName == "" {
 		return errors.New("id and display_name are required")
 	}
-	endpoint := req.Endpoint
-	if endpoint == "" && (req.Host != "" || req.Port != 0) {
-		var err error
-		endpoint, err = targetEndpoint(req)
-		if err != nil {
-			return err
-		}
+	prepared, err := prepareTarget(req)
+	if err != nil {
+		return err
 	}
-	_, err := execer.ExecContext(ctx, `INSERT INTO targets (id, display_name, region, tags, status, endpoint, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, req.ID, req.DisplayName, req.Region, encodeTags(req.Tags), defaultStatus(req.Status), endpoint, updatedAt)
+	_, err = execer.ExecContext(ctx, `INSERT INTO targets (id, display_name, region, tags, status, endpoint, kind, path, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, req.ID, req.DisplayName, req.Region, encodeTags(req.Tags), defaultStatus(req.Status), prepared.Endpoint, prepared.Kind, prepared.Path, updatedAt)
 	return err
 }
-
 func insertCheck(ctx context.Context, execer sqlExecer, req CreateCheckRequest, updatedAt string) error {
 	if req.ID == "" || req.DisplayName == "" {
 		return errors.New("id and display_name are required")
@@ -962,14 +973,82 @@ func insertCheck(ctx context.Context, execer sqlExecer, req CreateCheckRequest, 
 	return err
 }
 
-func targetEndpoint(req CreateTargetRequest) (string, error) {
+type preparedTarget struct {
+	Endpoint string
+	Kind     string
+	Host     string
+	Port     int
+	Path     string
+}
+
+func prepareTarget(req CreateTargetRequest) (preparedTarget, error) {
+	kind := normalizeTargetKind(req.Kind)
+	path := normalizeTargetPath(kind, req.Path)
 	if req.Endpoint != "" {
-		return req.Endpoint, nil
+		host, port, err := splitEndpointForKind(req.Endpoint, kind)
+		if err != nil {
+			return preparedTarget{}, err
+		}
+		return preparedTarget{Endpoint: req.Endpoint, Kind: kind, Host: host, Port: port, Path: path}, nil
 	}
-	if req.Host == "" || req.Port <= 0 || req.Port > 65535 {
-		return "", errors.New("host and valid port are required")
+	if req.Host == "" {
+		return preparedTarget{}, errors.New("host is required")
 	}
-	return net.JoinHostPort(req.Host, strconv.Itoa(req.Port)), nil
+	port := req.Port
+	if kind == "icmp" {
+		port = 0
+	} else {
+		if port == 0 && kind == "http" {
+			port = 443
+		}
+		if port <= 0 || port > 65535 {
+			return preparedTarget{}, errors.New("valid port is required")
+		}
+	}
+	endpoint := req.Host
+	if kind != "icmp" {
+		endpoint = net.JoinHostPort(req.Host, strconv.Itoa(port))
+	}
+	return preparedTarget{Endpoint: endpoint, Kind: kind, Host: req.Host, Port: port, Path: path}, nil
+}
+
+func targetEndpoint(req CreateTargetRequest) (string, error) {
+	prepared, err := prepareTarget(req)
+	return prepared.Endpoint, err
+}
+
+func normalizeTargetKind(kind string) string {
+	switch strings.ToLower(strings.TrimSpace(kind)) {
+	case "", "tcp":
+		return "tcp"
+	case "icmp":
+		return "icmp"
+	case "http":
+		return "http"
+	default:
+		return "tcp"
+	}
+}
+
+func normalizeTargetPath(kind string, path string) string {
+	if normalizeTargetKind(kind) != "http" {
+		return ""
+	}
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return "/"
+	}
+	if !strings.HasPrefix(path, "/") {
+		return "/" + path
+	}
+	return path
+}
+
+func splitEndpointForKind(endpoint string, kind string) (string, int, error) {
+	if normalizeTargetKind(kind) == "icmp" {
+		return endpoint, 0, nil
+	}
+	return splitEndpoint(endpoint)
 }
 
 func boolToInt(value bool) int {
@@ -1000,6 +1079,10 @@ ReadOnlyPaths=/etc/wiki-probe-agent.json
 [Install]
 WantedBy=multi-user.target
 `
+}
+
+func agentInstallCommand() string {
+	return `sudo install -m 0644 wiki-probe-agent.service /etc/systemd/system/wiki-probe-agent.service && sudo install -m 0600 wiki-probe-agent.json /etc/wiki-probe-agent.json && sudo systemctl daemon-reload && sudo systemctl enable --now wiki-probe-agent.service`
 }
 
 func agentConfigJSON(agentID, token, hubURL string) string {

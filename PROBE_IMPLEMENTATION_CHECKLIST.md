@@ -335,3 +335,67 @@ I. 后端补齐
   - public snapshot 仍无 host/ip/address/port。
 
 状态：已完成，待验收。
+
+## 批次 E.3：admin UI 宽度修复 + 接入命令简化 + 目标协议字段（schema）
+
+状态：已完成（2026-04-30）。验证：`npm run build`、`cd server && go test ./... && go build ./...`。
+
+允许修改：
+- `src/components/admin/*`、`src/pages/admin/*`、`src/styles/*`
+- `server/internal/hub/*.go`、`server/internal/hub/server_test.go`、`server/main.go`
+- `PROBE_IMPLEMENTATION_CHECKLIST.md`
+
+禁止修改：
+- `Dockerfile`、`docker-compose.yml`、`nginx/default.conf`、`server/Dockerfile`
+- `agent/`（agent 协议扩展放到批次 D.1）
+- `StatusProbe.tsx` / `LookingGlass.tsx` / `probeSnapshot.ts`
+
+要求：
+
+1. 全宽布局
+- admin 页面不再受 Rspress doc-page 容器（max-width ~64rem）限制。
+- admin 自己包一层 `.admin-shell`：宽度 100%，最大宽 1440px，居中。
+- 表格列数多时横向滚动只发生在表格内部，不让整页 body 滚。
+- 操作列 sticky 在表格右侧。
+- 顶部 Header（Admin Token + 退出登录）右对齐，不和侧边栏重叠。
+
+2. Token 始终可见 + 复制
+- 取消「token 明文仅本次显示」的设计。
+- 列表展开行展示完整 token（不是 token_prefix），右侧带「复制 Token」按钮。
+- 「重置 Token」按钮：调用 reset-token 后立刻把新 token 写入展开行，无弹窗。
+- 「查看安装命令」按钮：随时可点，弹抽屉显示 systemd unit + config.json + 一行 install 命令；token 用展开行那同一份；可一键复制 unit / config / install 命令。
+- 「复制卸载命令」按钮：一键复制下面的卸载脚本（systemd unit + binary + config 全清）。
+- agents 表行不再隐藏 token，显示 `wpa_xxxxxxxxxxxxxx`，可点眼睛切换显示/隐藏。
+
+3. 后端调整
+- `GET /api/admin/agents`：返回字段加 `token`（明文）；管理接口本来就是 admin 鉴权，可见明文。
+- `GET /api/admin/agents/{id}/install` 接口取消「reset 后才能用」限制，admin token 可随时拿到 unit + config（其中 token 直接来自 DB）。
+- `POST /api/admin/agents/{id}/reset-token` 仍生成新 token；返回包含明文。
+- 服务端继续以哈希存储用于 agent 鉴权对比，但**额外保存明文** token 字段（因为业务上 admin 需要能看到）。如果要兼容旧库：建表迁移加 `token_plain` 列；旧行为 NULL 则视为「需要先 reset」（此时 UI 显示 token 列为「— 重置以生成 Token」）。
+- 后端继续校验：DELETE 关联保护、PUT/POST、admin 鉴权。
+
+4. 目标协议字段（schema 层）
+- Targets 新增字段 `kind`：枚举 `tcp` / `icmp` / `http`，默认 `tcp`，向后兼容（旧 demo 数据全部默认 `tcp`）。
+- `http` kind 额外字段 `path`（默认 `/`）。
+- 数据库迁移：targets 表加 `kind TEXT NOT NULL DEFAULT 'tcp'`、`path TEXT NOT NULL DEFAULT ''`。
+- public snapshot DTO：暴露 `kind`，不暴露 `host` / `port` / `path`。
+- admin DTO：暴露 `host` / `port` / `path` / `kind`。
+- 前端表单 Target 抽屉加协议下拉：tcp/icmp/http；选择 icmp 时隐藏 port 输入；选择 http 时显示 path 输入。
+- targets 列表「地址」列按 kind 渲染：
+  - tcp：`host:port`
+  - icmp：`icmp host`
+  - http：`http(s)://host:port/path`（默认 https；若 port=80 用 http://，否则 https://）
+- agent 端**本批不实现** icmp / http，只准备 schema；agent poll 接口仍只返回 tcp host/port，icmp/http 类型先跳过或返回 type/host 信息但 agent 暂时只跑 tcp。批次 D.1 再补 agent 协议。
+
+5. Toast/错误
+- 复制 token / 复制 unit / 复制 install / 复制 uninstall 都给「已复制到剪贴板」 toast。
+
+验收：
+- `npm run build` 通过。
+- `cd server && go test ./... && go build ./...` 通过。
+- 本地端到端：
+  - 创建 source → 列表展开行直接看到明文 token + 复制按钮。
+  - 点重置 Token → 行内 token 替换为新值。
+  - 点查看安装命令 → 抽屉显示 unit + config + install + uninstall，复制按钮工作。
+  - 创建 target 时切换 kind=icmp，表单隐藏 port；保存后列表「地址」列展示「icmp host」。
+  - public snapshot 仍无 host/ip/address/port/path 字段。

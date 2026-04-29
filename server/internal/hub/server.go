@@ -180,9 +180,8 @@ func (s *Server) adminTargets(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	endpoint, _ := targetEndpoint(req)
-	host, port, _ := splitEndpoint(endpoint)
-	item := AdminTarget{ID: created.ID, DisplayName: created.DisplayName, Region: created.Region, Tags: created.Tags, Status: created.Status, Host: host, Port: port, UpdatedAt: created.UpdatedAt}
+	prepared, _ := prepareTarget(req)
+	item := AdminTarget{ID: created.ID, DisplayName: created.DisplayName, Region: created.Region, Tags: created.Tags, Status: created.Status, Kind: prepared.Kind, Host: prepared.Host, Port: prepared.Port, Path: prepared.Path, UpdatedAt: created.UpdatedAt}
 	writeJSON(w, http.StatusCreated, item)
 }
 
@@ -326,9 +325,9 @@ func (s *Server) adminAgentInstall(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	install, err := s.store.ConsumeAgentInstall(r.Context(), r.PathValue("id"), "https://wiki.kele.my/api/agent")
+	install, err := s.store.AgentInstall(r.Context(), r.PathValue("id"), "https://wiki.kele.my/api/agent")
 	if err != nil {
-		if strings.Contains(err.Error(), "reset token") {
+		if strings.Contains(err.Error(), "重置 Token") {
 			writeError(w, http.StatusConflict, err.Error())
 			return
 		}

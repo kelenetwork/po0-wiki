@@ -5,5 +5,5 @@ export default function AdminAgentsPage() {
   useEffect(() => {
     window.location.replace('/admin/sources');
   }, []);
-  return <AdminApp page="agents" />;
+  return <div style={{ maxWidth: 'none', padding: 0 }}><AdminApp page="agents" /></div>;
 }

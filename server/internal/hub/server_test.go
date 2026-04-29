@@ -61,6 +61,7 @@ func TestPublicSnapshotOmitsPrivateEndpointFields(t *testing.T) {
 		"address":  true,
 		"port":     true,
 		"endpoint": true,
+		"path":     true,
 	}
 	assertNoForbiddenKeys(t, snapshot, forbiddenKeys)
 	body := rec.Body.String()
@@ -92,7 +93,7 @@ func assertPublicSnapshotSchema(t *testing.T, snapshot map[string]any) {
 	if !ok || len(targets) == 0 {
 		t.Fatalf("targets must be a non-empty array")
 	}
-	assertObjectHasKeys(t, targets[0], "id", "display_name", "region", "tags", "status", "updated_at")
+	assertObjectHasKeys(t, targets[0], "id", "display_name", "region", "tags", "status", "kind", "updated_at")
 	checks, ok := snapshot["checks"].([]any)
 	if !ok || len(checks) == 0 {
 		t.Fatalf("checks must be a non-empty array")
@@ -253,6 +254,43 @@ func TestAdminDeleteAgentKeepsSource(t *testing.T) {
 	}
 }
 
+func TestTargetKindICMPInPublicSnapshotWithoutPrivateFields(t *testing.T) {
+	server := newTestServer(t)
+	body := strings.NewReader(`{"id":"tgt-ping","display_name":"Ping Target","kind":"icmp","host":"icmp.example.test"}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/admin/targets", body)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec := httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create icmp target status = %d body = %s", rec.Code, rec.Body.String())
+	}
+	req = httptest.NewRequest(http.MethodGet, "/api/public/probes/snapshot", nil)
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("snapshot status = %d body = %s", rec.Code, rec.Body.String())
+	}
+	var snapshot map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &snapshot); err != nil {
+		t.Fatalf("decode snapshot: %v", err)
+	}
+	targets, _ := snapshot["targets"].([]any)
+	found := false
+	for _, raw := range targets {
+		target, _ := raw.(map[string]any)
+		if target["id"] == "tgt-ping" {
+			found = true
+			if target["kind"] != "icmp" {
+				t.Fatalf("target kind = %v", target["kind"])
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("icmp target missing from snapshot: %s", rec.Body.String())
+	}
+	assertNoForbiddenKeys(t, snapshot, map[string]bool{"host": true, "port": true, "path": true, "endpoint": true})
+}
+
 func assertNoForbiddenKeys(t *testing.T, value any, forbidden map[string]bool) {
 	t.Helper()
 	switch typed := value.(type) {
@@ -308,7 +346,7 @@ func TestAdminPostAcceptsNameAndGeneratesUniqueIDs(t *testing.T) {
 		}
 	}
 
-	targetBody := strings.NewReader(`{"name":"Wiki Target"}`)
+	targetBody := strings.NewReader(`{"name":"Wiki Target","kind":"tcp","host":"wiki.example.test","port":443}`)
 	req := httptest.NewRequest(http.MethodPost, "/api/admin/targets", targetBody)
 	req.Header.Set("Authorization", "Bearer test-token")
 	rec := httptest.NewRecorder()
@@ -356,8 +394,16 @@ func TestAgentPollReportUpdatesPublicSnapshot(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("list agents status = %d body = %s", rec.Code, rec.Body.String())
 	}
-	if strings.Contains(rec.Body.String(), created.Token) || strings.Contains(rec.Body.String(), "token_hash") {
-		t.Fatalf("list agents leaked token material: %s", rec.Body.String())
+	if !strings.Contains(rec.Body.String(), created.Token) || strings.Contains(rec.Body.String(), "token_hash") {
+		t.Fatalf("list agents did not expose token safely: %s", rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/admin/agents/src-shanghai-ctc/install", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), created.Token) || !strings.Contains(rec.Body.String(), "systemd_unit") || !strings.Contains(rec.Body.String(), "config_json") || !strings.Contains(rec.Body.String(), "install_command") {
+		t.Fatalf("install response status = %d body = %s", rec.Code, rec.Body.String())
 	}
 
 	pollBody := strings.NewReader(`{"agent_id":"src-shanghai-ctc","version":"test","hostname":"unit"}`)
@@ -412,7 +458,7 @@ func TestAgentPollReportUpdatesPublicSnapshot(t *testing.T) {
 	if !found {
 		t.Fatalf("updated check not found")
 	}
-	forbiddenKeys := map[string]bool{"host": true, "ip": true, "address": true, "port": true, "endpoint": true}
+	forbiddenKeys := map[string]bool{"host": true, "ip": true, "address": true, "port": true, "endpoint": true, "path": true}
 	var public map[string]any
 	if err := json.Unmarshal(rec.Body.Bytes(), &public); err != nil {
 		t.Fatalf("decode public map: %v", err)
