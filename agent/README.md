@@ -6,7 +6,7 @@
 
 - Direction: agent -> hub and agent -> probe targets only.
 - Required hub access: outbound TCP 443 to `https://wiki.kele.my/api/agent` or your configured hub URL.
-- Probe modes: `tcp`, `icmp`, and `http` checks are all outbound from the agent host.
+- Probe modes: `tcp`, `icmp`, `http`, and `https` checks are all outbound from the agent host.
 - In mainland China deployments, the source machine does not need any inbound firewall opening; it only actively polls and reports to the hub.
 - The agent receives private target `kind`/`host`/`port`/`path` only from authenticated `/api/agent/poll`; public APIs must not expose host, port, or path.
 
@@ -32,7 +32,9 @@ Existing config files remain compatible. `insecure_skip_verify` is optional and 
 
 - `tcp`: performs three TCP connect attempts and reports average `tcp_connect_ms`, loss, and jitter.
 - `icmp`: performs three IPv4 ICMP echo attempts using unprivileged datagram ICMP. IPv6 is not supported yet.
-- `http`: performs one outbound `GET` with the configured timeout. Port `80` uses `http://`; all other ports use `https://`. Empty `path` defaults to `/`. Non-2xx responses are reported as `fail`, and redirects are only followed when they stay on the same host.
+- `http`: performs one outbound plain HTTP `GET` to `http://host:port{path}` with the configured timeout. Empty `path` defaults to `/`. `insecure_skip_verify` does not affect this mode.
+- `https`: performs one outbound TLS HTTPS `GET` to `https://host:port{path}` with the configured timeout. Empty `path` defaults to `/`. `insecure_skip_verify` only affects certificate verification for this mode.
+- HTTP/HTTPS non-2xx responses are reported as `fail`, and redirects are only followed when they stay on the same host.
 
 ## ICMP preparation
 

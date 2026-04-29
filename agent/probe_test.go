@@ -60,7 +60,7 @@ func TestAggregate(t *testing.T) {
 }
 
 func TestHTTPProbeStatusAndLatency(t *testing.T) {
-	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/fail" {
 			http.Error(w, "boom", http.StatusInternalServerError)
 			return
@@ -78,6 +78,19 @@ func TestHTTPProbeStatusAndLatency(t *testing.T) {
 	fail := probeCheck(context.Background(), Check{CheckID: "http-fail", Kind: "http", Host: host, Port: port, Path: "/fail"}, time.Second, true)
 	if fail.Status != "fail" || fail.Code != http.StatusInternalServerError || fail.TCPConnectMS <= 0 || fail.Error == "" {
 		t.Fatalf("fail result = %+v", fail)
+	}
+}
+
+func TestHTTPSProbeStatusAndLatency(t *testing.T) {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("ok"))
+	}))
+	defer server.Close()
+	host, port := splitTestServerAddr(t, server.Listener.Addr().String())
+
+	result := probeCheck(context.Background(), Check{CheckID: "https-ok", Kind: "https", Host: host, Port: port, Path: "/ok"}, time.Second, true)
+	if result.Status != "ok" || result.Code != http.StatusOK || result.TCPConnectMS <= 0 || result.Kind != "https" {
+		t.Fatalf("https result = %+v", result)
 	}
 }
 

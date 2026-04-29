@@ -56,12 +56,13 @@ func TestPublicSnapshotOmitsPrivateEndpointFields(t *testing.T) {
 	}
 	assertPublicSnapshotSchema(t, snapshot)
 	forbiddenKeys := map[string]bool{
-		"host":     true,
-		"ip":       true,
-		"address":  true,
-		"port":     true,
-		"endpoint": true,
-		"path":     true,
+		"host":       true,
+		"ip":         true,
+		"address":    true,
+		"port":       true,
+		"endpoint":   true,
+		"path":       true,
+		"last_error": true,
 	}
 	assertNoForbiddenKeys(t, snapshot, forbiddenKeys)
 	body := rec.Body.String()
@@ -423,14 +424,20 @@ func TestAgentPollReportUpdatesPublicSnapshot(t *testing.T) {
 	if _, err := server.store.CreateTarget(context.Background(), CreateTargetRequest{ID: "tgt-agent-icmp", DisplayName: "Agent ICMP", Kind: "icmp", Host: "icmp.example.test"}); err != nil {
 		t.Fatalf("create icmp target: %v", err)
 	}
-	if _, err := server.store.CreateTarget(context.Background(), CreateTargetRequest{ID: "tgt-agent-http", DisplayName: "Agent HTTP", Kind: "http", Host: "http.example.test", Port: 8443, Path: "/healthz"}); err != nil {
+	if _, err := server.store.CreateTarget(context.Background(), CreateTargetRequest{ID: "tgt-agent-http", DisplayName: "Agent HTTP", Kind: "http", Host: "http.example.test", Port: 8080, Path: "/healthz"}); err != nil {
 		t.Fatalf("create http target: %v", err)
+	}
+	if _, err := server.store.CreateTarget(context.Background(), CreateTargetRequest{ID: "tgt-agent-https", DisplayName: "Agent HTTPS", Kind: "https", Host: "https.example.test", Port: 8443, Path: "/healthz"}); err != nil {
+		t.Fatalf("create https target: %v", err)
 	}
 	if _, err := server.store.CreateCheck(context.Background(), CreateCheckRequest{ID: "chk-agent-icmp", DisplayName: "Agent ICMP", SourceID: "src-shanghai-ctc", TargetID: "tgt-agent-icmp"}); err != nil {
 		t.Fatalf("create icmp check: %v", err)
 	}
 	if _, err := server.store.CreateCheck(context.Background(), CreateCheckRequest{ID: "chk-agent-http", DisplayName: "Agent HTTP", SourceID: "src-shanghai-ctc", TargetID: "tgt-agent-http"}); err != nil {
 		t.Fatalf("create http check: %v", err)
+	}
+	if _, err := server.store.CreateCheck(context.Background(), CreateCheckRequest{ID: "chk-agent-https", DisplayName: "Agent HTTPS", SourceID: "src-shanghai-ctc", TargetID: "tgt-agent-https"}); err != nil {
+		t.Fatalf("create https check: %v", err)
 	}
 
 	pollBody = strings.NewReader(`{"agent_id":"src-shanghai-ctc","version":"test","hostname":"unit"}`)
@@ -454,11 +461,14 @@ func TestAgentPollReportUpdatesPublicSnapshot(t *testing.T) {
 	if check := byID["chk-agent-icmp"]; check.Kind != "icmp" || check.Host != "icmp.example.test" || check.Port != 0 || check.Path != "" {
 		t.Fatalf("icmp poll check = %+v", check)
 	}
-	if check := byID["chk-agent-http"]; check.Kind != "http" || check.Host != "http.example.test" || check.Port != 8443 || check.Path != "/healthz" {
+	if check := byID["chk-agent-http"]; check.Kind != "http" || check.Host != "http.example.test" || check.Port != 8080 || check.Path != "/healthz" {
 		t.Fatalf("http poll check = %+v", check)
 	}
+	if check := byID["chk-agent-https"]; check.Kind != "https" || check.Host != "https.example.test" || check.Port != 8443 || check.Path != "/healthz" {
+		t.Fatalf("https poll check = %+v", check)
+	}
 
-	reportBody := strings.NewReader(`{"agent_id":"src-shanghai-ctc","results":[{"check_id":"chk-shanghai-wiki","tcp_connect_ms":12.3,"loss":0,"jitter_ms":1.2,"status":"ok","observed_at":"2026-04-30T00:00:00Z"}]}`)
+	reportBody := strings.NewReader(`{"agent_id":"src-shanghai-ctc","results":[{"check_id":"chk-shanghai-wiki","tcp_connect_ms":12.3,"loss":0,"jitter_ms":1.2,"status":"fail","error":"tls handshake failed","observed_at":"2026-04-30T00:00:00Z"}]}`)
 	req = httptest.NewRequest(http.MethodPost, "/api/agent/report", reportBody)
 	req.Header.Set("Authorization", "Bearer "+created.Token)
 	rec = httptest.NewRecorder()
@@ -468,6 +478,31 @@ func TestAgentPollReportUpdatesPublicSnapshot(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), `"accepted":1`) {
 		t.Fatalf("report body = %s", rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/admin/checks", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"last_error":"tls handshake failed"`) {
+		t.Fatalf("admin checks missing last_error: status = %d body = %s", rec.Code, rec.Body.String())
+	}
+
+	reportBody = strings.NewReader(`{"agent_id":"src-shanghai-ctc","results":[{"check_id":"chk-shanghai-wiki","tcp_connect_ms":12.3,"loss":0,"jitter_ms":1.2,"status":"ok","observed_at":"2026-04-30T00:00:01Z"}]}`)
+	req = httptest.NewRequest(http.MethodPost, "/api/agent/report", reportBody)
+	req.Header.Set("Authorization", "Bearer "+created.Token)
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("ok report status = %d body = %s", rec.Code, rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/admin/checks", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"last_error":""`) || strings.Contains(rec.Body.String(), "tls handshake failed") {
+		t.Fatalf("admin checks did not clear last_error: status = %d body = %s", rec.Code, rec.Body.String())
 	}
 
 	req = httptest.NewRequest(http.MethodGet, "/api/public/probes/snapshot", nil)
@@ -492,7 +527,7 @@ func TestAgentPollReportUpdatesPublicSnapshot(t *testing.T) {
 	if !found {
 		t.Fatalf("updated check not found")
 	}
-	forbiddenKeys := map[string]bool{"host": true, "ip": true, "address": true, "port": true, "endpoint": true, "path": true}
+	forbiddenKeys := map[string]bool{"host": true, "ip": true, "address": true, "port": true, "endpoint": true, "path": true, "last_error": true}
 	var public map[string]any
 	if err := json.Unmarshal(rec.Body.Bytes(), &public); err != nil {
 		t.Fatalf("decode public map: %v", err)

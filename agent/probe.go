@@ -33,7 +33,7 @@ func probeCheck(ctx context.Context, check Check, timeout time.Duration, insecur
 	switch normalizeCheckKind(check.Kind) {
 	case "icmp":
 		return probeICMP(ctx, check, timeout)
-	case "http":
+	case "http", "https":
 		return probeHTTP(ctx, check, timeout, insecureSkipVerify)
 	default:
 		return probeTCP(ctx, check, timeout)
@@ -164,7 +164,7 @@ func samePeerIP(peer net.Addr, ip net.IP) bool {
 func probeHTTP(ctx context.Context, check Check, timeout time.Duration, insecureSkipVerify bool) Result {
 	url := httpProbeURL(check)
 	transport := http.DefaultTransport.(*http.Transport).Clone()
-	if insecureSkipVerify {
+	if normalizeCheckKind(check.Kind) == "https" && insecureSkipVerify {
 		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 	client := &http.Client{Timeout: timeout, Transport: transport}
@@ -206,8 +206,8 @@ func probeHTTP(ctx context.Context, check Check, timeout time.Duration, insecure
 }
 
 func httpProbeURL(check Check) string {
-	scheme := "https"
-	if check.Port == 80 {
+	scheme := normalizeCheckKind(check.Kind)
+	if scheme != "http" && scheme != "https" {
 		scheme = "http"
 	}
 	path := strings.TrimSpace(check.Path)
@@ -247,6 +247,8 @@ func normalizeCheckKind(kind string) string {
 		return "icmp"
 	case "http":
 		return "http"
+	case "https":
+		return "https"
 	default:
 		return "tcp"
 	}

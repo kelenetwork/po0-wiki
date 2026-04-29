@@ -438,3 +438,62 @@ I. 后端补齐
 - 本地端对端：
   - hub 中创建 target kind=tcp/http 各一，agent poll 后能在 report 中看到对应 latency_ms。
   - icmp 用本机 ping 127.0.0.1 验证（如系统支持 unprivileged icmp）。
+
+## 批次 E.4：HTTP scheme 显式 + 任务最近错误列（已完成）
+
+允许修改：
+- `src/components/admin/*`、`src/pages/admin/*`、`src/styles/*`
+- `server/internal/hub/*.go`、`server/internal/hub/server_test.go`、`server/main.go`
+- `agent/probe.go`、`agent/types.go`、`agent/probe_test.go`、`agent/README.md`、`agent/wiki-probe-agent.service`
+- `PROBE_IMPLEMENTATION_CHECKLIST.md`
+
+禁止修改：
+- `Dockerfile`、`docker-compose.yml`、`nginx/default.conf`、`server/Dockerfile`
+- `StatusProbe.tsx`、`LookingGlass.tsx`、`probeSnapshot.ts`
+- `rspress.config.ts`（除非新增 admin 路由）
+
+要求：
+
+1. HTTP scheme 显式
+- target kind 由原 `tcp / icmp / http` 改为 `tcp / icmp / http / https`。
+- 数据库迁移：targets.kind 允许新值；旧 `http` 数据如有按 `port=80 → http, 其他 → https` 自动迁移一次（仅 demo 旧记录）。
+- 前端 target 抽屉表单协议下拉改为四项：`TCP`/`ICMP`/`HTTP`/`HTTPS`。
+- 列表「地址」列：
+  - tcp: host:port
+  - icmp: icmp host
+  - http: http://host[:port]/path
+  - https: https://host[:port]/path
+- agent 端：
+  - kind=http → 用 `http://`，TLSConfig.InsecureSkipVerify 不影响
+  - kind=https → 用 `https://`，遵循 insecure_skip_verify
+  - 不再按 port 推断 scheme。
+
+2. 任务最近错误列
+- DB checks 表加列 `last_error TEXT NOT NULL DEFAULT ''`（迁移）。
+- agent report 写入 results 时，把 result.error 同步更新到 checks.last_error；status=ok 时清空。
+- admin GET /api/admin/checks 返回字段加 `last_error`。
+- 前端 checks 列表/交叉表把 last_error 展示为「最近错误」列；为空显示「—」；hover/long error 用 title 完整提示。
+- public snapshot 仍**不**包含 last_error。
+
+3. README + service 模板
+- README 协议章节新增 http vs https 区分。
+- 不需要其他系统能力变更。
+
+4. 测试
+- agent probe http/https 路径用 httptest.NewServer / NewTLSServer 各测一遍。
+- server tests：admin checks list 含 last_error；public snapshot 不含 last_error。
+
+操作要求：
+- 直接修改/创建文件。
+- 不要部署、不要 docker compose up。
+- 完成后列出修改文件、运行命令。
+
+验收：
+- `cd server && go test ./... && go build ./...`
+- `cd agent && go test ./... && go build ./...`
+- `npm run build`
+- 本地端到端：
+  - 创建 target kind=http port=18801 path=/ok 走 plain http 成功
+  - 创建 target kind=https port=18801（指向本地 TLS testserver）失败时 last_error 体现 TLS 错误
+  - admin 列表能看到「最近错误」列
+  - public snapshot 不含 host/port/path/last_error

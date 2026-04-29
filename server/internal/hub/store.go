@@ -82,6 +82,7 @@ type AdminCheck struct {
 	JitterMS        float64  `json:"jitter_ms"`
 	IntervalSeconds int      `json:"interval_seconds"`
 	Enabled         bool     `json:"enabled"`
+	LastError       string   `json:"last_error"`
 	UpdatedAt       string   `json:"updated_at"`
 }
 
@@ -256,6 +257,7 @@ CREATE TABLE IF NOT EXISTS checks (
   jitter_ms INTEGER NOT NULL DEFAULT 0,
   interval_seconds INTEGER NOT NULL DEFAULT 30,
   enabled INTEGER NOT NULL DEFAULT 1,
+  last_error TEXT NOT NULL DEFAULT '',
   updated_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS series_points (
@@ -284,8 +286,13 @@ CREATE TABLE IF NOT EXISTS agents (
 	}
 	_, _ = s.db.ExecContext(ctx, `ALTER TABLE checks ADD COLUMN interval_seconds INTEGER NOT NULL DEFAULT 30`)
 	_, _ = s.db.ExecContext(ctx, `ALTER TABLE checks ADD COLUMN enabled INTEGER NOT NULL DEFAULT 1`)
+	_, _ = s.db.ExecContext(ctx, `ALTER TABLE checks ADD COLUMN last_error TEXT NOT NULL DEFAULT ''`)
 	_, _ = s.db.ExecContext(ctx, `ALTER TABLE targets ADD COLUMN kind TEXT NOT NULL DEFAULT 'tcp'`)
 	_, _ = s.db.ExecContext(ctx, `ALTER TABLE targets ADD COLUMN path TEXT NOT NULL DEFAULT ''`)
+	_, err = s.db.ExecContext(ctx, `UPDATE targets SET kind = 'https' WHERE kind = 'http' AND endpoint LIKE '%:443'`)
+	if err != nil {
+		return err
+	}
 	_, _ = s.db.ExecContext(ctx, `ALTER TABLE agents ADD COLUMN pending_token TEXT NOT NULL DEFAULT ''`)
 	_, _ = s.db.ExecContext(ctx, `ALTER TABLE agents ADD COLUMN token_plain TEXT NOT NULL DEFAULT ''`)
 	return nil
@@ -451,7 +458,7 @@ func (s *Store) ListChecks(ctx context.Context) ([]Check, error) {
 }
 
 func (s *Store) ListAdminChecks(ctx context.Context) ([]AdminCheck, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, source_id, target_id, tags, status, latency_ms, loss_pct, jitter_ms, interval_seconds, enabled, updated_at FROM checks ORDER BY id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, source_id, target_id, tags, status, latency_ms, loss_pct, jitter_ms, interval_seconds, enabled, last_error, updated_at FROM checks ORDER BY id`)
 	if err != nil {
 		return nil, err
 	}
@@ -461,7 +468,7 @@ func (s *Store) ListAdminChecks(ctx context.Context) ([]AdminCheck, error) {
 		var check AdminCheck
 		var tags string
 		var enabled int
-		if err := rows.Scan(&check.ID, &check.DisplayName, &check.SourceID, &check.TargetID, &tags, &check.Status, &check.LatencyMS, &check.LossPct, &check.JitterMS, &check.IntervalSeconds, &enabled, &check.UpdatedAt); err != nil {
+		if err := rows.Scan(&check.ID, &check.DisplayName, &check.SourceID, &check.TargetID, &tags, &check.Status, &check.LatencyMS, &check.LossPct, &check.JitterMS, &check.IntervalSeconds, &enabled, &check.LastError, &check.UpdatedAt); err != nil {
 			return nil, err
 		}
 		check.Tags = decodeTags(tags)
@@ -913,7 +920,11 @@ func (s *Store) RecordAgentResults(ctx context.Context, agentID string, results 
 		if err != nil {
 			return accepted, err
 		}
-		_, err = tx.ExecContext(ctx, `UPDATE checks SET latency_ms = ?, loss_pct = ?, jitter_ms = ?, status = ?, updated_at = ? WHERE id = ?`, result.TCPConnectMS, result.Loss, result.JitterMS, status, when, result.CheckID)
+		lastError := result.Error
+		if status == "ok" {
+			lastError = ""
+		}
+		_, err = tx.ExecContext(ctx, `UPDATE checks SET latency_ms = ?, loss_pct = ?, jitter_ms = ?, status = ?, last_error = ?, updated_at = ? WHERE id = ?`, result.TCPConnectMS, result.Loss, result.JitterMS, status, lastError, when, result.CheckID)
 		if err != nil {
 			return accepted, err
 		}
@@ -985,6 +996,9 @@ type preparedTarget struct {
 
 func prepareTarget(req CreateTargetRequest) (preparedTarget, error) {
 	kind := normalizeTargetKind(req.Kind)
+	if kind == "" {
+		return preparedTarget{}, errors.New("目标协议必须是 tcp、icmp、http 或 https")
+	}
 	path := normalizeTargetPath(kind, req.Path)
 	if req.Endpoint != "" {
 		host, port, err := splitEndpointForKind(req.Endpoint, kind)
@@ -1000,8 +1014,12 @@ func prepareTarget(req CreateTargetRequest) (preparedTarget, error) {
 	if kind == "icmp" {
 		port = 0
 	} else {
-		if port == 0 && kind == "http" {
-			port = 443
+		if port == 0 {
+			if kind == "http" {
+				port = 80
+			} else if kind == "https" {
+				port = 443
+			}
 		}
 		if port <= 0 || port > 65535 {
 			return preparedTarget{}, errors.New("valid port is required")
@@ -1025,15 +1043,16 @@ func normalizeTargetKind(kind string) string {
 		return "tcp"
 	case "icmp":
 		return "icmp"
-	case "http":
-		return "http"
+	case "http", "https":
+		return strings.ToLower(strings.TrimSpace(kind))
 	default:
-		return "tcp"
+		return ""
 	}
 }
 
 func normalizeTargetPath(kind string, path string) string {
-	if normalizeTargetKind(kind) != "http" {
+	kind = normalizeTargetKind(kind)
+	if kind != "http" && kind != "https" {
 		return ""
 	}
 	path = strings.TrimSpace(path)
