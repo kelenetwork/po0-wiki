@@ -15,15 +15,19 @@ type Check struct {
 	DisplayName     string `json:"display_name"`
 	Host            string `json:"host"`
 	Port            int    `json:"port"`
+	Kind            string `json:"kind"`
+	Path            string `json:"path"`
 	IntervalSeconds int    `json:"interval_seconds"`
 }
 
 type Result struct {
 	CheckID      string  `json:"check_id"`
+	Kind         string  `json:"kind,omitempty"`
 	TCPConnectMS float64 `json:"tcp_connect_ms"`
 	Loss         float64 `json:"loss"`
 	JitterMS     float64 `json:"jitter_ms"`
 	Status       string  `json:"status"`
 	ObservedAt   string  `json:"observed_at"`
+	Code         int     `json:"code,omitempty"`
 	Error        string  `json:"error,omitempty"`
 }

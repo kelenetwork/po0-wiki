@@ -420,8 +420,42 @@ func TestAgentPollReportUpdatesPublicSnapshot(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &polled); err != nil {
 		t.Fatalf("decode poll: %v", err)
 	}
-	if len(polled.Checks) == 0 || polled.Checks[0].Host == "" || polled.Checks[0].Port == 0 {
-		t.Fatalf("poll checks = %+v", polled.Checks)
+	if _, err := server.store.CreateTarget(context.Background(), CreateTargetRequest{ID: "tgt-agent-icmp", DisplayName: "Agent ICMP", Kind: "icmp", Host: "icmp.example.test"}); err != nil {
+		t.Fatalf("create icmp target: %v", err)
+	}
+	if _, err := server.store.CreateTarget(context.Background(), CreateTargetRequest{ID: "tgt-agent-http", DisplayName: "Agent HTTP", Kind: "http", Host: "http.example.test", Port: 8443, Path: "/healthz"}); err != nil {
+		t.Fatalf("create http target: %v", err)
+	}
+	if _, err := server.store.CreateCheck(context.Background(), CreateCheckRequest{ID: "chk-agent-icmp", DisplayName: "Agent ICMP", SourceID: "src-shanghai-ctc", TargetID: "tgt-agent-icmp"}); err != nil {
+		t.Fatalf("create icmp check: %v", err)
+	}
+	if _, err := server.store.CreateCheck(context.Background(), CreateCheckRequest{ID: "chk-agent-http", DisplayName: "Agent HTTP", SourceID: "src-shanghai-ctc", TargetID: "tgt-agent-http"}); err != nil {
+		t.Fatalf("create http check: %v", err)
+	}
+
+	pollBody = strings.NewReader(`{"agent_id":"src-shanghai-ctc","version":"test","hostname":"unit"}`)
+	req = httptest.NewRequest(http.MethodPost, "/api/agent/poll", pollBody)
+	req.Header.Set("Authorization", "Bearer "+created.Token)
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("poll status = %d body = %s", rec.Code, rec.Body.String())
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &polled); err != nil {
+		t.Fatalf("decode poll: %v", err)
+	}
+	byID := map[string]AgentCheck{}
+	for _, check := range polled.Checks {
+		byID[check.CheckID] = check
+	}
+	if check := byID["chk-shanghai-wiki"]; check.Kind != "tcp" || check.Host == "" || check.Port == 0 || check.Path != "" {
+		t.Fatalf("tcp poll check = %+v", check)
+	}
+	if check := byID["chk-agent-icmp"]; check.Kind != "icmp" || check.Host != "icmp.example.test" || check.Port != 0 || check.Path != "" {
+		t.Fatalf("icmp poll check = %+v", check)
+	}
+	if check := byID["chk-agent-http"]; check.Kind != "http" || check.Host != "http.example.test" || check.Port != 8443 || check.Path != "/healthz" {
+		t.Fatalf("http poll check = %+v", check)
 	}
 
 	reportBody := strings.NewReader(`{"agent_id":"src-shanghai-ctc","results":[{"check_id":"chk-shanghai-wiki","tcp_connect_ms":12.3,"loss":0,"jitter_ms":1.2,"status":"ok","observed_at":"2026-04-30T00:00:00Z"}]}`)

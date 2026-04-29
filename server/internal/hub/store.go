@@ -191,11 +191,13 @@ type AgentCheck struct {
 
 type AgentResult struct {
 	CheckID      string  `json:"check_id"`
+	Kind         string  `json:"kind,omitempty"`
 	TCPConnectMS float64 `json:"tcp_connect_ms"`
 	Loss         float64 `json:"loss"`
 	JitterMS     float64 `json:"jitter_ms"`
 	Status       string  `json:"status"`
 	ObservedAt   string  `json:"observed_at"`
+	Code         int     `json:"code,omitempty"`
 	Error        string  `json:"error,omitempty"`
 }
 
@@ -853,7 +855,7 @@ func (s *Store) AgentChecks(ctx context.Context, agentID, version, hostname stri
 	if err != nil {
 		return nil, err
 	}
-	rows, err := s.db.QueryContext(ctx, `SELECT c.id, c.display_name, t.endpoint, t.kind, t.path, c.interval_seconds FROM checks c JOIN targets t ON t.id = c.target_id WHERE c.source_id = ? AND c.enabled = 1 AND t.kind = 'tcp' ORDER BY c.id`, agentID)
+	rows, err := s.db.QueryContext(ctx, `SELECT c.id, c.display_name, t.endpoint, t.kind, t.path, c.interval_seconds FROM checks c JOIN targets t ON t.id = c.target_id WHERE c.source_id = ? AND c.enabled = 1 ORDER BY c.id`, agentID)
 	if err != nil {
 		return nil, err
 	}

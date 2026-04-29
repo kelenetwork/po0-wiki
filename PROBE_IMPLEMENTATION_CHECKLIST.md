@@ -399,3 +399,42 @@ I. 后端补齐
   - 点查看安装命令 → 抽屉显示 unit + config + install + uninstall，复制按钮工作。
   - 创建 target 时切换 kind=icmp，表单隐藏 port；保存后列表「地址」列展示「icmp host」。
   - public snapshot 仍无 host/ip/address/port/path 字段。
+
+## 批次 D.1：Agent 多协议（icmp + http）
+
+状态：已实现（agent tcp/icmp/http 分流、hub agent poll 私有字段、agent/server 测试与文档已更新）。
+
+允许修改：
+- `agent/*`（全部）
+- `server/internal/hub/server.go`、`server/internal/hub/store.go`、`server/main.go`、`server/internal/hub/server_test.go`：扩展 agent poll 响应携带 kind/path 等信息
+- `PROBE_IMPLEMENTATION_CHECKLIST.md`
+
+禁止修改：
+- `Dockerfile`、`docker-compose.yml`、`nginx/default.conf`、`server/Dockerfile`
+- `src/`、`docs/`
+
+要求：
+1. Hub agent poll 响应：每个 check 增加字段 `kind` / `host` / `port` / `path`（仅对认证 agent 可见，public snapshot 保持隐私）。
+2. Agent CLI：
+   - 收到 check 时根据 `kind` 分流：
+     - `tcp`：现有 TCP connect 逻辑保留。
+     - `icmp`：使用 unprivileged ICMP（`golang.org/x/net/icmp` 配合 `net.ListenPacket("udp4","")`）；实现 3 次探测、记录 RTT/丢包/抖动；如不可用则记录 status=fail + error="icmp unsupported"。
+     - `http`：使用 net/http GET `scheme://host:port{path}`（port=80 → http；其他 → https），带 timeout=tcp_timeout_ms；记 latency_ms = 请求耗时；非 2xx 视为 fail；不跟随重定向到外站。
+   - 上报字段保持现状：tcp_connect_ms（兼容老字段名）+ status/loss/jitter/error/observed_at。
+3. README 更新：
+   - icmp 需要 `sysctl -w net.ipv4.ping_group_range="0 2147483647"` 或 systemd `AmbientCapabilities=CAP_NET_RAW`，写明两种方案。
+   - http 模式遵循出站 only 原则。
+   - 卸载脚本（与 admin UI 一致）。
+4. systemd unit 文件：增加注释说明 icmp 需要的能力配置（默认仍用 DynamicUser，不自动给 CAP_NET_RAW；用户按需开启）。
+5. 测试：
+   - probe_test.go 增加 http 路径：用 `httptest` 启 server，验证 latency 测量与 status。
+   - icmp 单元测试可跳过（CI 没 raw socket），保留 stub function 测试。
+6. 不部署，不改 Docker/nginx；agent 二进制保留 `.gitignore`。
+
+验收：
+- `cd agent && go test ./...`
+- `cd agent && go build ./...`
+- `cd server && go test ./... && go build ./...`
+- 本地端对端：
+  - hub 中创建 target kind=tcp/http 各一，agent poll 后能在 report 中看到对应 latency_ms。
+  - icmp 用本机 ping 127.0.0.1 验证（如系统支持 unprivileged icmp）。

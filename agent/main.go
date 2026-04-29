@@ -64,7 +64,7 @@ func (r *runner) run(ctx context.Context) {
 					continue
 				}
 				lastRun[check.CheckID] = time.Now()
-				pending = append(pending, probeCheck(ctx, check, time.Duration(r.cfg.TCPTimeoutMS)*time.Millisecond))
+				pending = append(pending, probeCheck(ctx, check, time.Duration(r.cfg.TCPTimeoutMS)*time.Millisecond, r.cfg.InsecureSkipVerify))
 			}
 		case <-reportTicker.C:
 			if len(pending) == 0 {
@@ -88,9 +88,15 @@ func (r *runner) poll(ctx context.Context) error {
 	}
 	next := map[string]Check{}
 	for _, check := range checks {
-		if check.CheckID != "" && check.Host != "" && check.Port > 0 {
-			next[check.CheckID] = check
+		kind := normalizeCheckKind(check.Kind)
+		if check.CheckID == "" || check.Host == "" {
+			continue
 		}
+		if kind != "icmp" && check.Port <= 0 {
+			continue
+		}
+		check.Kind = kind
+		next[check.CheckID] = check
 	}
 	r.mu.Lock()
 	r.checks = next

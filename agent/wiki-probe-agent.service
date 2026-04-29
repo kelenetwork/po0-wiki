@@ -9,6 +9,10 @@ ExecStart=/usr/local/bin/wiki-probe-agent -config /etc/wiki-probe-agent.json
 Restart=always
 RestartSec=5s
 DynamicUser=yes
+# ICMP checks require extra setup; see README. Keep disabled by default.
+# Option A: set net.ipv4.ping_group_range. Option B: enable CAP_NET_RAW below.
+# AmbientCapabilities=CAP_NET_RAW
+# CapabilityBoundingSet=CAP_NET_RAW
 NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=strict
