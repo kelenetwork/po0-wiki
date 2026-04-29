@@ -204,6 +204,29 @@ type AgentResult struct {
 	Error        string  `json:"error,omitempty"`
 }
 
+type LGJob struct {
+	ID          string `json:"id"`
+	AgentID     string `json:"agent_id"`
+	Tool        string `json:"tool"`
+	TargetID    string `json:"target_id"`
+	TargetHost  string `json:"target_host"`
+	TargetPort  int    `json:"target_port"`
+	Status      string `json:"status"`
+	Output      string `json:"output,omitempty"`
+	Error       string `json:"error,omitempty"`
+	CreatedAt   string `json:"created_at"`
+	StartedAt   string `json:"started_at,omitempty"`
+	CompletedAt string `json:"completed_at,omitempty"`
+}
+
+type LGJobResult struct {
+	Status      string `json:"status"`
+	Output      string `json:"output,omitempty"`
+	Error       string `json:"error,omitempty"`
+	StartedAt   string `json:"started_at,omitempty"`
+	CompletedAt string `json:"completed_at,omitempty"`
+}
+
 func OpenStore(dbPath string) (*Store, error) {
 	if dbPath == "" {
 		dbPath = defaultDBPath
@@ -282,6 +305,21 @@ CREATE TABLE IF NOT EXISTS agents (
   pending_token TEXT NOT NULL DEFAULT '',
   token_plain TEXT NOT NULL DEFAULT ''
 );
+CREATE TABLE IF NOT EXISTS lg_jobs (
+  id TEXT PRIMARY KEY,
+  agent_id TEXT NOT NULL,
+  tool TEXT NOT NULL,
+  target_id TEXT NOT NULL,
+  target_host TEXT NOT NULL,
+  target_port INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  output TEXT NOT NULL DEFAULT '',
+  error TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL,
+  started_at TEXT NOT NULL DEFAULT '',
+  completed_at TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_lg_jobs_agent_pending ON lg_jobs(agent_id, status) WHERE status='pending';
 `)
 	if err != nil {
 		return err
@@ -451,14 +489,18 @@ func (s *Store) LookingGlassEndpoint(ctx context.Context, sourceID string, targe
 		return Source{}, AdminTarget{}, errors.New("source_id and target_id are required")
 	}
 	var source Source
-	var sourceTags string
-	if err := s.db.QueryRowContext(ctx, `SELECT id, display_name, region, tags, status, updated_at FROM sources WHERE id = ?`, sourceID).Scan(&source.ID, &source.DisplayName, &source.Region, &sourceTags, &source.Status, &source.UpdatedAt); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return Source{}, AdminTarget{}, errors.New("source not found")
+	if isHubSource(sourceID) {
+		source = Source{ID: "hub", DisplayName: "Hub (上海·wiki.kele.my 服务器)", Region: "上海", Tags: []string{"Hub-local"}, Status: "online", UpdatedAt: time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)}
+	} else {
+		var sourceTags string
+		if err := s.db.QueryRowContext(ctx, `SELECT id, display_name, region, tags, status, updated_at FROM sources WHERE id = ?`, sourceID).Scan(&source.ID, &source.DisplayName, &source.Region, &sourceTags, &source.Status, &source.UpdatedAt); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return Source{}, AdminTarget{}, errors.New("source not found")
+			}
+			return Source{}, AdminTarget{}, err
 		}
-		return Source{}, AdminTarget{}, err
+		source.Tags = decodeTags(sourceTags)
 	}
-	source.Tags = decodeTags(sourceTags)
 
 	var target AdminTarget
 	var targetTags string
@@ -984,6 +1026,91 @@ func (s *Store) RecordAgentResults(ctx context.Context, agentID string, results 
 	return accepted, nil
 }
 
+func (s *Store) CreateLGJob(ctx context.Context, agentID, tool, targetID, targetHost string, targetPort int) (LGJob, error) {
+	if strings.TrimSpace(agentID) == "" || strings.TrimSpace(tool) == "" || strings.TrimSpace(targetID) == "" || strings.TrimSpace(targetHost) == "" {
+		return LGJob{}, errors.New("agent_id, tool, target_id, and target_host are required")
+	}
+	id, err := newLGJobID()
+	if err != nil {
+		return LGJob{}, err
+	}
+	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
+	job := LGJob{ID: id, AgentID: agentID, Tool: tool, TargetID: targetID, TargetHost: targetHost, TargetPort: targetPort, Status: "pending", CreatedAt: now}
+	_, err = s.db.ExecContext(ctx, `INSERT INTO lg_jobs (id, agent_id, tool, target_id, target_host, target_port, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, job.ID, job.AgentID, job.Tool, job.TargetID, job.TargetHost, job.TargetPort, job.Status, job.CreatedAt)
+	return job, err
+}
+
+func (s *Store) LGJobResult(ctx context.Context, id string) (LGJobResult, error) {
+	id = strings.TrimSpace(id)
+	if id == "" {
+		return LGJobResult{}, errors.New("job_id is required")
+	}
+	var result LGJobResult
+	var host, displayName string
+	err := s.db.QueryRowContext(ctx, `SELECT j.status, j.output, j.error, j.started_at, j.completed_at, j.target_host, COALESCE(t.display_name, j.target_id) FROM lg_jobs j LEFT JOIN targets t ON t.id = j.target_id WHERE j.id = ?`, id).Scan(&result.Status, &result.Output, &result.Error, &result.StartedAt, &result.CompletedAt, &host, &displayName)
+	if errors.Is(err, sql.ErrNoRows) {
+		return LGJobResult{}, errors.New("job not found")
+	}
+	if err != nil {
+		return LGJobResult{}, err
+	}
+	result.Output = sanitizeLGOutput(result.Output, host, displayName)
+	result.Error = sanitizeLGOutput(result.Error, host, displayName)
+	return result, nil
+}
+
+func (s *Store) ClaimLGJob(ctx context.Context, agentID string) (LGJob, bool, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return LGJob{}, false, err
+	}
+	defer tx.Rollback()
+	var job LGJob
+	err = tx.QueryRowContext(ctx, `SELECT id, agent_id, tool, target_id, target_host, target_port, status, output, error, created_at, started_at, completed_at FROM lg_jobs WHERE agent_id = ? AND status = 'pending' ORDER BY created_at, id LIMIT 1`, agentID).Scan(&job.ID, &job.AgentID, &job.Tool, &job.TargetID, &job.TargetHost, &job.TargetPort, &job.Status, &job.Output, &job.Error, &job.CreatedAt, &job.StartedAt, &job.CompletedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return LGJob{}, false, nil
+	}
+	if err != nil {
+		return LGJob{}, false, err
+	}
+	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
+	res, err := tx.ExecContext(ctx, `UPDATE lg_jobs SET status = 'running', started_at = ? WHERE id = ? AND status = 'pending'`, now, job.ID)
+	if err != nil {
+		return LGJob{}, false, err
+	}
+	changed, _ := res.RowsAffected()
+	if changed == 0 {
+		return LGJob{}, false, nil
+	}
+	if err := tx.Commit(); err != nil {
+		return LGJob{}, false, err
+	}
+	job.Status = "running"
+	job.StartedAt = now
+	return job, true, nil
+}
+
+func (s *Store) CompleteLGJob(ctx context.Context, agentID, jobID, outputText, errorText string) error {
+	jobID = strings.TrimSpace(jobID)
+	if jobID == "" {
+		return errors.New("job_id is required")
+	}
+	status := "completed"
+	if strings.TrimSpace(errorText) != "" {
+		status = "failed"
+	}
+	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
+	res, err := s.db.ExecContext(ctx, `UPDATE lg_jobs SET status = ?, output = ?, error = ?, completed_at = ? WHERE id = ? AND agent_id = ? AND status IN ('pending', 'running')`, status, outputText, errorText, now, jobID, agentID)
+	if err != nil {
+		return err
+	}
+	changed, _ := res.RowsAffected()
+	if changed == 0 {
+		return errors.New("job not found")
+	}
+	return nil
+}
+
 type sqlExecer interface {
 	ExecContext(context.Context, string, ...any) (sql.Result, error)
 }
@@ -1204,6 +1331,14 @@ func newAgentToken() (string, error) {
 		return "", err
 	}
 	return "wpa_" + hex.EncodeToString(random), nil
+}
+
+func newLGJobID() (string, error) {
+	random := make([]byte, 16)
+	if _, err := rand.Read(random); err != nil {
+		return "", err
+	}
+	return "lg_" + hex.EncodeToString(random), nil
 }
 
 func hashToken(token string) string {

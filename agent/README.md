@@ -20,6 +20,8 @@ Example shape:
 curl -fsSL https://github.com/kelenetwork/po0-wiki/releases/latest/download/install.sh | sudo AGENT_ID=src-xxx TOKEN=AGENT_TOKEN HUB_URL=https://wiki.kele.my/api/agent bash
 ```
 
+After upgrading to `v0.2.0` or newer, rerun `install.sh` on existing source machines so systemd picks up the new binary and optional unit settings. Looking Glass dispatch requires the upgraded agent.
+
 To remove the agent, use the `复制卸载命令` command from the same admin drawer or run:
 
 ```bash
@@ -56,13 +58,19 @@ Existing config files remain compatible. `insecure_skip_verify` is optional and 
 
 ## ICMP preparation
 
-ICMP is not enabled by the packaged systemd unit by default. Use one of these options if you need `icmp` checks:
+ICMP is not enabled by the packaged systemd unit by default. `ping` Looking Glass jobs and `icmp` checks may fail under `DynamicUser` unless ICMP is enabled. Use one of these options if you need ICMP:
 
 ```bash
 sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"
 ```
 
-Or add capabilities to the systemd service override/unit:
+Or install with the optional capability flag:
+
+```bash
+curl -fsSL https://github.com/kelenetwork/po0-wiki/releases/latest/download/install.sh | sudo ENABLE_ICMP=true AGENT_ID=src-xxx TOKEN=AGENT_TOKEN HUB_URL=https://wiki.kele.my/api/agent bash
+```
+
+This writes these capability lines to the systemd unit; you can also add them manually via an override/unit:
 
 ```ini
 AmbientCapabilities=CAP_NET_RAW

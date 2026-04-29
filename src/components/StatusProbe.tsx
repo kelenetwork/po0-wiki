@@ -375,11 +375,11 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
           <div className="latency-grid" aria-label="目标延迟卡片">
             {filteredLatencies.map((item) => (
               <article className={`latency-card latency-card--${item.tone}${item.pending ? ' latency-card--pending' : ''}`} key={item.id}>
-                <span className="latency-card__location">{item.location}</span>
+                <span className="latency-card__route">{item.location}</span>
                 <strong className="latency-card__value">
                   <span>{item.latencyValue}</span>{item.latencyUnit && <span className="unit">{item.latencyUnit}</span>}
                 </strong>
-                <p>{item.target}</p>
+                <p className="latency-card__target">{item.target}</p>
                 <div className="latency-card__meta">
                   <small>抖动 {item.jitter}</small>
                   <small>丢包 {item.loss}</small>

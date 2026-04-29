@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import './LookingGlass.css';
 import { PublicProbeItem, usePublicProbeSnapshot } from './probeSnapshot';
 
@@ -31,32 +31,49 @@ function nodeTone(status: string) {
   return 'standby';
 }
 
+const hubSource: PublicProbeItem = {
+  id: 'hub',
+  display_name: 'Hub (上海·wiki.kele.my 服务器)',
+  region: 'Hub-local',
+  tags: ['上海', '服务器本机'],
+  status: 'online',
+  updated_at: '',
+};
+
 function defaultSourceId(sources: PublicProbeItem[]) {
-  return sources.find((source) => source.status === 'online' || source.status === 'ok')?.id ?? sources[0]?.id ?? '';
+  return sources.find((source) => source.status === 'online' || source.status === 'ok')?.id ?? sources[0]?.id ?? 'hub';
 }
+
+type LGResult = {
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'timeout' | string;
+  output?: string;
+  error?: string;
+  started_at?: string;
+  completed_at?: string;
+};
 
 function renderTerminalOutput(value: string) {
   const [firstLine, ...restLines] = value.split('\n');
-  if (!firstLine.startsWith('⚠')) return value;
+  const className = firstLine.startsWith('✓') ? 'lg-terminal-success' : firstLine.startsWith('⚠') ? 'lg-terminal-warning' : '';
+  if (!className) return value;
   return (
     <>
-      <span className="lg-terminal-warning">{firstLine}</span>
+      <span className={className}>{firstLine}</span>
       {restLines.length > 0 && `\n${restLines.join('\n')}`}
     </>
   );
 }
 
 const initialTerminal = [
-  '⚠ 测试发起点：Hub (上海) — 不是你选的 src-item。',
-  '   如需从源节点发起，请等 agent dispatch 模式上线。',
   '$ 选择源节点、目标和工具后点击 Run',
-  'Looking Glass 已接入后端 /api/public/lg/run。',
-  '当前版本使用 Hub-local fallback 执行，并在输出中标注真实执行位置。',
+  '选择 Hub 会从 wiki.kele.my 上海服务器本机执行。',
+  '选择真实源节点会下发到该 agent 执行并轮询结果。',
 ].join('\n');
 
 export default function LookingGlass() {
   const { snapshot, origin } = usePublicProbeSnapshot();
   const regionGroups = groupSources(snapshot.sources);
+  const selectableSources = useMemo(() => [hubSource, ...snapshot.sources], [snapshot.sources]);
   const [selectedSourceId, setSelectedSourceId] = useState(defaultSourceId(snapshot.sources));
   const [selectedTargetId, setSelectedTargetId] = useState(snapshot.targets[0]?.id ?? '');
   const [selectedTool, setSelectedTool] = useState<LGTool>('mtr');
@@ -68,21 +85,52 @@ export default function LookingGlass() {
     setSelectedTargetId((current) => current || snapshot.targets[0]?.id || '');
   }, [snapshot.sources, snapshot.targets]);
 
-  const selectedSource = snapshot.sources.find((source) => source.id === selectedSourceId);
+  const selectedSource = selectableSources.find((source) => source.id === selectedSourceId);
   const selectedTarget = snapshot.targets.find((target) => target.id === selectedTargetId);
+  const dispatchMode = selectedSourceId !== 'hub';
 
   async function runTool() {
     if (!selectedSourceId || !selectedTargetId || running) return;
+    const sourceName = selectedSource?.display_name ?? selectedSourceId;
+    const targetName = selectedTarget?.display_name ?? selectedTargetId;
     setRunning(true);
-    setTerminalOutput(`⚠ 测试发起点：Hub (上海) — 不是你选的 src-item (${selectedSource?.display_name ?? selectedSourceId})。\n   如需从源节点发起，请等 agent dispatch 模式上线。\n$ ${selectedTool} ${selectedTarget?.display_name ?? selectedTargetId} --from ${selectedSource?.display_name ?? selectedSourceId}\nRunning...`);
+    setTerminalOutput(dispatchMode
+      ? `✓ 测试发起点：你的源节点 ${sourceName}\n$ ${selectedTool} ${targetName} --from ${sourceName}\n等待 ${sourceName} 执行中...`
+      : `⚠ 测试发起点：Hub (上海) — Hub-local fallback。\n$ ${selectedTool} ${targetName} --from Hub\nRunning...`);
     try {
       const response = await fetch('/api/public/lg/run', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'text/plain' },
+        headers: { 'Content-Type': 'application/json', Accept: dispatchMode ? 'application/json' : 'text/plain' },
         body: JSON.stringify({ tool: selectedTool, source_id: selectedSourceId, target_id: selectedTargetId }),
       });
-      const text = await response.text();
-      setTerminalOutput(text || `请求完成，但后端没有返回输出。HTTP ${response.status}`);
+
+      if (!dispatchMode) {
+        const text = await response.text();
+        setTerminalOutput(text || `请求完成，但后端没有返回输出。HTTP ${response.status}`);
+        return;
+      }
+
+      if (response.status !== 202) {
+        setTerminalOutput(`Looking Glass dispatch 创建失败：HTTP ${response.status}\n${await response.text()}`);
+        return;
+      }
+      const payload = await response.json() as { job_id?: string };
+      if (!payload.job_id) {
+        setTerminalOutput('Looking Glass dispatch 创建失败：后端没有返回 job_id。');
+        return;
+      }
+
+      for (let second = 0; second < 30; second += 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, 1000));
+        const resultResponse = await fetch(`/api/public/lg/result?job_id=${encodeURIComponent(payload.job_id)}`, { headers: { Accept: 'application/json' } });
+        const result = await resultResponse.json() as LGResult;
+        if (result.status === 'completed' || result.status === 'failed') {
+          setTerminalOutput(`✓ 测试发起点：你的源节点 ${sourceName}\n# job_id: ${payload.job_id} · status=${result.status}\n${result.output || ''}${result.error ? `\nerror: ${result.error}` : ''}`);
+          return;
+        }
+        setTerminalOutput(`✓ 测试发起点：你的源节点 ${sourceName}\n# job_id: ${payload.job_id} · status=${result.status}\n等待 ${sourceName} 执行中... ${second + 1}s`);
+      }
+      setTerminalOutput(`✓ 测试发起点：你的源节点 ${sourceName}\n# job timed out locally after 30s\n等待 ${sourceName} 执行超时，请稍后刷新结果或检查 agent 日志。`);
     } catch (error) {
       setTerminalOutput(`Looking Glass 请求失败：${error instanceof Error ? error.message : 'unknown error'}`);
     } finally {
@@ -99,6 +147,19 @@ export default function LookingGlass() {
           <span>{origin === 'api' ? '来自 Public Snapshot API。' : 'API 不可用，使用安全 mock。'}</span>
         </div>
         <div className="lg-region-list">
+          <article className="lg-region">
+            <div className="lg-region__title">
+              <strong>Hub-local</strong>
+              <small>明确从上海服务器本机执行</small>
+            </div>
+            <button className={`lg-node${selectedSourceId === 'hub' ? ' is-active' : ''}`} type="button" onClick={() => setSelectedSourceId('hub')}>
+              <span className="lg-node-dot online" />
+              <span>
+                <strong>{hubSource.display_name}</strong>
+                <small>Hub-local fallback · 手动选择</small>
+              </span>
+            </button>
+          </article>
           {regionGroups.map((group) => (
             <article className="lg-region" key={group.region}>
               <div className="lg-region__title">
@@ -146,9 +207,9 @@ export default function LookingGlass() {
           <button className="lg-run" type="button" onClick={runTool} disabled={running || !selectedSourceId || !selectedTargetId}>{running ? 'Running…' : 'Run'}</button>
         </div>
 
-        <div className="lg-mode-banner" role="note">
-          <strong>Hub-local 模式</strong>
-          <span>当前所有测试均从 wiki.kele.my 服务器发起，不会从左侧所选源节点执行。</span>
+        <div className={`lg-mode-banner${dispatchMode ? ' lg-mode-banner--dispatch' : ''}`} role="note">
+          <strong>{dispatchMode ? 'Agent dispatch 模式' : 'Hub-local 模式'}</strong>
+          <span>{dispatchMode ? `测试将下发到 ${selectedSource?.display_name ?? selectedSourceId} 执行。` : '当前测试从 wiki.kele.my 上海服务器本机发起。'}</span>
         </div>
 
         <div className="lg-summary-grid">
@@ -164,8 +225,8 @@ export default function LookingGlass() {
           </article>
           <article>
             <span>状态</span>
-            <strong>{running ? '运行中' : 'Hub-local fallback'}</strong>
-            <small>后端本机执行，非 agent dispatch</small>
+            <strong>{running ? '运行中' : dispatchMode ? 'Agent dispatch' : 'Hub-local fallback'}</strong>
+            <small>{dispatchMode ? '源节点 agent 执行，轮询结果' : '后端本机执行'}</small>
           </article>
         </div>
 

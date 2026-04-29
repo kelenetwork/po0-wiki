@@ -37,6 +37,7 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("GET /api/public/probes/snapshot", s.publicSnapshot)
 	mux.HandleFunc("GET /api/public/probes/stream", s.publicStream)
 	mux.HandleFunc("POST /api/public/lg/run", s.publicLGRun)
+	mux.HandleFunc("GET /api/public/lg/result", s.publicLGResult)
 	mux.HandleFunc("GET /api/admin/sources", s.adminSources)
 	mux.HandleFunc("POST /api/admin/sources", s.adminSources)
 	mux.HandleFunc("PUT /api/admin/sources/{id}", s.adminSource)
@@ -56,6 +57,8 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("GET /api/admin/agents/{id}/install", s.adminAgentInstall)
 	mux.HandleFunc("POST /api/agent/poll", s.agentPoll)
 	mux.HandleFunc("POST /api/agent/report", s.agentReport)
+	mux.HandleFunc("POST /api/agent/lg/poll", s.agentLGPoll)
+	mux.HandleFunc("POST /api/agent/lg/report", s.agentLGReport)
 	return mux
 }
 
@@ -164,12 +167,40 @@ func (s *Server) publicLGRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(r.Context(), 18*time.Second)
-	defer cancel()
-	output := runLocalLookingGlass(ctx, req.Tool, source, target)
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte(output))
+	if isHubSource(req.SourceID) {
+		ctx, cancel := context.WithTimeout(r.Context(), 18*time.Second)
+		defer cancel()
+		output := runLocalLookingGlass(ctx, req.Tool, source, target)
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(output))
+		return
+	}
+
+	job, err := s.store.CreateLGJob(r.Context(), source.ID, req.Tool, target.ID, target.Host, target.Port)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "job unavailable")
+		return
+	}
+	writeJSON(w, http.StatusAccepted, map[string]string{"job_id": job.ID, "status": job.Status})
+}
+
+func (s *Server) publicLGResult(w http.ResponseWriter, r *http.Request) {
+	result, err := s.store.LGJobResult(r.Context(), r.URL.Query().Get("job_id"))
+	if err != nil {
+		writeError(w, http.StatusNotFound, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func isHubSource(sourceID string) bool {
+	switch strings.ToLower(strings.TrimSpace(sourceID)) {
+	case "", "hub", "wiki-hub", "hub-local":
+		return true
+	default:
+		return false
+	}
 }
 
 func validLGTool(tool string) bool {
@@ -183,8 +214,8 @@ func validLGTool(tool string) bool {
 
 func runLocalLookingGlass(ctx context.Context, tool string, source Source, target AdminTarget) string {
 	var builder strings.Builder
-	fmt.Fprintf(&builder, "⚠ 测试发起点：Hub (上海) — 不是你选的 src-item (%s)。\n", source.DisplayName)
-	fmt.Fprintf(&builder, "   如需从源节点发起，请等 agent dispatch 模式上线。\n")
+	fmt.Fprintf(&builder, "⚠ 测试发起点：Hub (上海) — Hub-local fallback。\n")
+	fmt.Fprintf(&builder, "   这是 wiki.kele.my 服务器本机执行，不是 agent dispatch。\n")
 	fmt.Fprintf(&builder, "# Looking Glass Run\n")
 	fmt.Fprintf(&builder, "# Requested source: %s (%s)\n", source.DisplayName, source.ID)
 	fmt.Fprintf(&builder, "# Execution mode: Hub-local fallback (not agent dispatch)\n")
@@ -525,6 +556,60 @@ func (s *Server) agentReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]int{"accepted": accepted})
+}
+
+func (s *Server) agentLGPoll(w http.ResponseWriter, r *http.Request) {
+	agentID, ok := s.authorizedAgent(w, r)
+	if !ok {
+		return
+	}
+	var req struct {
+		AgentID string `json:"agent_id"`
+	}
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if req.AgentID != agentID {
+		writeError(w, http.StatusForbidden, "agent_id does not match token")
+		return
+	}
+	job, ok, err := s.store.ClaimLGJob(r.Context(), agentID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "job unavailable")
+		return
+	}
+	if !ok {
+		writeJSON(w, http.StatusOK, map[string]any{"job": nil})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"job": job})
+}
+
+func (s *Server) agentLGReport(w http.ResponseWriter, r *http.Request) {
+	agentID, ok := s.authorizedAgent(w, r)
+	if !ok {
+		return
+	}
+	var req struct {
+		AgentID string `json:"agent_id"`
+		JobID   string `json:"job_id"`
+		Output  string `json:"output"`
+		Error   string `json:"error"`
+	}
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if req.AgentID != agentID {
+		writeError(w, http.StatusForbidden, "agent_id does not match token")
+		return
+	}
+	if err := s.store.CompleteLGJob(r.Context(), agentID, req.JobID, req.Output, req.Error); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
 }
 
 func (s *Server) authorized(r *http.Request) bool {

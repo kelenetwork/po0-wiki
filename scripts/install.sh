@@ -18,6 +18,7 @@ RELEASE_TAG="${RELEASE_TAG:-latest}"
 BIN_PATH="${BIN_PATH:-/usr/local/bin/wiki-probe-agent}"
 CONFIG_PATH="${CONFIG_PATH:-/etc/wiki-probe-agent.json}"
 SERVICE_NAME="${SERVICE_NAME:-wiki-probe-agent.service}"
+ENABLE_ICMP="${ENABLE_ICMP:-false}"
 UNIT_PATH="/etc/systemd/system/${SERVICE_NAME}"
 RELEASE_BASE_URL="${RELEASE_BASE_URL:-https://github.com/kelenetwork/po0-wiki/releases/${RELEASE_TAG}/download}"
 
@@ -66,6 +67,13 @@ JSON
 # 0644 so systemd DynamicUser can read it; root-owned, ReadOnlyPaths-protected.
 chmod 0644 "$CONFIG_PATH"
 
+icmp_capability_lines=""
+case "$ENABLE_ICMP" in
+  true|TRUE|1|yes|YES)
+    icmp_capability_lines=$'AmbientCapabilities=CAP_NET_RAW\nCapabilityBoundingSet=CAP_NET_RAW'
+    ;;
+esac
+
 log "writing systemd unit to ${UNIT_PATH}"
 cat > "$UNIT_PATH" <<UNIT
 [Unit]
@@ -79,7 +87,8 @@ ExecStart=${BIN_PATH} -config ${CONFIG_PATH}
 Restart=always
 RestartSec=5s
 DynamicUser=yes
-# ICMP checks require extra setup; see agent/README.md.
+# Set ENABLE_ICMP=true when installing to allow ICMP ping under DynamicUser.
+${icmp_capability_lines}
 NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=strict

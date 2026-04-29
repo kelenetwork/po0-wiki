@@ -31,3 +31,13 @@ type Result struct {
 	Code         int     `json:"code,omitempty"`
 	Error        string  `json:"error,omitempty"`
 }
+
+type LGJob struct {
+	ID         string `json:"id"`
+	AgentID    string `json:"agent_id"`
+	Tool       string `json:"tool"`
+	TargetID   string `json:"target_id"`
+	TargetHost string `json:"target_host"`
+	TargetPort int    `json:"target_port"`
+	Status     string `json:"status"`
+}

@@ -45,6 +45,21 @@ func (c *client) report(ctx context.Context, agentID string, results []Result) (
 	return out.Accepted, err
 }
 
+func (c *client) pollLGJob(ctx context.Context, agentID string) (*LGJob, error) {
+	var out struct {
+		Job *LGJob `json:"job"`
+	}
+	err := c.post(ctx, "/lg/poll", map[string]string{"agent_id": agentID}, &out)
+	return out.Job, err
+}
+
+func (c *client) reportLGJob(ctx context.Context, agentID, jobID, output, errorText string) error {
+	var out struct {
+		OK bool `json:"ok"`
+	}
+	return c.post(ctx, "/lg/report", map[string]string{"agent_id": agentID, "job_id": jobID, "output": output, "error": errorText}, &out)
+}
+
 func (c *client) post(ctx context.Context, path string, body any, out any) error {
 	payload, err := json.Marshal(body)
 	if err != nil {

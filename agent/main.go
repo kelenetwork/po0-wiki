@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const version = "batch-d"
+const version = "v0.2.0"
 
 func main() {
 	configPath := flag.String("config", "/etc/wiki-probe-agent.json", "path to JSON config")
@@ -40,10 +40,13 @@ func (r *runner) run(ctx context.Context) {
 	pollInterval := time.Duration(r.cfg.PollIntervalSeconds) * time.Second
 	reportInterval := time.Duration(r.cfg.ReportIntervalSeconds) * time.Second
 	_ = r.poll(ctx)
+	r.pollLG(ctx)
 	probeTicker := time.NewTicker(time.Second)
+	lgTicker := time.NewTicker(time.Second)
 	reportTicker := time.NewTicker(reportInterval)
 	pollTicker := time.NewTicker(pollInterval)
 	defer probeTicker.Stop()
+	defer lgTicker.Stop()
 	defer reportTicker.Stop()
 	defer pollTicker.Stop()
 	var pending []Result
@@ -132,4 +135,26 @@ func (r *runner) reportWithRetry(ctx context.Context, results []Result) bool {
 		backoff *= 2
 	}
 	return false
+}
+
+func (r *runner) pollLG(ctx context.Context) {
+	job, err := r.client.pollLGJob(ctx, r.cfg.AgentID)
+	if err != nil {
+		log.Printf("lg poll failed: %v", err)
+		return
+	}
+	if job == nil || job.ID == "" {
+		return
+	}
+	log.Printf("lg job start: id=%s tool=%s target=%s", job.ID, job.Tool, job.TargetID)
+	output, errorText := runLGJob(ctx, *job)
+	if err := r.client.reportLGJob(ctx, r.cfg.AgentID, job.ID, output, errorText); err != nil {
+		log.Printf("lg report failed: id=%s error=%v", job.ID, err)
+		return
+	}
+	if errorText != "" {
+		log.Printf("lg job failed: id=%s error=%s", job.ID, errorText)
+		return
+	}
+	log.Printf("lg job completed: id=%s", job.ID)
 }
