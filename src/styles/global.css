@@ -139,6 +139,11 @@
 }
 
 /* Wide homepage and status redesign */
+html,
+body {
+  overflow-x: hidden;
+}
+
 :root {
   --kele-bg: #f5f7fb;
   --kele-ink: #101827;
