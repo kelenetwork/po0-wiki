@@ -1,44 +1,80 @@
+---
+pageType: custom
+title: 可乐 Wiki
+---
+
 import StatusProbe from '../src/components/StatusProbe';
 
-# 可乐 Wiki
-
-<div className="hero-panel">
-  <div>
-    <p className="eyebrow">wiki.kele.my</p>
-    <h2>一个干净、可持续扩展的中文知识库</h2>
-    <p>
-      用于沉淀项目文档、运维手册、服务说明与后续二次开发。当前基于 Rspress 构建，静态产物可由 Nginx 直接托管。
-    </p>
-    <div className="hero-actions">
-      <a href="/guide/getting-started">开始阅读</a>
-      <a href="/status" className="secondary">查看状态页</a>
+<div className="kele-home">
+  <section className="kele-hero">
+    <div className="kele-hero__copy">
+      <div className="kele-eyebrow">
+        <span className="kele-live-dot" />
+        wiki.kele.my · Ops Knowledge Base
+      </div>
+      <h1>可乐 Wiki</h1>
+      <p className="kele-lead">
+        面向运维、网络探测与内部知识沉淀的静态 Wiki。首页采用全屏信息面板，文档页继续保持舒适阅读宽度。
+      </p>
+      <div className="kele-actions">
+        <a className="kele-button kele-button--primary" href="/guide/getting-started">
+          开始使用
+        </a>
+        <a className="kele-button kele-button--ghost" href="#knowledge-map">
+          查看结构
+        </a>
+        <a className="kele-button kele-button--ghost" href="/status">
+          服务状态
+        </a>
+      </div>
     </div>
-  </div>
-  <StatusProbe compact />
+
+    <StatusProbe compact />
+  </section>
+
+  <section className="kele-rail" aria-label="重点能力">
+    <article>
+      <span className="kele-card-index">01</span>
+      <h2>知识库入口</h2>
+      <p>保留清晰导航，把部署、故障记录、工具说明沉淀成可检索文档。</p>
+    </article>
+    <article>
+      <span className="kele-card-index">02</span>
+      <h2>探测面板预留</h2>
+      <p>复用状态页的 StatusProbe 占位组件，为 tcping、probe monitor、节点状态展示预留视觉语言。</p>
+    </article>
+    <article>
+      <span className="kele-card-index">03</span>
+      <h2>静态优先</h2>
+      <p>当前不引入后端，构建产物可直接由 Docker + Nginx 或任意静态服务托管。</p>
+    </article>
+  </section>
+
+  <section id="knowledge-map" className="kele-grid-section">
+    <div>
+      <p className="kele-section-kicker">Knowledge Map</p>
+      <h2>从最小 Wiki 开始，逐步扩展为运维控制台</h2>
+      <p>
+        首页负责呈现站点定位与状态感；具体文章仍在指南与后续栏目中保持阅读友好的版心，避免长文铺满屏幕。
+      </p>
+    </div>
+    <div className="kele-link-board">
+      <a href="/guide/getting-started">
+        <span>Guide</span>
+        <strong>开始使用</strong>
+      </a>
+      <a href="/guide/content-guide">
+        <span>Content</span>
+        <strong>内容规范</strong>
+      </a>
+      <a href="/guide/deployment">
+        <span>Deploy</span>
+        <strong>部署说明</strong>
+      </a>
+      <a href="/status">
+        <span>Status</span>
+        <strong>服务探测</strong>
+      </a>
+    </div>
+  </section>
 </div>
-
-## 内容入口
-
-<div className="feature-grid">
-  <a className="feature-card" href="/guide/getting-started">
-    <span>01</span>
-    <h3>快速开始</h3>
-    <p>了解目录结构、本地开发和新增页面的基本方式。</p>
-  </a>
-  <a className="feature-card" href="/guide/content-guide">
-    <span>02</span>
-    <h3>内容规范</h3>
-    <p>统一文档命名、语气、链接和运维记录格式。</p>
-  </a>
-  <a className="feature-card" href="/guide/deployment">
-    <span>03</span>
-    <h3>部署说明</h3>
-    <p>使用 Docker + Nginx 运行静态站点，并预留 CF Tunnel 暴露方式。</p>
-  </a>
-</div>
-
-## 当前定位
-
-- **知识库**：记录项目说明、常见问题、操作流程与排障经验。
-- **运维入口**：后续可接入 TCPing、HTTP 探测、延迟图表与告警摘要。
-- **静态优先**：默认构建为静态文件，部署简单、可缓存、易迁移。
