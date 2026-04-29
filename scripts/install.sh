@@ -83,6 +83,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart=${BIN_PATH} -config ${CONFIG_PATH}
 Restart=always
 RestartSec=5s
