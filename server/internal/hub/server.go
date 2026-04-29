@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 )
@@ -34,6 +36,7 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("GET /api/healthz", s.healthz)
 	mux.HandleFunc("GET /api/public/probes/snapshot", s.publicSnapshot)
 	mux.HandleFunc("GET /api/public/probes/stream", s.publicStream)
+	mux.HandleFunc("POST /api/public/lg/run", s.publicLGRun)
 	mux.HandleFunc("GET /api/admin/sources", s.adminSources)
 	mux.HandleFunc("POST /api/admin/sources", s.adminSources)
 	mux.HandleFunc("PUT /api/admin/sources/{id}", s.adminSource)
@@ -136,6 +139,131 @@ func (s *Server) writeSnapshotEvent(ctx context.Context, w http.ResponseWriter) 
 	}
 	_, err = fmt.Fprintf(w, "event: snapshot\ndata: %s\n\n", payload)
 	return err
+}
+
+type lgRunRequest struct {
+	Tool     string `json:"tool"`
+	SourceID string `json:"source_id"`
+	TargetID string `json:"target_id"`
+}
+
+func (s *Server) publicLGRun(w http.ResponseWriter, r *http.Request) {
+	var req lgRunRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	req.Tool = strings.ToLower(strings.TrimSpace(req.Tool))
+	if !validLGTool(req.Tool) {
+		writeError(w, http.StatusBadRequest, "unsupported tool")
+		return
+	}
+	source, target, err := s.store.LookingGlassEndpoint(r.Context(), req.SourceID, req.TargetID)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 18*time.Second)
+	defer cancel()
+	output := runLocalLookingGlass(ctx, req.Tool, source, target)
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(output))
+}
+
+func validLGTool(tool string) bool {
+	switch tool {
+	case "ping", "tcping", "mtr", "nexttrace", "traceroute":
+		return true
+	default:
+		return false
+	}
+}
+
+func runLocalLookingGlass(ctx context.Context, tool string, source Source, target AdminTarget) string {
+	var builder strings.Builder
+	fmt.Fprintf(&builder, "# Looking Glass Run\n")
+	fmt.Fprintf(&builder, "# Requested source: %s (%s)\n", source.DisplayName, source.ID)
+	fmt.Fprintf(&builder, "# Execution mode: Hub-local fallback (not agent dispatch)\n")
+	fmt.Fprintf(&builder, "# Target: %s [endpoint hidden, port %d]\n\n", target.DisplayName, target.Port)
+
+	switch tool {
+	case "tcping":
+		builder.WriteString(runTCPing(ctx, target.Host, target.Port, target.DisplayName))
+	case "ping":
+		builder.WriteString(runCommandOrMessage(ctx, "ping", []string{"-c", "4", "-W", "2", target.Host}, target.Host, target.DisplayName, func() string {
+			return "ping command is unavailable in hub container; fallback to tcping.\n" + runTCPing(ctx, target.Host, target.Port, target.DisplayName)
+		}))
+	case "traceroute":
+		builder.WriteString(runCommandOrMessage(ctx, "traceroute", []string{"-m", "20", target.Host}, target.Host, target.DisplayName, func() string {
+			return "traceroute command is unavailable in hub container; fallback to tcping.\n" + runTCPing(ctx, target.Host, target.Port, target.DisplayName)
+		}))
+	case "mtr":
+		builder.WriteString(runCommandOrMessage(ctx, "mtr", []string{"--report", "--report-cycles", "4", target.Host}, target.Host, target.DisplayName, func() string {
+			return "mtr command is unavailable in hub container; fallback to tcping.\n" + runTCPing(ctx, target.Host, target.Port, target.DisplayName)
+		}))
+	case "nexttrace":
+		builder.WriteString(runCommandOrMessage(ctx, "nexttrace", []string{"-q", "1", target.Host}, target.Host, target.DisplayName, func() string {
+			return "nexttrace command is unavailable in hub container; fallback to tcping.\n" + runTCPing(ctx, target.Host, target.Port, target.DisplayName)
+		}))
+	}
+	return builder.String()
+}
+
+func runCommandOrMessage(ctx context.Context, name string, args []string, hiddenHost string, displayName string, fallback func() string) string {
+	if _, err := exec.LookPath(name); err != nil {
+		return fallback()
+	}
+	cmd := exec.CommandContext(ctx, name, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return sanitizeLGOutput(fmt.Sprintf("$ %s %s\n%s\nerror: %v\n", name, strings.Join(args, " "), strings.TrimSpace(string(output)), err), hiddenHost, displayName)
+	}
+	return sanitizeLGOutput(fmt.Sprintf("$ %s %s\n%s\n", name, strings.Join(args, " "), strings.TrimSpace(string(output))), hiddenHost, displayName)
+}
+
+func sanitizeLGOutput(value string, hiddenHost string, displayName string) string {
+	if hiddenHost == "" {
+		return value
+	}
+	replacement := displayName
+	if replacement == "" {
+		replacement = "target"
+	}
+	return strings.ReplaceAll(value, hiddenHost, replacement)
+}
+
+func runTCPing(ctx context.Context, host string, port int, displayName string) string {
+	if port <= 0 {
+		port = 443
+	}
+	address := net.JoinHostPort(host, fmt.Sprintf("%d", port))
+	var builder strings.Builder
+	fmt.Fprintf(&builder, "$ tcping %s:%d\n", displayName, port)
+	dialer := net.Dialer{Timeout: 3 * time.Second}
+	var successes int
+	var total time.Duration
+	for index := 1; index <= 4; index++ {
+		started := time.Now()
+		conn, err := dialer.DialContext(ctx, "tcp", address)
+		elapsed := time.Since(started)
+		if err != nil {
+			fmt.Fprintf(&builder, "%d  timeout/error  %s\n", index, sanitizeLGOutput(err.Error(), host, displayName))
+			continue
+		}
+		successes++
+		total += elapsed
+		_ = conn.Close()
+		fmt.Fprintf(&builder, "%d  connected  %.2f ms\n", index, float64(elapsed.Microseconds())/1000)
+	}
+	loss := 100 - successes*25
+	avg := 0.0
+	if successes > 0 {
+		avg = float64(total.Microseconds()) / 1000 / float64(successes)
+	}
+	fmt.Fprintf(&builder, "\nsummary: sent=4 received=%d loss=%d%% avg=%.2f ms\n", successes, loss, avg)
+	return builder.String()
 }
 
 func (s *Server) adminSources(w http.ResponseWriter, r *http.Request) {

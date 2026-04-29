@@ -1,16 +1,25 @@
+import { useEffect, useMemo, useState } from 'react';
 import './StatusProbe.css';
-import { mockProbeSnapshot, PublicProbeCheck, PublicProbeSnapshot, usePublicProbeSnapshot } from './probeSnapshot';
+import { mockProbeSnapshot, PublicProbeItem, PublicProbeSnapshot, PublicProbeSeries, usePublicProbeSnapshot } from './probeSnapshot';
 
 type ProbeStatus = 'online' | 'warn' | 'pending';
 
 type TargetLatency = {
   id: string;
+  sourceId: string;
   target: string;
   location: string;
   latency: string;
   jitter: string;
   loss: string;
   tone: 'green' | 'blue' | 'amber' | 'violet';
+  pending: boolean;
+};
+
+type ChartSeries = {
+  id: string;
+  color: string;
+  segments: string[][];
 };
 
 type StatusProbeProps = {
@@ -18,6 +27,7 @@ type StatusProbeProps = {
 };
 
 const toneCycle: TargetLatency['tone'][] = ['green', 'blue', 'amber', 'violet'];
+const chartColors = ['#14b8a6', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4'];
 
 function safeStatus(status: string): ProbeStatus {
   if (status === 'online' || status === 'ok') return 'online';
@@ -25,8 +35,35 @@ function safeStatus(status: string): ProbeStatus {
   return 'pending';
 }
 
-function metricValue(value: number, suffix: string) {
-  return value > 0 ? `${value}${suffix}` : '待接入';
+function isOnline(status: string) {
+  return safeStatus(status) === 'online';
+}
+
+function metricValue(value: number, suffix: string, digits = 2) {
+  return value > 0 ? `${value.toFixed(digits)}${suffix}` : '待接入';
+}
+
+function lossValue(value: number) {
+  return `${Math.round(value)}%`;
+}
+
+function relativeTime(value: string) {
+  if (!value) return '—';
+  const timestamp = new Date(value).getTime();
+  if (!Number.isFinite(timestamp)) return value;
+  const diffSeconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+  if (diffSeconds < 60) return '刚刚';
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  if (diffMinutes < 60) return `${diffMinutes} 分钟前`;
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} 小时前`;
+  return `${Math.floor(diffHours / 24)} 天前`;
+}
+
+function formatTimeLabel(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
 function findName(snapshot: PublicProbeSnapshot, kind: 'sources' | 'targets', id: string) {
@@ -34,41 +71,96 @@ function findName(snapshot: PublicProbeSnapshot, kind: 'sources' | 'targets', id
 }
 
 function toLatencyCards(snapshot: PublicProbeSnapshot): TargetLatency[] {
-  return snapshot.checks.map((check, index) => ({
-    id: check.id,
-    target: findName(snapshot, 'targets', check.target_id),
-    location: check.display_name || `${findName(snapshot, 'sources', check.source_id)} → ${findName(snapshot, 'targets', check.target_id)}`,
-    latency: metricValue(check.latency_ms, ' ms'),
-    jitter: check.jitter_ms > 0 ? `±${check.jitter_ms} ms` : '—',
-    loss: `${check.loss_pct}%`,
-    tone: check.status === 'warn' ? 'amber' : toneCycle[index % toneCycle.length],
-  }));
+  return snapshot.checks.map((check, index) => {
+    const pending = check.latency_ms <= 0 && check.loss_pct >= 100;
+    return {
+      id: check.id,
+      sourceId: check.source_id,
+      target: findName(snapshot, 'targets', check.target_id),
+      location: check.display_name || `${findName(snapshot, 'sources', check.source_id)} → ${findName(snapshot, 'targets', check.target_id)}`,
+      latency: metricValue(check.latency_ms, ' ms'),
+      jitter: check.jitter_ms > 0 ? `±${check.jitter_ms.toFixed(2)} ms` : '—',
+      loss: lossValue(check.loss_pct),
+      tone: pending ? 'amber' : check.status === 'warn' ? 'amber' : toneCycle[index % toneCycle.length],
+      pending,
+    };
+  });
 }
 
-function chartPath(check: PublicProbeCheck | undefined, snapshot: PublicProbeSnapshot) {
-  const series = snapshot.series.find((item) => item.check_id === check?.id) ?? snapshot.series[0];
-  const points = series?.points ?? [];
-  if (points.length < 2) {
-    return 'M48 214 C120 188 150 178 220 186 S340 126 420 142 S540 198 620 150 S740 86 862 116';
-  }
+function buildChartSeries(snapshot: PublicProbeSnapshot, selectedIds: string[]): ChartSeries[] {
+  const checksById = new Map(snapshot.checks.map((check) => [check.id, check]));
+  const visibleSeries = snapshot.series.filter((series) => selectedIds.includes(series.check_id));
+  const validPoints = visibleSeries.flatMap((series) => series.points.filter((point) => point.latency_ms > 0 && point.loss_pct < 100));
+  const times = validPoints.map((point) => new Date(point.updated_at).getTime()).filter(Number.isFinite);
+  const values = validPoints.map((point) => point.latency_ms);
+  const minTime = times.length ? Math.min(...times) : Date.now() - 86_400_000;
+  const maxTime = times.length ? Math.max(...times) : Date.now();
+  const minLatency = values.length ? Math.min(...values) : 0;
+  const maxLatency = values.length ? Math.max(...values) : 100;
+  const timeSpan = Math.max(maxTime - minTime, 1);
+  const latencySpan = Math.max(maxLatency - minLatency, 10);
 
-  const values = points.map((point) => point.latency_ms);
-  const max = Math.max(...values, 1);
-  const min = Math.min(...values, 0);
-  const span = Math.max(max - min, 1);
-  return points.map((point, index) => {
-    const x = 48 + (814 * index) / (points.length - 1);
-    const y = 250 - ((point.latency_ms - min) / span) * 150;
-    return `${index === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
-  }).join(' ');
+  return visibleSeries.map((series, index) => {
+    const check = checksById.get(series.check_id);
+    const segments: string[][] = [];
+    let current: string[] = [];
+    series.points.forEach((point) => {
+      const pointTime = new Date(point.updated_at).getTime();
+      const broken = point.latency_ms <= 0 || point.loss_pct >= 100 || !Number.isFinite(pointTime);
+      if (broken) {
+        if (current.length > 1) segments.push(current);
+        current = [];
+        return;
+      }
+      const x = 58 + ((pointTime - minTime) / timeSpan) * 794;
+      const y = 250 - ((point.latency_ms - minLatency) / latencySpan) * 170;
+      current.push(`${current.length === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`);
+    });
+    if (current.length > 1) segments.push(current);
+    return {
+      id: series.check_id,
+      color: chartColors[index % chartColors.length],
+      segments,
+    };
+  });
+}
+
+function defaultSelectedSeries(series: PublicProbeSeries[]) {
+  const healthy = series.filter((item) => item.points.some((point) => point.latency_ms > 0 && point.loss_pct < 100));
+  return healthy.slice(0, 3).map((item) => item.check_id);
+}
+
+function defaultSourceId(sources: PublicProbeItem[]) {
+  return sources.find((source) => isOnline(source.status))?.id ?? sources[0]?.id ?? 'all';
 }
 
 export default function StatusProbe({ compact = false }: StatusProbeProps) {
   const { snapshot, origin } = usePublicProbeSnapshot();
-  const targetLatencies = toLatencyCards(snapshot);
+  const safeSnapshot = snapshot.checks.length > 0 ? snapshot : mockProbeSnapshot;
+  const targetLatencies = toLatencyCards(safeSnapshot);
   const compactTargets = targetLatencies.slice(0, 3);
-  const trendPath = chartPath(snapshot.checks[0], snapshot);
-  const safeSnapshot = targetLatencies.length > 0 ? snapshot : mockProbeSnapshot;
+  const [selectedSourceId, setSelectedSourceId] = useState(defaultSourceId(safeSnapshot.sources));
+  const [selectedSeriesIds, setSelectedSeriesIds] = useState<string[]>(defaultSelectedSeries(safeSnapshot.series));
+
+  useEffect(() => {
+    setSelectedSourceId(defaultSourceId(safeSnapshot.sources));
+    setSelectedSeriesIds(defaultSelectedSeries(safeSnapshot.series));
+  }, [safeSnapshot]);
+
+  const filteredLatencies = selectedSourceId === 'all'
+    ? targetLatencies
+    : targetLatencies.filter((item) => item.sourceId === selectedSourceId);
+  const chartSeries = useMemo(() => buildChartSeries(safeSnapshot, selectedSeriesIds), [safeSnapshot, selectedSeriesIds]);
+  const selectedSource = safeSnapshot.sources.find((source) => source.id === selectedSourceId);
+  const chartPoints = safeSnapshot.series.flatMap((series) => series.points);
+  const firstPoint = chartPoints[0]?.updated_at;
+  const lastPoint = chartPoints[chartPoints.length - 1]?.updated_at;
+
+  function toggleSeries(checkId: string) {
+    setSelectedSeriesIds((current) => current.includes(checkId)
+      ? current.filter((id) => id !== checkId)
+      : [...current, checkId]);
+  }
 
   if (compact) {
     return (
@@ -83,7 +175,7 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
         <div className="probe-list">
           {compactTargets.map((probe) => (
             <div className="probe-row" key={probe.id}>
-              <span className={`dot ${probe.tone === 'amber' ? 'warn' : 'online'}`} />
+              <span className={`dot ${probe.pending ? 'pending' : probe.tone === 'amber' ? 'warn' : 'online'}`} />
               <div>
                 <strong>{probe.target}</strong>
                 <small>{probe.location}</small>
@@ -97,7 +189,7 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
   }
 
   return (
-    <section className="status-probe status-dashboard" aria-label="网络监控总览">
+    <section className="status-probe status-dashboard kele-status" aria-label="网络监控总览">
       <div className="status-dashboard__topbar">
         <div>
           <p className="status-kicker">Looking Glass Monitor</p>
@@ -118,28 +210,40 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
             <strong>{safeSnapshot.sources.length} 个区域</strong>
           </div>
           <div className="source-node-list">
-            {safeSnapshot.sources.map((node) => (
-              <article className="source-node-card" key={node.id}>
-                <div className="source-node-card__main">
-                  <span className={`dot ${safeStatus(node.status)}`} />
-                  <div>
-                    <strong>{node.display_name}</strong>
-                    <small>{node.region} · {node.tags.join(' / ') || 'public'}</small>
+            {safeSnapshot.sources.map((node) => {
+              const status = safeStatus(node.status);
+              return (
+                <article className="source-node-card" key={node.id}>
+                  <div className="source-node-card__main">
+                    <span className={`dot ${status}`} />
+                    <div>
+                      <strong>{node.display_name}</strong>
+                      <small>{node.region} · {node.tags.join(' / ') || 'public'}</small>
+                    </div>
                   </div>
-                </div>
-                <div className="source-node-card__meta">
-                  <code>{safeStatus(node.status)}</code>
-                  <span>更新时间 {node.updated_at || '—'}</span>
-                </div>
-              </article>
-            ))}
+                  <div className="source-node-card__meta">
+                    <span className={`node-status node-status--${status}`}><i />{status}</span>
+                    <span title={node.updated_at}>更新于 {relativeTime(node.updated_at)}</span>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </aside>
 
         <div className="status-main-panel">
+          <div className="source-filter" aria-label="源节点筛选">
+            <button type="button" className={selectedSourceId === 'all' ? 'active' : ''} onClick={() => setSelectedSourceId('all')}>全部</button>
+            {safeSnapshot.sources.map((source) => (
+              <button type="button" className={selectedSourceId === source.id ? 'active' : ''} key={source.id} onClick={() => setSelectedSourceId(source.id)}>
+                <span className={`dot ${safeStatus(source.status)}`} />{source.display_name}
+              </button>
+            ))}
+          </div>
+
           <div className="latency-grid" aria-label="目标延迟卡片">
-            {targetLatencies.map((item) => (
-              <article className={`latency-card latency-card--${item.tone}`} key={item.id}>
+            {filteredLatencies.map((item) => (
+              <article className={`latency-card latency-card--${item.tone}${item.pending ? ' latency-card--pending' : ''}`} key={item.id}>
                 <span>{item.location}</span>
                 <strong>{item.latency}</strong>
                 <p>{item.target}</p>
@@ -156,29 +260,30 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
               <div>
                 <p className="status-kicker">Latency Trend</p>
                 <h3>24 小时延迟曲线</h3>
+                <small>{selectedSource ? `当前筛选：${selectedSource.display_name}` : '多选图例可叠加更多线路'}</small>
               </div>
-              <div className="status-legend">
-                {safeSnapshot.sources.slice(0, 3).map((node, index) => (
-                  <span key={node.id}><i className={toneCycle[index]} />{node.region}</span>
-                ))}
+              <div className="status-legend" aria-label="曲线图例">
+                {safeSnapshot.series.map((series, index) => {
+                  const check = safeSnapshot.checks.find((item) => item.id === series.check_id);
+                  const active = selectedSeriesIds.includes(series.check_id);
+                  return (
+                    <button type="button" className={active ? 'active' : ''} key={series.check_id} onClick={() => toggleSeries(series.check_id)}>
+                      <i style={{ background: chartColors[index % chartColors.length] }} />{check?.display_name || series.check_id}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-            <svg className="latency-chart" viewBox="0 0 900 320" role="img" aria-label="延迟折线图">
-              <defs>
-                <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.24" />
-                  <stop offset="100%" stopColor="#14b8a6" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              {[70, 130, 190, 250].map((y) => <line key={y} x1="42" x2="872" y1={y} y2={y} />)}
-              {[80, 220, 360, 500, 640, 780].map((x) => <line key={x} x1={x} x2={x} y1="42" y2="282" />)}
-              <path className="chart-area" d={`${trendPath} L862 282 L48 282 Z`} />
-              <path className="chart-line chart-line--green" d={trendPath} />
-              <path className="chart-line chart-line--blue" d="M48 238 C130 220 174 202 238 214 S360 164 446 178 S566 216 650 188 S760 142 862 154" />
-              <path className="chart-line chart-line--amber" d="M48 182 C112 170 164 206 238 194 S346 92 438 118 S560 176 646 130 S752 196 862 172" />
-              <text x="44" y="310">00:00</text>
-              <text x="424" y="310">12:00</text>
-              <text x="812" y="310">24:00</text>
+            <svg className="latency-chart" viewBox="0 0 900 320" role="img" aria-label="真实延迟折线图">
+              {[70, 130, 190, 250].map((y) => <line key={y} x1="58" x2="852" y1={y} y2={y} />)}
+              {[58, 256, 455, 654, 852].map((x) => <line key={x} x1={x} x2={x} y1="46" y2="250" />)}
+              <text x="58" y="286">{firstPoint ? formatTimeLabel(firstPoint) : '00:00'}</text>
+              <text x="420" y="286">Latency / ms</text>
+              <text x="790" y="286">{lastPoint ? formatTimeLabel(lastPoint) : '24:00'}</text>
+              {chartSeries.map((series) => series.segments.map((segment, index) => (
+                <path className="chart-line" d={segment.join(' ')} key={`${series.id}-${index}`} stroke={series.color} />
+              )))}
+              {chartSeries.length === 0 && <text x="320" y="164">暂无可绘制的真实延迟点</text>}
             </svg>
           </div>
         </div>

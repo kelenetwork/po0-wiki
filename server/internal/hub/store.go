@@ -440,6 +440,39 @@ func (s *Store) ListAdminTargets(ctx context.Context) ([]AdminTarget, error) {
 	return targets, rows.Err()
 }
 
+func (s *Store) LookingGlassEndpoint(ctx context.Context, sourceID string, targetID string) (Source, AdminTarget, error) {
+	if strings.TrimSpace(sourceID) == "" || strings.TrimSpace(targetID) == "" {
+		return Source{}, AdminTarget{}, errors.New("source_id and target_id are required")
+	}
+	var source Source
+	var sourceTags string
+	if err := s.db.QueryRowContext(ctx, `SELECT id, display_name, region, tags, status, updated_at FROM sources WHERE id = ?`, sourceID).Scan(&source.ID, &source.DisplayName, &source.Region, &sourceTags, &source.Status, &source.UpdatedAt); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return Source{}, AdminTarget{}, errors.New("source not found")
+		}
+		return Source{}, AdminTarget{}, err
+	}
+	source.Tags = decodeTags(sourceTags)
+
+	var target AdminTarget
+	var targetTags string
+	var endpoint string
+	if err := s.db.QueryRowContext(ctx, `SELECT id, display_name, region, tags, status, endpoint, kind, path, updated_at FROM targets WHERE id = ?`, targetID).Scan(&target.ID, &target.DisplayName, &target.Region, &targetTags, &target.Status, &endpoint, &target.Kind, &target.Path, &target.UpdatedAt); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return Source{}, AdminTarget{}, errors.New("target not found")
+		}
+		return Source{}, AdminTarget{}, err
+	}
+	target.Tags = decodeTags(targetTags)
+	target.Kind = normalizeTargetKind(target.Kind)
+	target.Path = normalizeTargetPath(target.Kind, target.Path)
+	target.Host, target.Port, _ = splitEndpoint(endpoint)
+	if target.Host == "" {
+		return Source{}, AdminTarget{}, errors.New("target endpoint is empty")
+	}
+	return source, target, nil
+}
+
 func (s *Store) ListChecks(ctx context.Context) ([]Check, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, source_id, target_id, tags, status, latency_ms, loss_pct, jitter_ms, updated_at FROM checks ORDER BY id`)
 	if err != nil {

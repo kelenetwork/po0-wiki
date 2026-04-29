@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import './LookingGlass.css';
 import { PublicProbeItem, usePublicProbeSnapshot } from './probeSnapshot';
 
@@ -6,6 +7,8 @@ type RegionGroup = {
   summary: string;
   nodes: PublicProbeItem[];
 };
+
+type LGTool = 'ping' | 'tcping' | 'mtr' | 'nexttrace' | 'traceroute';
 
 function groupSources(nodes: PublicProbeItem[]): RegionGroup[] {
   const groups = new Map<string, PublicProbeItem[]>();
@@ -28,20 +31,51 @@ function nodeTone(status: string) {
   return 'standby';
 }
 
-const terminalLines = [
-  '$ mtr --report Wiki Portal --from HK-Edge-01',
-  'Start: public looking glass preview',
-  '  1.|-- regional edge relay        0.0% loss   2.1 ms avg',
-  '  2.|-- transit exchange           0.0% loss   8.4 ms avg',
-  '  3.|-- protected service edge     0.0% loss  18.5 ms avg',
-  'Report complete: static preview output',
-];
+function defaultSourceId(sources: PublicProbeItem[]) {
+  return sources.find((source) => source.status === 'online' || source.status === 'ok')?.id ?? sources[0]?.id ?? '';
+}
+
+const initialTerminal = [
+  '$ 选择源节点、目标和工具后点击 Run',
+  'Looking Glass 已接入后端 /api/public/lg/run。',
+  '当前版本使用 Hub-local fallback 执行，并在输出中标注真实执行位置。',
+].join('\n');
 
 export default function LookingGlass() {
   const { snapshot, origin } = usePublicProbeSnapshot();
   const regionGroups = groupSources(snapshot.sources);
-  const firstSource = snapshot.sources[0];
-  const firstTarget = snapshot.targets[0];
+  const [selectedSourceId, setSelectedSourceId] = useState(defaultSourceId(snapshot.sources));
+  const [selectedTargetId, setSelectedTargetId] = useState(snapshot.targets[0]?.id ?? '');
+  const [selectedTool, setSelectedTool] = useState<LGTool>('mtr');
+  const [terminalOutput, setTerminalOutput] = useState(initialTerminal);
+  const [running, setRunning] = useState(false);
+
+  useEffect(() => {
+    setSelectedSourceId((current) => current || defaultSourceId(snapshot.sources));
+    setSelectedTargetId((current) => current || snapshot.targets[0]?.id || '');
+  }, [snapshot.sources, snapshot.targets]);
+
+  const selectedSource = snapshot.sources.find((source) => source.id === selectedSourceId);
+  const selectedTarget = snapshot.targets.find((target) => target.id === selectedTargetId);
+
+  async function runTool() {
+    if (!selectedSourceId || !selectedTargetId || running) return;
+    setRunning(true);
+    setTerminalOutput(`$ ${selectedTool} ${selectedTarget?.display_name ?? selectedTargetId} --from ${selectedSource?.display_name ?? selectedSourceId}\nRunning...`);
+    try {
+      const response = await fetch('/api/public/lg/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'text/plain' },
+        body: JSON.stringify({ tool: selectedTool, source_id: selectedSourceId, target_id: selectedTargetId }),
+      });
+      const text = await response.text();
+      setTerminalOutput(text || `请求完成，但后端没有返回输出。HTTP ${response.status}`);
+    } catch (error) {
+      setTerminalOutput(`Looking Glass 请求失败：${error instanceof Error ? error.message : 'unknown error'}`);
+    } finally {
+      setRunning(false);
+    }
+  }
 
   return (
     <section className="looking-glass-console" aria-label="Looking Glass 工具台">
@@ -59,7 +93,7 @@ export default function LookingGlass() {
                 <small>{group.summary}</small>
               </div>
               {group.nodes.map((node) => (
-                <button className="lg-node" type="button" key={node.id}>
+                <button className={`lg-node${selectedSourceId === node.id ? ' is-active' : ''}`} type="button" key={node.id} onClick={() => setSelectedSourceId(node.id)}>
                   <span className={`lg-node-dot ${nodeTone(node.status)}`} />
                   <span>
                     <strong>{node.display_name}</strong>
@@ -76,7 +110,7 @@ export default function LookingGlass() {
         <div className="lg-toolbar">
           <label>
             <span>工具</span>
-            <select defaultValue="mtr" aria-label="选择工具">
+            <select value={selectedTool} aria-label="选择工具" onChange={(event) => setSelectedTool(event.target.value as LGTool)}>
               <option value="ping">Ping</option>
               <option value="tcping">TCPing</option>
               <option value="mtr">MTR</option>
@@ -86,30 +120,34 @@ export default function LookingGlass() {
           </label>
           <label className="lg-target">
             <span>目标</span>
-            <select defaultValue={firstTarget?.id} aria-label="选择目标">
+            <select value={selectedTargetId} aria-label="选择目标" onChange={(event) => setSelectedTargetId(event.target.value)}>
               {snapshot.targets.map((target) => (
                 <option value={target.id} key={target.id}>{target.display_name}</option>
               ))}
             </select>
           </label>
-          <button className="lg-run" type="button">Run</button>
+          <label className="lg-source-readonly">
+            <span>源节点</span>
+            <strong>{selectedSource?.display_name ?? '未选择'}</strong>
+          </label>
+          <button className="lg-run" type="button" onClick={runTool} disabled={running || !selectedSourceId || !selectedTargetId}>{running ? 'Running…' : 'Run'}</button>
         </div>
 
         <div className="lg-summary-grid">
           <article>
             <span>当前源</span>
-            <strong>{firstSource?.display_name ?? '未选择'}</strong>
-            <small>{firstSource ? `${firstSource.region} · ${firstSource.tags.join(' / ') || 'public'}` : '暂无节点'}</small>
+            <strong>{selectedSource?.display_name ?? '未选择'}</strong>
+            <small>{selectedSource ? `${selectedSource.region} · ${selectedSource.tags.join(' / ') || 'public'}` : '暂无节点'}</small>
           </article>
           <article>
             <span>目标</span>
-            <strong>{firstTarget?.display_name ?? '未选择'}</strong>
-            <small>{firstTarget ? `${firstTarget.region} · ${firstTarget.tags.join(' / ') || 'public'}` : '暂无目标'}</small>
+            <strong>{selectedTarget?.display_name ?? '未选择'}</strong>
+            <small>{selectedTarget ? `${selectedTarget.region} · ${selectedTarget.tags.join(' / ') || 'public'}` : '暂无目标'}</small>
           </article>
           <article>
             <span>状态</span>
-            <strong>静态预览</strong>
-            <small>未连接后端执行器</small>
+            <strong>{running ? '运行中' : 'Hub-local fallback'}</strong>
+            <small>后端本机执行，非 agent dispatch</small>
           </article>
         </div>
 
@@ -118,9 +156,9 @@ export default function LookingGlass() {
             <span />
             <span />
             <span />
-            <strong>terminal · mock output</strong>
+            <strong>terminal · live output</strong>
           </div>
-          <pre>{terminalLines.join('\n')}</pre>
+          <pre>{terminalOutput}</pre>
         </div>
       </div>
     </section>
