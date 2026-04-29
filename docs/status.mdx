@@ -10,7 +10,7 @@ import StatusProbe from '../src/components/StatusProbe';
     <p className="kele-section-kicker">Network Status</p>
     <h1>网络监控</h1>
     <p>
-      轻量 Looking Glass + 延迟监控面板原型。当前仅展示静态模拟数据，源节点、目标与时间范围均按可扩展结构组织，后续可接入真实探测接口。
+      轻量 Looking Glass + 延迟监控面板。页面优先读取 public snapshot API；接口不可用或返回空数据时，自动回退到安全模拟数据。
     </p>
   </section>
 
@@ -19,9 +19,9 @@ import StatusProbe from '../src/components/StatusProbe';
   <section className="kele-status-roadmap">
     <h2>原型边界</h2>
     <ul>
-      <li>本页不执行真实探测，不创建 probe / agent / hub / server。</li>
-      <li>Mock 数据覆盖香港、日本、新加坡、大陆源节点，后续可替换为接口返回列表。</li>
-      <li>趋势图、延迟卡片与图例均为 SVG / React 静态展示。</li>
+      <li>本页只消费 public snapshot，不展示敏感连接信息。</li>
+      <li>Mock 数据覆盖香港、日本、新加坡、大陆源节点，用于 API 不可用时兜底。</li>
+      <li>趋势图、延迟卡片与图例由快照中的公开 sources、targets、checks、series 派生。</li>
       <li>需要执行网络工具时，可从导航进入 Looking Glass 工具台原型。</li>
     </ul>
   </section>

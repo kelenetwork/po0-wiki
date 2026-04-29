@@ -1,17 +1,10 @@
 import './StatusProbe.css';
+import { mockProbeSnapshot, PublicProbeCheck, PublicProbeSnapshot, usePublicProbeSnapshot } from './probeSnapshot';
 
 type ProbeStatus = 'online' | 'warn' | 'pending';
 
-type SourceNode = {
-  region: string;
-  name: string;
-  provider: string;
-  ipv4: string;
-  status: ProbeStatus;
-  load: string;
-};
-
 type TargetLatency = {
+  id: string;
   target: string;
   location: string;
   latency: string;
@@ -24,23 +17,59 @@ type StatusProbeProps = {
   compact?: boolean;
 };
 
-const sourceNodes: SourceNode[] = [
-  { region: '香港', name: 'HK-Edge-01', provider: 'CMI / HGC', ipv4: '203.0.113.21', status: 'online', load: '31%' },
-  { region: '日本', name: 'TYO-LG-02', provider: 'IIJ / JPIX', ipv4: '198.51.100.14', status: 'online', load: '24%' },
-  { region: '新加坡', name: 'SIN-Core-01', provider: 'SGIX Transit', ipv4: '192.0.2.45', status: 'warn', load: '48%' },
-  { region: '大陆源', name: 'SHA-Test-01', provider: 'CN2 / Cernet', ipv4: '10.20.4.8', status: 'pending', load: '待接入' },
-];
+const toneCycle: TargetLatency['tone'][] = ['green', 'blue', 'amber', 'violet'];
 
-const targetLatencies: TargetLatency[] = [
-  { target: 'wiki.kele.my', location: '香港 → Wiki', latency: '18 ms', jitter: '±2.4 ms', loss: '0%', tone: 'green' },
-  { target: 'api.kele.my', location: '东京 → API', latency: '42 ms', jitter: '±5.1 ms', loss: '0%', tone: 'blue' },
-  { target: 'cdn.kele.my', location: '新加坡 → CDN', latency: '67 ms', jitter: '±8.7 ms', loss: '0.2%', tone: 'amber' },
-  { target: 'origin.kele.internal', location: '大陆源 → Origin', latency: '待接入', jitter: '—', loss: '—', tone: 'violet' },
-];
+function safeStatus(status: string): ProbeStatus {
+  if (status === 'online' || status === 'ok') return 'online';
+  if (status === 'warn' || status === 'degraded') return 'warn';
+  return 'pending';
+}
 
-const compactTargets = targetLatencies.slice(0, 3);
+function metricValue(value: number, suffix: string) {
+  return value > 0 ? `${value}${suffix}` : '待接入';
+}
+
+function findName(snapshot: PublicProbeSnapshot, kind: 'sources' | 'targets', id: string) {
+  return snapshot[kind].find((item) => item.id === id)?.display_name ?? id;
+}
+
+function toLatencyCards(snapshot: PublicProbeSnapshot): TargetLatency[] {
+  return snapshot.checks.map((check, index) => ({
+    id: check.id,
+    target: findName(snapshot, 'targets', check.target_id),
+    location: check.display_name || `${findName(snapshot, 'sources', check.source_id)} → ${findName(snapshot, 'targets', check.target_id)}`,
+    latency: metricValue(check.latency_ms, ' ms'),
+    jitter: check.jitter_ms > 0 ? `±${check.jitter_ms} ms` : '—',
+    loss: `${check.loss_pct}%`,
+    tone: check.status === 'warn' ? 'amber' : toneCycle[index % toneCycle.length],
+  }));
+}
+
+function chartPath(check: PublicProbeCheck | undefined, snapshot: PublicProbeSnapshot) {
+  const series = snapshot.series.find((item) => item.check_id === check?.id) ?? snapshot.series[0];
+  const points = series?.points ?? [];
+  if (points.length < 2) {
+    return 'M48 214 C120 188 150 178 220 186 S340 126 420 142 S540 198 620 150 S740 86 862 116';
+  }
+
+  const values = points.map((point) => point.latency_ms);
+  const max = Math.max(...values, 1);
+  const min = Math.min(...values, 0);
+  const span = Math.max(max - min, 1);
+  return points.map((point, index) => {
+    const x = 48 + (814 * index) / (points.length - 1);
+    const y = 250 - ((point.latency_ms - min) / span) * 150;
+    return `${index === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
+  }).join(' ');
+}
 
 export default function StatusProbe({ compact = false }: StatusProbeProps) {
+  const { snapshot, origin } = usePublicProbeSnapshot();
+  const targetLatencies = toLatencyCards(snapshot);
+  const compactTargets = targetLatencies.slice(0, 3);
+  const trendPath = chartPath(snapshot.checks[0], snapshot);
+  const safeSnapshot = targetLatencies.length > 0 ? snapshot : mockProbeSnapshot;
+
   if (compact) {
     return (
       <section className="status-probe compact">
@@ -49,11 +78,11 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
             <p className="status-kicker">Network NOC</p>
             <h3>网络探测预览</h3>
           </div>
-          <span className="status-pill">静态 UI</span>
+          <span className="status-pill">{origin === 'api' ? 'Live API' : 'Mock fallback'}</span>
         </div>
         <div className="probe-list">
           {compactTargets.map((probe) => (
-            <div className="probe-row" key={probe.target}>
+            <div className="probe-row" key={probe.id}>
               <span className={`dot ${probe.tone === 'amber' ? 'warn' : 'online'}`} />
               <div>
                 <strong>{probe.target}</strong>
@@ -73,7 +102,7 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
         <div>
           <p className="status-kicker">Looking Glass Monitor</p>
           <h2>网络监控总览</h2>
-          <span>静态 Mock 数据 · 后续可接入 Probe API / 时序数据库</span>
+          <span>{origin === 'api' ? 'Public Snapshot API · 已隐藏敏感连接信息' : 'Mock fallback · API 不可用时展示安全模拟数据'}</span>
         </div>
         <div className="status-tabs" aria-label="时间范围">
           <button type="button" className="active">1天</button>
@@ -86,21 +115,21 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
         <aside className="status-source-panel" aria-label="源节点概览">
           <div className="status-panel-title">
             <span>源节点</span>
-            <strong>{sourceNodes.length} 个区域</strong>
+            <strong>{safeSnapshot.sources.length} 个区域</strong>
           </div>
           <div className="source-node-list">
-            {sourceNodes.map((node) => (
-              <article className="source-node-card" key={node.name}>
+            {safeSnapshot.sources.map((node) => (
+              <article className="source-node-card" key={node.id}>
                 <div className="source-node-card__main">
-                  <span className={`dot ${node.status}`} />
+                  <span className={`dot ${safeStatus(node.status)}`} />
                   <div>
-                    <strong>{node.name}</strong>
-                    <small>{node.region} · {node.provider}</small>
+                    <strong>{node.display_name}</strong>
+                    <small>{node.region} · {node.tags.join(' / ') || 'public'}</small>
                   </div>
                 </div>
                 <div className="source-node-card__meta">
-                  <code>{node.ipv4}</code>
-                  <span>负载 {node.load}</span>
+                  <code>{safeStatus(node.status)}</code>
+                  <span>更新时间 {node.updated_at || '—'}</span>
                 </div>
               </article>
             ))}
@@ -110,7 +139,7 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
         <div className="status-main-panel">
           <div className="latency-grid" aria-label="目标延迟卡片">
             {targetLatencies.map((item) => (
-              <article className={`latency-card latency-card--${item.tone}`} key={item.target}>
+              <article className={`latency-card latency-card--${item.tone}`} key={item.id}>
                 <span>{item.location}</span>
                 <strong>{item.latency}</strong>
                 <p>{item.target}</p>
@@ -129,12 +158,12 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
                 <h3>24 小时延迟曲线</h3>
               </div>
               <div className="status-legend">
-                <span><i className="green" />香港</span>
-                <span><i className="blue" />日本</span>
-                <span><i className="amber" />新加坡</span>
+                {safeSnapshot.sources.slice(0, 3).map((node, index) => (
+                  <span key={node.id}><i className={toneCycle[index]} />{node.region}</span>
+                ))}
               </div>
             </div>
-            <svg className="latency-chart" viewBox="0 0 900 320" role="img" aria-label="延迟折线图 mock">
+            <svg className="latency-chart" viewBox="0 0 900 320" role="img" aria-label="延迟折线图">
               <defs>
                 <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
                   <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.24" />
@@ -143,8 +172,8 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
               </defs>
               {[70, 130, 190, 250].map((y) => <line key={y} x1="42" x2="872" y1={y} y2={y} />)}
               {[80, 220, 360, 500, 640, 780].map((x) => <line key={x} x1={x} x2={x} y1="42" y2="282" />)}
-              <path className="chart-area" d="M48 214 C120 188 150 178 220 186 S340 126 420 142 S540 198 620 150 S740 86 862 116 L862 282 L48 282 Z" />
-              <path className="chart-line chart-line--green" d="M48 214 C120 188 150 178 220 186 S340 126 420 142 S540 198 620 150 S740 86 862 116" />
+              <path className="chart-area" d={`${trendPath} L862 282 L48 282 Z`} />
+              <path className="chart-line chart-line--green" d={trendPath} />
               <path className="chart-line chart-line--blue" d="M48 238 C130 220 174 202 238 214 S360 164 446 178 S566 216 650 188 S760 142 862 154" />
               <path className="chart-line chart-line--amber" d="M48 182 C112 170 164 206 238 194 S346 92 438 118 S560 176 646 130 S752 196 862 172" />
               <text x="44" y="310">00:00</text>
