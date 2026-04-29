@@ -19,6 +19,14 @@ BIN_PATH="${BIN_PATH:-/usr/local/bin/wiki-probe-agent}"
 CONFIG_PATH="${CONFIG_PATH:-/etc/wiki-probe-agent.json}"
 SERVICE_NAME="${SERVICE_NAME:-wiki-probe-agent.service}"
 ENABLE_ICMP="${ENABLE_ICMP:-false}"
+PROXY_URL="${PROXY_URL:-}"
+
+# 把代理传给 curl 用于 binary 下载
+if [ -n "$PROXY_URL" ]; then
+  curl_proxy_args=("-x" "$PROXY_URL")
+else
+  curl_proxy_args=()
+fi
 UNIT_PATH="/etc/systemd/system/${SERVICE_NAME}"
 RELEASE_BASE_URL="${RELEASE_BASE_URL:-https://github.com/kelenetwork/po0-wiki/releases/${RELEASE_TAG}/download}"
 
@@ -41,8 +49,8 @@ bin_tmp="${tmp_dir}/${asset}"
 sha_tmp="${tmp_dir}/${asset}.sha256"
 
 log "downloading ${asset} from ${RELEASE_BASE_URL}"
-curl -fsSL "${RELEASE_BASE_URL}/${asset}" -o "$bin_tmp"
-curl -fsSL "${RELEASE_BASE_URL}/${asset}.sha256" -o "$sha_tmp"
+curl -fsSL "${curl_proxy_args[@]}" "${RELEASE_BASE_URL}/${asset}" -o "$bin_tmp"
+curl -fsSL "${curl_proxy_args[@]}" "${RELEASE_BASE_URL}/${asset}.sha256" -o "$sha_tmp"
 (
   cd "$tmp_dir"
   sha256sum -c "${asset}.sha256"
@@ -74,6 +82,13 @@ case "$ENABLE_ICMP" in
     ;;
 esac
 
+proxy_env_lines=""
+if [ -n "$PROXY_URL" ]; then
+  proxy_env_lines="Environment=HTTPS_PROXY=${PROXY_URL}
+Environment=HTTP_PROXY=${PROXY_URL}
+Environment=NO_PROXY=localhost,127.0.0.1,::1"
+fi
+
 log "writing systemd unit to ${UNIT_PATH}"
 cat > "$UNIT_PATH" <<UNIT
 [Unit]
@@ -84,7 +99,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ExecStart=${BIN_PATH} -config ${CONFIG_PATH}
+${proxy_env_lines}ExecStart=${BIN_PATH} -config ${CONFIG_PATH}
 Restart=always
 RestartSec=5s
 DynamicUser=yes
@@ -132,7 +147,7 @@ install_lg_tools() {
     amd64|arm64)
       local nt_url="https://github.com/sjlleo/nexttrace/releases/latest/download/nexttrace_linux_${arch}"
       log "downloading nexttrace from ${nt_url}"
-      if curl -fsSL "${nt_url}" -o /usr/bin/nexttrace.tmp; then
+      if curl -fsSL "${curl_proxy_args[@]}" "${nt_url}" -o /usr/bin/nexttrace.tmp; then
         chmod 0755 /usr/bin/nexttrace.tmp
         mv /usr/bin/nexttrace.tmp /usr/bin/nexttrace
         # nexttrace needs raw socket / TTL manipulation; without these caps it
