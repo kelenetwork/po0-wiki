@@ -7,22 +7,22 @@ import StatusProbe from '../src/components/StatusProbe';
 
 <div className="kele-status-page">
   <section className="kele-status-hero">
-    <p className="kele-section-kicker">Network Status</p>
-    <h1>网络监控</h1>
+    <p className="kele-section-kicker">Probe Atlas</p>
+    <h1>链路状态</h1>
     <p>
-      轻量 Looking Glass + 延迟监控面板。页面优先读取 public snapshot API；接口不可用或返回空数据时，自动回退到安全模拟数据。
+      从公开快照读取各源节点到目标的延迟、抖动和丢包。前台只展示脱敏后的状态，不暴露真实连接信息。
     </p>
   </section>
 
   <StatusProbe />
 
   <section className="kele-status-roadmap">
-    <h2>原型边界</h2>
+    <h2>读法</h2>
     <ul>
-      <li>本页只消费 public snapshot，不展示敏感连接信息。</li>
-      <li>Mock 数据覆盖香港、日本、新加坡、大陆源节点，用于 API 不可用时兜底。</li>
-      <li>趋势图、延迟卡片与图例由快照中的公开 sources、targets、checks、series 派生。</li>
-      <li>需要执行网络工具时，可从导航进入 Looking Glass 工具台原型。</li>
+      <li>页面只消费公开快照，不展示真实 host、端口或 token。</li>
+      <li>没有快照时显示备用样例，避免页面空白。</li>
+      <li>卡片、节点和曲线都由 sources / targets / checks / series 派生。</li>
+      <li>需要实际探测时，从 Looking Glass 选择在线源节点执行。</li>
     </ul>
   </section>
 </div>

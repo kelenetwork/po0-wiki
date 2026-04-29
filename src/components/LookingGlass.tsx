@@ -60,8 +60,8 @@ function renderTerminalOutput(value: string) {
 }
 
 const initialTerminal = [
-  '$ 选择源节点、目标和工具后点击 Run',
-  '所有测试都从你选择的源节点 agent 上执行；hub 服务器不会代跑。',
+  '选择发起点、目标和工具，Run 后从 agent 发起测试',
+  'Hub 只派单，结果由发起点回传。',
 ].join('\n');
 
 export default function LookingGlass() {
@@ -128,7 +128,7 @@ export default function LookingGlass() {
   }
 
   const runDisabledHint = !sourceOnline
-    ? '请先在左侧选择一个 online 的源节点'
+    ? '请先在左侧选择一个 online 的发起点'
     : !selectedTargetId
       ? '请选择一个目标'
       : '';
@@ -137,9 +137,9 @@ export default function LookingGlass() {
     <section className="looking-glass-console" aria-label="Looking Glass 工具台">
       <aside className="lg-sidebar">
         <div className="lg-sidebar__head">
-          <p className="status-kicker">Source Nodes</p>
-          <h2>节点列表</h2>
-          <span>{origin === 'api' ? '来自 Public Snapshot API。仅 online 节点可执行测试。' : 'API 不可用，使用安全 mock。'}</span>
+          <p className="status-kicker">Nodes</p>
+          <h2>发起点</h2>
+          <span>{origin === 'api' ? '在线节点可执行测试。' : '同步节点中。'}</span>
         </div>
         <div className="lg-region-list">
           {regionGroups.map((group) => (
@@ -170,7 +170,7 @@ export default function LookingGlass() {
             </article>
           ))}
           {snapshot.sources.length === 0 && (
-            <p className="lg-empty">还没有任何 agent 上报。先部署一个源节点 agent。</p>
+            <p className="lg-empty">还没有任何 agent 上报。先部署一个发起点 agent。</p>
           )}
         </div>
       </aside>
@@ -196,7 +196,7 @@ export default function LookingGlass() {
             </select>
           </label>
           <label className="lg-source-readonly">
-            <span>源节点</span>
+            <span>发起点</span>
             <strong>{selectedSource?.display_name ?? '未选择'}</strong>
           </label>
           <button
@@ -212,7 +212,7 @@ export default function LookingGlass() {
 
         <div className="lg-summary-grid">
           <article>
-            <span>当前源</span>
+            <span>发起点</span>
             <strong>{selectedSource?.display_name ?? '未选择'}</strong>
             <small>{selectedSource ? `${selectedSource.region} · ${selectedSource.tags.join(' / ') || 'public'}` : '暂无节点'}</small>
           </article>
@@ -222,9 +222,9 @@ export default function LookingGlass() {
             <small>{selectedTarget ? `${selectedTarget.region} · ${selectedTarget.tags.join(' / ') || 'public'}` : '暂无目标'}</small>
           </article>
           <article>
-            <span>状态</span>
-            <strong>{running ? '运行中' : 'Agent dispatch'}</strong>
-            <small>源节点 agent 执行，轮询结果</small>
+            <span>执行方式</span>
+            <strong>{running ? '运行中' : 'Agent 派发'}</strong>
+            <small>发起点 agent 执行，轮询结果</small>
           </article>
         </div>
 
@@ -233,7 +233,7 @@ export default function LookingGlass() {
             <span />
             <span />
             <span />
-            <strong>terminal · live output</strong>
+            <strong>Agent Output</strong>
           </div>
           <pre>{renderTerminalOutput(terminalOutput)}</pre>
         </div>

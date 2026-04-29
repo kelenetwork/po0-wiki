@@ -1,6 +1,6 @@
 ---
 pageType: custom
-title: 可乐 Wiki
+title: Po0 Atlas
 ---
 
 import StatusProbe from '../src/components/StatusProbe';
@@ -10,18 +10,18 @@ import StatusProbe from '../src/components/StatusProbe';
     <div className="kele-hero__copy">
       <div className="kele-eyebrow">
         <span className="kele-live-dot" />
-        wiki.kele.my · Ops Knowledge Base
+        po0.wiki · Probe Atlas
       </div>
-      <h1>可乐 Wiki</h1>
+      <h1>Po0 Atlas</h1>
       <p className="kele-lead">
-        面向运维、网络探测与内部知识沉淀的静态 Wiki。首页采用全屏信息面板，文档页继续保持舒适阅读宽度。
+        把节点、线路、故障记录和运维手册收进同一个清爽入口。信息密度够高，但不把页面做成说明书。
       </p>
       <div className="kele-actions">
         <a className="kele-button kele-button--primary" href="/guide/getting-started">
-          开始使用
+          进入文档
         </a>
         <a className="kele-button kele-button--ghost" href="#knowledge-map">
-          查看结构
+          查看入口
         </a>
         <a className="kele-button kele-button--ghost" href="/status">
           服务状态
@@ -35,36 +35,36 @@ import StatusProbe from '../src/components/StatusProbe';
   <section className="kele-rail" aria-label="重点能力">
     <article>
       <span className="kele-card-index">01</span>
-      <h2>知识库入口</h2>
-      <p>保留清晰导航，把部署、故障记录、工具说明沉淀成可检索文档。</p>
+      <h2>知识库</h2>
+      <p>部署、故障、工具记录都放在能搜索、能长期维护的位置。</p>
     </article>
     <article>
       <span className="kele-card-index">02</span>
-      <h2>探测面板预留</h2>
-      <p>复用状态页的 StatusProbe 占位组件，为 tcping、probe monitor、节点状态展示预留视觉语言。</p>
+      <h2>链路状态</h2>
+      <p>直接看各源节点到目标的延迟、抖动、丢包和最近上报。</p>
     </article>
     <article>
       <span className="kele-card-index">03</span>
-      <h2>静态优先</h2>
-      <p>当前不引入后端，构建产物可直接由 Docker + Nginx 或任意静态服务托管。</p>
+      <h2>轻量部署</h2>
+      <p>Rspress 前端 + 本机容器，公开入口走现有 Tunnel。</p>
     </article>
   </section>
 
   <section id="knowledge-map" className="kele-grid-section">
     <div>
-      <p className="kele-section-kicker">Knowledge Map</p>
-      <h2>从最小 Wiki 开始，逐步扩展为运维控制台</h2>
+      <p className="kele-section-kicker">入口</p>
+      <h2>Wiki、状态面板和 Looking Glass 放在同一张地图里</h2>
       <p>
-        首页负责呈现站点定位与状态感；具体文章仍在指南与后续栏目中保持阅读友好的版心，避免长文铺满屏幕。
+        首页负责快速进入；长文继续保持舒服的阅读宽度，工具页负责实时操作。
       </p>
     </div>
     <div className="kele-link-board">
       <a href="/guide/getting-started">
-        <span>Guide</span>
-        <strong>开始使用</strong>
+        <span>Docs</span>
+        <strong>进入文档</strong>
       </a>
       <a href="/guide/content-guide">
-        <span>Content</span>
+        <span>Rules</span>
         <strong>内容规范</strong>
       </a>
       <a href="/guide/deployment">
@@ -72,8 +72,8 @@ import StatusProbe from '../src/components/StatusProbe';
         <strong>部署说明</strong>
       </a>
       <a href="/status">
-        <span>Status</span>
-        <strong>服务探测</strong>
+        <span>Probe</span>
+        <strong>链路状态</strong>
       </a>
     </div>
   </section>

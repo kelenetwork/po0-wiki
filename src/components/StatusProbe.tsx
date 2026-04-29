@@ -298,10 +298,10 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
       <section className="status-probe compact">
         <div className="status-head">
           <div>
-            <p className="status-kicker">Network NOC</p>
-            <h3>网络探测预览</h3>
+            <p className="status-kicker">Po0 Atlas</p>
+            <h3>实时路径</h3>
           </div>
-          <span className="status-pill">{origin === 'api' ? 'Live API' : 'Mock fallback'}</span>
+          <span className="status-pill">{origin === 'api' ? 'Live' : 'Syncing'}</span>
         </div>
         <div className="probe-list">
           {compactTargets.map((probe) => (
@@ -320,12 +320,12 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
   }
 
   return (
-    <section className="status-probe status-dashboard kele-status" aria-label="网络监控总览">
+    <section className="status-probe status-dashboard kele-status" aria-label="链路状态">
       <div className="status-dashboard__topbar">
         <div>
-          <p className="status-kicker">Looking Glass Monitor</p>
-          <h2>网络监控总览</h2>
-          <span>{origin === 'api' ? 'Public Snapshot API · 已隐藏敏感连接信息' : 'Mock fallback · API 不可用时展示安全模拟数据'}</span>
+          <p className="status-kicker">Probe Atlas</p>
+          <h2>链路状态</h2>
+          <span>{origin === 'api' ? '公网快照 · 已脱敏' : '读取快照中'}</span>
         </div>
         <div className="status-tabs" aria-label="时间范围">
           <button type="button" className="active">1天</button>
@@ -335,10 +335,10 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
       </div>
 
       <div className="status-layout">
-        <aside className="status-source-panel" aria-label="源节点概览">
+        <aside className="status-source-panel" aria-label="源节点">
           <div className="status-panel-title">
             <span>源节点</span>
-            <strong>{safeSnapshot.sources.length} 个区域</strong>
+            <strong>{safeSnapshot.sources.length} 个节点</strong>
           </div>
           <div className="source-node-list">
             {safeSnapshot.sources.map((node) => {
@@ -391,11 +391,11 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
           <div className="status-chart-card">
             <div className="status-chart-head">
               <div>
-                <p className="status-kicker">Latency Trend</p>
-                <h3>24 小时延迟曲线</h3>
-                <small>{selectedSource ? `当前筛选：${selectedSource.display_name}` : '多选图例可叠加更多线路'}</small>
+                <p className="status-kicker">Route Trace</p>
+                <h3>24h 延迟轨迹</h3>
+                <small>{selectedSource ? `当前筛选：${selectedSource.display_name}` : '点击线路名切换显示'}</small>
               </div>
-              <div className="status-legend" aria-label="曲线图例">
+              <div className="status-legend" aria-label="线路图例">
                 <button type="button" className={allSeriesSelected ? 'active' : ''} onClick={toggleAllSeries}>全选</button>
                 {safeSnapshot.series.map((series) => {
                   const check = safeSnapshot.checks.find((item) => item.id === series.check_id);
@@ -408,13 +408,13 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
                 })}
               </div>
             </div>
-            <svg className="latency-chart" viewBox="0 0 900 340" preserveAspectRatio="xMidYMid meet" role="img" aria-label="SmokePing 风格 24 小时延迟曲线" onMouseMove={handleChartMove} onMouseLeave={() => setHoverPoint(null)}>
+            <svg className="latency-chart" viewBox="0 0 900 340" preserveAspectRatio="xMidYMid meet" role="img" aria-label="SmokePing 风格 24h 延迟轨迹" onMouseMove={handleChartMove} onMouseLeave={() => setHoverPoint(null)}>
               {chartModel.yTicks.map((tick) => <line className="chart-grid" key={`y-${tick.value}`} x1={chartBounds.left} x2={chartBounds.right} y1={tick.y} y2={tick.y} />)}
               {chartModel.xTicks.map((tick) => <line className="chart-grid chart-grid--vertical" key={`x-${tick.value}`} x1={tick.x} x2={tick.x} y1={chartBounds.top} y2={chartBounds.bottom} />)}
               {chartModel.yTicks.map((tick) => <text className="chart-axis" key={`yt-${tick.value}`} x="54" y={(tick.y ?? 0) + 4} textAnchor="end">{tick.label}</text>)}
               {chartModel.xTicks.map((tick) => <text className="chart-axis" key={`xt-${tick.value}`} x={tick.x} y="278" textAnchor="middle">{tick.label}</text>)}
-              <text className="chart-axis chart-axis-title" x="64" y="20">Latency / ms</text>
-              <text className="chart-axis chart-axis-title" x="64" y="324">Loss heatmap</text>
+              <text className="chart-axis chart-axis-title" x="64" y="20">Latency · ms</text>
+              <text className="chart-axis chart-axis-title" x="64" y="324">Loss</text>
               {chartModel.lossBins.map((bin, index) => <rect className="chart-loss-bin" key={index} x={bin.x} y={chartBounds.heatTop} width={bin.width} height={chartBounds.heatHeight} fill={lossFill(bin.loss)} />)}
               {chartModel.series.map((series) => (
                 <g key={series.id}>
