@@ -183,6 +183,8 @@ func validLGTool(tool string) bool {
 
 func runLocalLookingGlass(ctx context.Context, tool string, source Source, target AdminTarget) string {
 	var builder strings.Builder
+	fmt.Fprintf(&builder, "⚠ 测试发起点：Hub (上海) — 不是你选的 src-item (%s)。\n", source.DisplayName)
+	fmt.Fprintf(&builder, "   如需从源节点发起，请等 agent dispatch 模式上线。\n")
 	fmt.Fprintf(&builder, "# Looking Glass Run\n")
 	fmt.Fprintf(&builder, "# Requested source: %s (%s)\n", source.DisplayName, source.ID)
 	fmt.Fprintf(&builder, "# Execution mode: Hub-local fallback (not agent dispatch)\n")

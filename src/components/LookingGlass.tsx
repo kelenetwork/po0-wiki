@@ -35,7 +35,20 @@ function defaultSourceId(sources: PublicProbeItem[]) {
   return sources.find((source) => source.status === 'online' || source.status === 'ok')?.id ?? sources[0]?.id ?? '';
 }
 
+function renderTerminalOutput(value: string) {
+  const [firstLine, ...restLines] = value.split('\n');
+  if (!firstLine.startsWith('⚠')) return value;
+  return (
+    <>
+      <span className="lg-terminal-warning">{firstLine}</span>
+      {restLines.length > 0 && `\n${restLines.join('\n')}`}
+    </>
+  );
+}
+
 const initialTerminal = [
+  '⚠ 测试发起点：Hub (上海) — 不是你选的 src-item。',
+  '   如需从源节点发起，请等 agent dispatch 模式上线。',
   '$ 选择源节点、目标和工具后点击 Run',
   'Looking Glass 已接入后端 /api/public/lg/run。',
   '当前版本使用 Hub-local fallback 执行，并在输出中标注真实执行位置。',
@@ -61,7 +74,7 @@ export default function LookingGlass() {
   async function runTool() {
     if (!selectedSourceId || !selectedTargetId || running) return;
     setRunning(true);
-    setTerminalOutput(`$ ${selectedTool} ${selectedTarget?.display_name ?? selectedTargetId} --from ${selectedSource?.display_name ?? selectedSourceId}\nRunning...`);
+    setTerminalOutput(`⚠ 测试发起点：Hub (上海) — 不是你选的 src-item (${selectedSource?.display_name ?? selectedSourceId})。\n   如需从源节点发起，请等 agent dispatch 模式上线。\n$ ${selectedTool} ${selectedTarget?.display_name ?? selectedTargetId} --from ${selectedSource?.display_name ?? selectedSourceId}\nRunning...`);
     try {
       const response = await fetch('/api/public/lg/run', {
         method: 'POST',
@@ -133,6 +146,11 @@ export default function LookingGlass() {
           <button className="lg-run" type="button" onClick={runTool} disabled={running || !selectedSourceId || !selectedTargetId}>{running ? 'Running…' : 'Run'}</button>
         </div>
 
+        <div className="lg-mode-banner" role="note">
+          <strong>Hub-local 模式</strong>
+          <span>当前所有测试均从 wiki.kele.my 服务器发起，不会从左侧所选源节点执行。</span>
+        </div>
+
         <div className="lg-summary-grid">
           <article>
             <span>当前源</span>
@@ -158,7 +176,7 @@ export default function LookingGlass() {
             <span />
             <strong>terminal · live output</strong>
           </div>
-          <pre>{terminalOutput}</pre>
+          <pre>{renderTerminalOutput(terminalOutput)}</pre>
         </div>
       </div>
     </section>

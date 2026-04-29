@@ -283,3 +283,35 @@
     grid-template-columns: 1fr;
   }
 }
+
+.lg-mode-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  border: 1px solid rgba(239, 68, 68, 0.34);
+  border-radius: 18px;
+  padding: 12px 14px;
+  color: #991b1b;
+  background: linear-gradient(135deg, rgba(254, 226, 226, 0.95), rgba(255, 247, 237, 0.8));
+  font-weight: 850;
+}
+
+.dark .lg-mode-banner {
+  color: #fecaca;
+  background: linear-gradient(135deg, rgba(127, 29, 29, 0.46), rgba(69, 26, 3, 0.34));
+}
+
+.lg-mode-banner strong {
+  flex: 0 0 auto;
+}
+
+.lg-terminal-warning {
+  display: inline-block;
+  margin: -2px 0 2px;
+  border-radius: 10px;
+  padding: 2px 8px;
+  color: #fecaca;
+  background: rgba(220, 38, 38, 0.32);
+  font-weight: 900;
+}
