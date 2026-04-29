@@ -417,7 +417,7 @@ func (s *Store) Snapshot(ctx context.Context) (Snapshot, error) {
 }
 
 func (s *Store) ListSources(ctx context.Context) ([]Source, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT s.id, s.display_name, s.region, s.tags, s.status, s.updated_at, COALESCE(a.last_reported_at, '') FROM sources s LEFT JOIN agents a ON a.id = s.id ORDER BY s.id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT s.id, s.display_name, s.region, s.tags, s.status, s.updated_at, COALESCE(MAX(a.last_reported_at, a.last_seen_at), '') FROM sources s LEFT JOIN agents a ON a.id = s.id ORDER BY s.id`)
 	if err != nil {
 		return nil, err
 	}
@@ -491,7 +491,7 @@ func (s *Store) LookingGlassEndpoint(ctx context.Context, sourceID string, targe
 	var source Source
 	var sourceTags string
 	var lastReportedAt string
-	if err := s.db.QueryRowContext(ctx, `SELECT s.id, s.display_name, s.region, s.tags, s.status, s.updated_at, COALESCE(a.last_reported_at, '') FROM sources s LEFT JOIN agents a ON a.id = s.id WHERE s.id = ?`, sourceID).Scan(&source.ID, &source.DisplayName, &source.Region, &sourceTags, &source.Status, &source.UpdatedAt, &lastReportedAt); err != nil {
+	if err := s.db.QueryRowContext(ctx, `SELECT s.id, s.display_name, s.region, s.tags, s.status, s.updated_at, COALESCE(MAX(a.last_reported_at, a.last_seen_at), '') FROM sources s LEFT JOIN agents a ON a.id = s.id WHERE s.id = ?`, sourceID).Scan(&source.ID, &source.DisplayName, &source.Region, &sourceTags, &source.Status, &source.UpdatedAt, &lastReportedAt); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return Source{}, AdminTarget{}, errors.New("source not found")
 		}
