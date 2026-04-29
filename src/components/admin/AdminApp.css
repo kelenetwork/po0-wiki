@@ -14,13 +14,17 @@
 .admin-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; align-items: end; margin-bottom: 24px; padding: 18px; }
 .admin-form label { display: grid; gap: 7px; color: #667085; font-size: 13px; font-weight: 700; }
 .admin-form input, .admin-form select { border: 1px solid rgba(28, 39, 76, .16); border-radius: 14px; padding: 10px 12px; color: #172033; background: #fff; }
+.admin-form input:disabled { background: #f2f4f7; color: #667085; cursor: not-allowed; }
+.admin-editing { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid rgba(45, 111, 255, .18); border-radius: 16px; padding: 10px 12px; background: rgba(45, 111, 255, .08); color: #2454b8; font-weight: 800; }
 .admin-check { align-self: center; display: flex !important; grid-auto-flow: column; justify-content: start; }
 .admin-notice { border: 1px solid rgba(45, 111, 255, .18); border-radius: 18px; margin: 18px 0; padding: 12px 14px; background: rgba(45, 111, 255, .08); color: #2454b8; }
 .admin-shell table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 22px; background: #fff; box-shadow: 0 16px 40px rgba(20, 28, 48, .06); }
 .admin-shell th, .admin-shell td { border-bottom: 1px solid rgba(28, 39, 76, .08); padding: 12px; text-align: left; vertical-align: top; }
-.admin-shell th { color: #667085; font-size: 12px; text-transform: uppercase; }
+.admin-shell th { color: #667085; font-size: 12px; text-transform: none; }
 .admin-shell td { font-size: 14px; }
 .admin-shell td button { margin: 0 6px 6px 0; padding: 7px 10px; font-size: 12px; }
+.admin-shell button.danger { border-color: rgba(217, 45, 32, .28); color: #b42318; }
+.admin-shell button.danger:hover { background: #b42318; color: #fff; }
 .admin-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; background: rgba(10, 16, 30, .58); }
 .admin-modal-card { width: min(920px, 100%); max-height: 88vh; overflow: auto; border-radius: 24px; padding: 22px; background: #fff; box-shadow: 0 30px 120px rgba(0, 0, 0, .34); }
 .admin-modal-card header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }

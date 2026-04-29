@@ -21,6 +21,8 @@ type Store struct {
 	db *sql.DB
 }
 
+var errRelatedChecks = errors.New("请先删除关联任务")
+
 type Source struct {
 	ID          string   `json:"id"`
 	DisplayName string   `json:"display_name"`
@@ -558,6 +560,92 @@ func (s *Store) UpdateCheck(ctx context.Context, id string, req CreateCheckReque
 		return AdminCheck{}, errors.New("check not found")
 	}
 	return AdminCheck{ID: id, DisplayName: req.DisplayName, SourceID: req.SourceID, TargetID: req.TargetID, Tags: req.Tags, Status: defaultCheckStatus(req.Status), LatencyMS: req.LatencyMS, LossPct: req.LossPct, JitterMS: req.JitterMS, IntervalSeconds: interval, Enabled: enabled != 0, UpdatedAt: now}, nil
+}
+
+func (s *Store) DeleteSource(ctx context.Context, id string) error {
+	if id == "" {
+		return errors.New("id is required")
+	}
+	var related int
+	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM checks WHERE source_id = ?`, id).Scan(&related); err != nil {
+		return err
+	}
+	if related > 0 {
+		return errRelatedChecks
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err := tx.ExecContext(ctx, `DELETE FROM agents WHERE id = ?`, id); err != nil {
+		return err
+	}
+	result, err := tx.ExecContext(ctx, `DELETE FROM sources WHERE id = ?`, id)
+	if err != nil {
+		return err
+	}
+	if rows, _ := result.RowsAffected(); rows == 0 {
+		return errors.New("source not found")
+	}
+	return tx.Commit()
+}
+
+func (s *Store) DeleteTarget(ctx context.Context, id string) error {
+	if id == "" {
+		return errors.New("id is required")
+	}
+	var related int
+	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM checks WHERE target_id = ?`, id).Scan(&related); err != nil {
+		return err
+	}
+	if related > 0 {
+		return errRelatedChecks
+	}
+	result, err := s.db.ExecContext(ctx, `DELETE FROM targets WHERE id = ?`, id)
+	if err != nil {
+		return err
+	}
+	if rows, _ := result.RowsAffected(); rows == 0 {
+		return errors.New("target not found")
+	}
+	return nil
+}
+
+func (s *Store) DeleteCheck(ctx context.Context, id string) error {
+	if id == "" {
+		return errors.New("id is required")
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err := tx.ExecContext(ctx, `DELETE FROM series_points WHERE check_id = ?`, id); err != nil {
+		return err
+	}
+	result, err := tx.ExecContext(ctx, `DELETE FROM checks WHERE id = ?`, id)
+	if err != nil {
+		return err
+	}
+	if rows, _ := result.RowsAffected(); rows == 0 {
+		return errors.New("check not found")
+	}
+	return tx.Commit()
+}
+
+func (s *Store) DeleteAgent(ctx context.Context, id string) error {
+	if id == "" {
+		return errors.New("id is required")
+	}
+	result, err := s.db.ExecContext(ctx, `DELETE FROM agents WHERE id = ?`, id)
+	if err != nil {
+		return err
+	}
+	if rows, _ := result.RowsAffected(); rows == 0 {
+		return errors.New("agent not found")
+	}
+	return nil
 }
 
 func (s *Store) CreateAgent(ctx context.Context, req CreateAgentRequest) (CreateAgentResponse, error) {

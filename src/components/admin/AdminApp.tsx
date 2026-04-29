@@ -97,6 +97,9 @@ export default function AdminApp({ page }: AdminAppProps) {
   const [sourceForm, setSourceForm] = useState(blankSource);
   const [targetForm, setTargetForm] = useState(blankTarget);
   const [checkForm, setCheckForm] = useState(blankCheck);
+  const [editingSourceId, setEditingSourceId] = useState('');
+  const [editingTargetId, setEditingTargetId] = useState('');
+  const [editingCheckId, setEditingCheckId] = useState('');
   const [agentID, setAgentID] = useState('');
   const [secret, setSecret] = useState<{ title: string; body: string } | null>(null);
   const [install, setInstall] = useState<InstallPayload | null>(null);
@@ -173,32 +176,47 @@ export default function AdminApp({ page }: AdminAppProps) {
 
   async function saveSource(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const editing = sources.some((item) => item.id === sourceForm.id);
+    const editing = Boolean(editingSourceId);
     const body = JSON.stringify({ display_name: sourceForm.display_name, region: sourceForm.region, tags: tagsFromText(sourceForm.tags), ...(editing ? {} : { id: sourceForm.id }) });
-    await adminFetch(editing ? `/api/admin/sources/${encodeURIComponent(sourceForm.id)}` : '/api/admin/sources', { method: editing ? 'PUT' : 'POST', body });
+    await adminFetch(editing ? `/api/admin/sources/${encodeURIComponent(editingSourceId)}` : '/api/admin/sources', { method: editing ? 'PUT' : 'POST', body });
     setSourceForm(blankSource);
+    setEditingSourceId('');
     setNotice(editing ? '源机器已更新。' : '源机器已创建。');
     await loadAll();
   }
 
   async function saveTarget(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const editing = targets.some((item) => item.id === targetForm.id);
+    const editing = Boolean(editingTargetId);
     const body = JSON.stringify({ id: targetForm.id, display_name: targetForm.display_name, region: targetForm.region, tags: tagsFromText(targetForm.tags), host: targetForm.host, port: Number(targetForm.port), status: 'online' });
-    await adminFetch(editing ? `/api/admin/targets/${encodeURIComponent(targetForm.id)}` : '/api/admin/targets', { method: editing ? 'PUT' : 'POST', body });
+    await adminFetch(editing ? `/api/admin/targets/${encodeURIComponent(editingTargetId)}` : '/api/admin/targets', { method: editing ? 'PUT' : 'POST', body });
     setTargetForm(blankTarget);
+    setEditingTargetId('');
     setNotice(editing ? '目标已更新。' : '目标已创建。');
     await loadAll();
   }
 
   async function saveCheck(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const editing = checks.some((item) => item.id === checkForm.id);
+    const editing = Boolean(editingCheckId);
     const body = JSON.stringify({ id: checkForm.id, display_name: checkForm.display_name, source_id: checkForm.source_id, target_id: checkForm.target_id, tags: tagsFromText(checkForm.tags), interval_seconds: Number(checkForm.interval_seconds), enabled: checkForm.enabled, status: 'ok' });
-    await adminFetch(editing ? `/api/admin/checks/${encodeURIComponent(checkForm.id)}` : '/api/admin/checks', { method: editing ? 'PUT' : 'POST', body });
+    await adminFetch(editing ? `/api/admin/checks/${encodeURIComponent(editingCheckId)}` : '/api/admin/checks', { method: editing ? 'PUT' : 'POST', body });
     setCheckForm(blankCheck);
+    setEditingCheckId('');
     setNotice(editing ? '任务已更新。' : '任务已创建。');
     await loadAll();
+  }
+
+  async function deleteItem(resource: 'sources' | 'targets' | 'checks' | 'agents', id: string, onDeleted: () => void) {
+    if (!confirm('确认删除？')) return;
+    try {
+      await adminFetch(`/api/admin/${resource}/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '删除失败');
+      return;
+    }
+    onDeleted();
+    setNotice('已删除。');
   }
 
   async function createAgent(event: FormEvent<HTMLFormElement>) {
@@ -254,10 +272,10 @@ export default function AdminApp({ page }: AdminAppProps) {
       {notice && <p className="admin-notice">{notice}</p>}
 
       {page === 'home' && <Overview sources={sources} targets={targets} checks={checks} agents={agents} />}
-      {page === 'sources' && <SourcesPage sources={sources} form={sourceForm} setForm={setSourceForm} onSave={saveSource} />}
-      {page === 'targets' && <TargetsPage targets={targets} form={targetForm} setForm={setTargetForm} onSave={saveTarget} />}
-      {page === 'checks' && <ChecksPage checks={checks} sources={sources} targets={targets} form={checkForm} setForm={setCheckForm} onSave={saveCheck} sourceName={sourceName} targetName={targetName} />}
-      {page === 'agents' && <AgentsPage agents={agents} sources={sources} agentID={agentID} setAgentID={setAgentID} onCreate={createAgent} onReset={resetToken} onInstall={showInstall} />}
+      {page === 'sources' && <SourcesPage sources={sources} form={sourceForm} setForm={setSourceForm} editingId={editingSourceId} setEditingId={setEditingSourceId} onSave={saveSource} onDelete={(id) => deleteItem('sources', id, () => { setSources((items) => items.filter((item) => item.id !== id)); if (editingSourceId === id) { setSourceForm(blankSource); setEditingSourceId(''); } })} />}
+      {page === 'targets' && <TargetsPage targets={targets} form={targetForm} setForm={setTargetForm} editingId={editingTargetId} setEditingId={setEditingTargetId} onSave={saveTarget} onDelete={(id) => deleteItem('targets', id, () => { setTargets((items) => items.filter((item) => item.id !== id)); if (editingTargetId === id) { setTargetForm(blankTarget); setEditingTargetId(''); } })} />}
+      {page === 'checks' && <ChecksPage checks={checks} sources={sources} targets={targets} form={checkForm} setForm={setCheckForm} editingId={editingCheckId} setEditingId={setEditingCheckId} onSave={saveCheck} onDelete={(id) => deleteItem('checks', id, () => { setChecks((items) => items.filter((item) => item.id !== id)); if (editingCheckId === id) { setCheckForm(blankCheck); setEditingCheckId(''); } })} sourceName={sourceName} targetName={targetName} />}
+      {page === 'agents' && <AgentsPage agents={agents} sources={sources} agentID={agentID} setAgentID={setAgentID} onCreate={createAgent} onReset={resetToken} onInstall={showInstall} onDelete={(id) => deleteItem('agents', id, () => setAgents((items) => items.filter((item) => item.id !== id)))} />}
 
       {secret && <Modal title={secret.title} onClose={() => setSecret(null)}><pre>{secret.body}</pre><button onClick={() => copyText(secret.body)}>复制 token</button></Modal>}
       {install && <InstallModal install={install} onClose={() => setInstall(null)} onCopy={copyText} />}
@@ -271,28 +289,39 @@ function Overview({ sources, targets, checks, agents }: { sources: Source[]; tar
   ].map(([label, count, href]) => <a className="admin-card admin-stat" href={String(href)} key={String(label)}><span>{label}</span><strong>{count}</strong></a>)}</div>;
 }
 
-function SourcesPage({ sources, form, setForm, onSave }: { sources: Source[]; form: typeof blankSource; setForm: (form: typeof blankSource) => void; onSave: (event: FormEvent<HTMLFormElement>) => void }) {
-  return <><form className="admin-card admin-form" onSubmit={onSave}><FormInput label="ID" value={form.id} onChange={(id) => setForm({ ...form, id })} /><FormInput label="display_name" value={form.display_name} onChange={(display_name) => setForm({ ...form, display_name })} /><FormInput label="region" value={form.region} onChange={(region) => setForm({ ...form, region })} /><FormInput label="tags" value={form.tags} onChange={(tags) => setForm({ ...form, tags })} /><button>保存源机器</button></form><table><thead><tr><th>id</th><th>display_name</th><th>region</th><th>tags</th><th>status</th><th>最近 seen</th><th /></tr></thead><tbody>{sources.map((item) => <tr key={item.id}><td>{item.id}</td><td>{item.display_name}</td><td>{item.region}</td><td>{tagsToText(item.tags)}</td><td>{item.status}</td><td>{item.updated_at}</td><td><button onClick={() => setForm({ id: item.id, display_name: item.display_name, region: item.region, tags: tagsToText(item.tags) })}>编辑</button></td></tr>)}</tbody></table></>;
+function SourcesPage({ sources, form, setForm, editingId, setEditingId, onSave, onDelete }: { sources: Source[]; form: typeof blankSource; setForm: (form: typeof blankSource) => void; editingId: string; setEditingId: (id: string) => void; onSave: (event: FormEvent<HTMLFormElement>) => void; onDelete: (id: string) => void }) {
+  const cancelEdit = () => { setForm(blankSource); setEditingId(''); };
+  return <><form className="admin-card admin-form" onSubmit={onSave}>{editingId && <EditBanner id={editingId} onCancel={cancelEdit} />}<FormInput label="ID" value={form.id} disabled={Boolean(editingId)} onChange={(id) => setForm({ ...form, id })} /><FormInput label="显示名" value={form.display_name} onChange={(display_name) => setForm({ ...form, display_name })} /><FormInput label="区域" value={form.region} onChange={(region) => setForm({ ...form, region })} /><FormInput label="标签（逗号分隔）" value={form.tags} onChange={(tags) => setForm({ ...form, tags })} /><button>保存源机器</button></form><table><thead><tr><th>ID</th><th>显示名</th><th>区域</th><th>标签</th><th>状态</th><th>最近活动时间</th><th>操作</th></tr></thead><tbody>{sources.map((item) => <tr key={item.id}><td>{empty(item.id)}</td><td>{empty(item.display_name)}</td><td>{empty(item.region)}</td><td>{empty(tagsToText(item.tags))}</td><td>{empty(item.status)}</td><td>{empty(item.updated_at)}</td><td><button onClick={() => { setForm({ id: item.id, display_name: item.display_name, region: item.region, tags: tagsToText(item.tags) }); setEditingId(item.id); }}>编辑</button>{editingId === item.id && <button onClick={cancelEdit}>取消编辑</button>}<button className="danger" onClick={() => onDelete(item.id)}>删除</button></td></tr>)}</tbody></table></>;
 }
 
-function TargetsPage({ targets, form, setForm, onSave }: { targets: Target[]; form: typeof blankTarget; setForm: (form: typeof blankTarget) => void; onSave: (event: FormEvent<HTMLFormElement>) => void }) {
-  return <><form className="admin-card admin-form" onSubmit={onSave}><FormInput label="ID" value={form.id} onChange={(id) => setForm({ ...form, id })} /><FormInput label="display_name" value={form.display_name} onChange={(display_name) => setForm({ ...form, display_name })} /><FormInput label="region" value={form.region} onChange={(region) => setForm({ ...form, region })} /><FormInput label="tags" value={form.tags} onChange={(tags) => setForm({ ...form, tags })} /><FormInput label="host" value={form.host} onChange={(host) => setForm({ ...form, host })} /><FormInput label="port" value={form.port} type="number" onChange={(port) => setForm({ ...form, port })} /><button>保存目标</button></form><table><thead><tr><th>id</th><th>display_name</th><th>region</th><th>tags</th><th>host</th><th>port</th><th /></tr></thead><tbody>{targets.map((item) => <tr key={item.id}><td>{item.id}</td><td>{item.display_name}</td><td>{item.region}</td><td>{tagsToText(item.tags)}</td><td>{item.host}</td><td>{item.port}</td><td><button onClick={() => setForm({ id: item.id, display_name: item.display_name, region: item.region, tags: tagsToText(item.tags), host: item.host, port: String(item.port) })}>编辑</button></td></tr>)}</tbody></table></>;
+function TargetsPage({ targets, form, setForm, editingId, setEditingId, onSave, onDelete }: { targets: Target[]; form: typeof blankTarget; setForm: (form: typeof blankTarget) => void; editingId: string; setEditingId: (id: string) => void; onSave: (event: FormEvent<HTMLFormElement>) => void; onDelete: (id: string) => void }) {
+  const cancelEdit = () => { setForm(blankTarget); setEditingId(''); };
+  return <><form className="admin-card admin-form" onSubmit={onSave}>{editingId && <EditBanner id={editingId} onCancel={cancelEdit} />}<FormInput label="ID" value={form.id} disabled={Boolean(editingId)} onChange={(id) => setForm({ ...form, id })} /><FormInput label="显示名" value={form.display_name} onChange={(display_name) => setForm({ ...form, display_name })} /><FormInput label="区域" value={form.region} onChange={(region) => setForm({ ...form, region })} /><FormInput label="标签（逗号分隔）" value={form.tags} onChange={(tags) => setForm({ ...form, tags })} /><FormInput label="真实 Host（仅管理员可见）" value={form.host} onChange={(host) => setForm({ ...form, host })} /><FormInput label="真实端口" value={form.port} type="number" onChange={(port) => setForm({ ...form, port })} /><button>保存目标</button></form><table><thead><tr><th>ID</th><th>显示名</th><th>区域</th><th>标签</th><th>状态</th><th>真实 Host（仅管理员可见）</th><th>真实端口</th><th>最近活动时间</th><th>操作</th></tr></thead><tbody>{targets.map((item) => <tr key={item.id}><td>{empty(item.id)}</td><td>{empty(item.display_name)}</td><td>{empty(item.region)}</td><td>{empty(tagsToText(item.tags))}</td><td>{empty(item.status)}</td><td>{empty(item.host)}</td><td>{empty(item.port)}</td><td>{empty(item.updated_at)}</td><td><button onClick={() => { setForm({ id: item.id, display_name: item.display_name, region: item.region, tags: tagsToText(item.tags), host: item.host, port: String(item.port) }); setEditingId(item.id); }}>编辑</button>{editingId === item.id && <button onClick={cancelEdit}>取消编辑</button>}<button className="danger" onClick={() => onDelete(item.id)}>删除</button></td></tr>)}</tbody></table></>;
 }
 
-function ChecksPage({ checks, sources, targets, form, setForm, onSave, sourceName, targetName }: { checks: Check[]; sources: Source[]; targets: Target[]; form: typeof blankCheck; setForm: (form: typeof blankCheck) => void; onSave: (event: FormEvent<HTMLFormElement>) => void; sourceName: Map<string, string>; targetName: Map<string, string> }) {
-  return <><form className="admin-card admin-form" onSubmit={onSave}><FormInput label="ID" value={form.id} onChange={(id) => setForm({ ...form, id })} /><FormInput label="display_name" value={form.display_name} onChange={(display_name) => setForm({ ...form, display_name })} /><Select label="source" value={form.source_id} options={sources} onChange={(source_id) => setForm({ ...form, source_id })} /><Select label="target" value={form.target_id} options={targets} onChange={(target_id) => setForm({ ...form, target_id })} /><FormInput label="interval_seconds" value={form.interval_seconds} type="number" onChange={(interval_seconds) => setForm({ ...form, interval_seconds })} /><FormInput label="tags" value={form.tags} onChange={(tags) => setForm({ ...form, tags })} /><label className="admin-check"><input type="checkbox" checked={form.enabled} onChange={(event) => setForm({ ...form, enabled: event.target.checked })} /> enabled</label><button>保存任务</button></form><table><thead><tr><th>id</th><th>display_name</th><th>source</th><th>target</th><th>interval</th><th>enabled</th><th>最近指标</th><th /></tr></thead><tbody>{checks.map((item) => <tr key={item.id}><td>{item.id}</td><td>{item.display_name}</td><td>{sourceName.get(item.source_id) ?? item.source_id}</td><td>{targetName.get(item.target_id) ?? item.target_id}</td><td>{item.interval_seconds}s</td><td>{item.enabled ? '是' : '否'}</td><td>{metric(item)}</td><td><button onClick={() => setForm({ id: item.id, display_name: item.display_name, source_id: item.source_id, target_id: item.target_id, tags: tagsToText(item.tags), interval_seconds: String(item.interval_seconds), enabled: item.enabled })}>编辑</button></td></tr>)}</tbody></table></>;
+function ChecksPage({ checks, sources, targets, form, setForm, editingId, setEditingId, onSave, onDelete, sourceName, targetName }: { checks: Check[]; sources: Source[]; targets: Target[]; form: typeof blankCheck; setForm: (form: typeof blankCheck) => void; editingId: string; setEditingId: (id: string) => void; onSave: (event: FormEvent<HTMLFormElement>) => void; onDelete: (id: string) => void; sourceName: Map<string, string>; targetName: Map<string, string> }) {
+  const cancelEdit = () => { setForm(blankCheck); setEditingId(''); };
+  return <><form className="admin-card admin-form" onSubmit={onSave}>{editingId && <EditBanner id={editingId} onCancel={cancelEdit} />}<FormInput label="ID" value={form.id} disabled={Boolean(editingId)} onChange={(id) => setForm({ ...form, id })} /><FormInput label="显示名" value={form.display_name} onChange={(display_name) => setForm({ ...form, display_name })} /><Select label="源机器" value={form.source_id} options={sources} onChange={(source_id) => setForm({ ...form, source_id })} /><Select label="目标" value={form.target_id} options={targets} onChange={(target_id) => setForm({ ...form, target_id })} /><FormInput label="轮询间隔（秒）" value={form.interval_seconds} type="number" onChange={(interval_seconds) => setForm({ ...form, interval_seconds })} /><FormInput label="标签（逗号分隔）" value={form.tags} onChange={(tags) => setForm({ ...form, tags })} /><label className="admin-check"><input type="checkbox" checked={form.enabled} onChange={(event) => setForm({ ...form, enabled: event.target.checked })} /> 启用</label><button>保存任务</button></form><table><thead><tr><th>ID</th><th>显示名</th><th>源机器</th><th>目标</th><th>轮询间隔</th><th>启用</th><th>标签</th><th>状态</th><th>最近指标</th><th>最近活动时间</th><th>操作</th></tr></thead><tbody>{checks.map((item) => <tr key={item.id}><td>{empty(item.id)}</td><td>{empty(item.display_name)}</td><td>{empty(sourceName.get(item.source_id) ?? item.source_id)}</td><td>{empty(targetName.get(item.target_id) ?? item.target_id)}</td><td>{empty(item.interval_seconds ? `${item.interval_seconds}s` : '')}</td><td>{item.enabled ? '是' : '否'}</td><td>{empty(tagsToText(item.tags))}</td><td>{empty(item.status)}</td><td>{metric(item)}</td><td>{empty(item.updated_at)}</td><td><button onClick={() => { setForm({ id: item.id, display_name: item.display_name, source_id: item.source_id, target_id: item.target_id, tags: tagsToText(item.tags), interval_seconds: String(item.interval_seconds), enabled: item.enabled }); setEditingId(item.id); }}>编辑</button>{editingId === item.id && <button onClick={cancelEdit}>取消编辑</button>}<button className="danger" onClick={() => onDelete(item.id)}>删除</button></td></tr>)}</tbody></table></>;
 }
 
-function AgentsPage({ agents, sources, agentID, setAgentID, onCreate, onReset, onInstall }: { agents: Agent[]; sources: Source[]; agentID: string; setAgentID: (id: string) => void; onCreate: (event: FormEvent<HTMLFormElement>) => void; onReset: (id: string) => void; onInstall: (id: string) => void }) {
-  return <><form className="admin-card admin-form" onSubmit={onCreate}><label>source id<select value={agentID} onChange={(event) => setAgentID(event.target.value)}><option value="">选择源机器</option>{sources.map((item) => <option value={item.id} key={item.id}>{item.id} · {item.display_name}</option>)}</select></label><button>创建/替换 Agent</button></form><table><thead><tr><th>id</th><th>token_prefix</th><th>hostname</th><th>version</th><th>last_seen</th><th>last_reported</th><th>操作</th></tr></thead><tbody>{agents.map((item) => <tr key={item.id}><td>{item.id}</td><td>{item.token_prefix}</td><td>{lastSeen(item.hostname)}</td><td>{lastSeen(item.version)}</td><td>{lastSeen(item.last_seen_at)}</td><td>{lastSeen(item.last_reported_at)}</td><td><button onClick={() => onReset(item.id)}>重置 token</button><button onClick={() => onInstall(item.id)}>查看接入命令</button></td></tr>)}</tbody></table></>;
+function AgentsPage({ agents, sources, agentID, setAgentID, onCreate, onReset, onInstall, onDelete }: { agents: Agent[]; sources: Source[]; agentID: string; setAgentID: (id: string) => void; onCreate: (event: FormEvent<HTMLFormElement>) => void; onReset: (id: string) => void; onInstall: (id: string) => void; onDelete: (id: string) => void }) {
+  return <><form className="admin-card admin-form" onSubmit={onCreate}><label>源机器<select value={agentID} onChange={(event) => setAgentID(event.target.value)} required><option value="">选择源机器</option>{sources.map((item) => <option value={item.id} key={item.id}>{item.id} · {item.display_name}</option>)}</select></label><button>创建/重置 Agent</button></form><table><thead><tr><th>ID</th><th>Token 前缀</th><th>主机名</th><th>版本</th><th>最近活动时间</th><th>最近上报</th><th>操作</th></tr></thead><tbody>{agents.map((item) => <tr key={item.id}><td>{empty(item.id)}</td><td>{empty(item.token_prefix)}</td><td>{empty(item.hostname)}</td><td>{empty(item.version)}</td><td>{lastSeen(item.last_seen_at)}</td><td>{lastSeen(item.last_reported_at)}</td><td><button onClick={() => onReset(item.id)}>重置 Token</button><button onClick={() => onInstall(item.id)}>查看接入命令</button><button className="danger" onClick={() => onDelete(item.id)}>删除</button></td></tr>)}</tbody></table></>;
 }
 
-function FormInput({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (value: string) => void; type?: string }) {
-  return <label>{label}<input type={type} value={value} onChange={(event) => onChange(event.target.value)} required /></label>;
+function EditBanner({ id, onCancel }: { id: string; onCancel: () => void }) {
+  return <div className="admin-editing"><span>编辑中：{id}</span><button type="button" onClick={onCancel}>取消编辑</button></div>;
+}
+
+function FormInput({ label, value, onChange, type = 'text', disabled = false }: { label: string; value: string; onChange: (value: string) => void; type?: string; disabled?: boolean }) {
+  return <label>{label}<input type={type} value={value} onChange={(event) => onChange(event.target.value)} required disabled={disabled} /></label>;
 }
 
 function Select({ label, value, options, onChange }: { label: string; value: string; options: Array<{ id: string; display_name: string }>; onChange: (value: string) => void }) {
   return <label>{label}<select value={value} onChange={(event) => onChange(event.target.value)} required><option value="">请选择</option>{options.map((item) => <option value={item.id} key={item.id}>{item.id} · {item.display_name}</option>)}</select></label>;
+}
+
+function empty(value?: string | number) {
+  return value === undefined || value === null || value === '' ? '—' : value;
 }
 
 function Modal({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {

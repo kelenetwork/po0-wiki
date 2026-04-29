@@ -160,6 +160,99 @@ func TestAdminRequiresBearerTokenAndCreatesSource(t *testing.T) {
 	}
 }
 
+func TestAdminUpdateAndDeleteResources(t *testing.T) {
+	server := newTestServer(t)
+
+	body := strings.NewReader(`{"display_name":"上海电信入口更新","region":"华东","tags":["updated"]}`)
+	req := httptest.NewRequest(http.MethodPut, "/api/admin/sources/src-shanghai-ctc", body)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec := httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("update source status = %d body = %s", rec.Code, rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/admin/sources", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list sources status = %d body = %s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "上海电信入口更新") || strings.Count(rec.Body.String(), "src-shanghai-ctc") != 1 {
+		t.Fatalf("source was not updated in place: %s", rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodDelete, "/api/admin/sources/src-shanghai-ctc", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusConflict || !strings.Contains(rec.Body.String(), "请先删除关联任务") {
+		t.Fatalf("delete related source status = %d body = %s", rec.Code, rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodDelete, "/api/admin/targets/tgt-wiki", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusConflict || !strings.Contains(rec.Body.String(), "请先删除关联任务") {
+		t.Fatalf("delete related target status = %d body = %s", rec.Code, rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodDelete, "/api/admin/checks/chk-shanghai-wiki", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("delete check status = %d body = %s", rec.Code, rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/admin/checks", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK || strings.Contains(rec.Body.String(), "chk-shanghai-wiki") {
+		t.Fatalf("deleted check still listed: status = %d body = %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestAdminDeleteAgentKeepsSource(t *testing.T) {
+	server := newTestServer(t)
+
+	body := strings.NewReader(`{"id":"src-shanghai-ctc"}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/admin/agents", body)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec := httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create agent status = %d body = %s", rec.Code, rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodDelete, "/api/admin/agents/src-shanghai-ctc", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("delete agent status = %d body = %s", rec.Code, rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/admin/agents", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK || strings.Contains(rec.Body.String(), "src-shanghai-ctc") {
+		t.Fatalf("deleted agent still listed: status = %d body = %s", rec.Code, rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/admin/sources", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "src-shanghai-ctc") {
+		t.Fatalf("source missing after deleting agent: status = %d body = %s", rec.Code, rec.Body.String())
+	}
+}
+
 func assertNoForbiddenKeys(t *testing.T, value any, forbidden map[string]bool) {
 	t.Helper()
 	switch typed := value.(type) {

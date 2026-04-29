@@ -208,3 +208,49 @@
 - public snapshot 仍无 `host/ip/address/port`
 
 状态：已完成，待验收。
+
+## 批次 E.1：admin UI 修复（汉化 + 编辑 + 删除）
+
+背景：批次 E 上线后发现 admin UI 三个问题：
+- 字段标签和表头是英文/蛇形，不汉化（如 `display_name`, `region`, `tags`, `最近 seen`, `token_prefix` 等）。
+- 「编辑」点保存有时表现为新增；编辑时 ID 应该锁定不可改，明确 PUT 调用。
+- 缺少删除按钮：sources/targets/checks/agents 都没有删除入口。
+
+允许修改：
+- `src/components/admin/AdminApp.tsx`、`src/components/admin/AdminApp.css`
+- `src/pages/admin/*.tsx`（如需）
+- `server/internal/hub/server.go`、`server/internal/hub/store.go`
+- `PROBE_IMPLEMENTATION_CHECKLIST.md`
+
+禁止修改：
+- `Dockerfile`、`docker-compose.yml`、`nginx/default.conf`、`server/Dockerfile`
+- `agent/`、`StatusProbe`/`LookingGlass` 既有组件、`probeSnapshot.ts`
+
+要求：
+1. 全部用户可见的中文：
+   - 表单 label：`ID`、`显示名`、`区域`、`标签`、`真实 host（仅管理员可见）`、`真实端口`、`source 源机器`、`target 目标`、`轮询间隔（秒）`、`启用` 等。
+   - 表头：`ID`、`显示名`、`区域`、`标签`、`状态`、`最近活动时间`、`最近上报`、`Token 前缀`、`主机名`、`版本`、`操作`。
+   - 提示语：`已创建`、`已更新`、`已删除`、`确认删除？` 等。
+2. 编辑流程修复：
+   - 列表「编辑」按钮把当前行写入表单，并设置一个 `editingId` 状态。
+   - 编辑模式下 ID 输入框 disabled，明确显示「编辑中：xxx」。
+   - 表单上方新增「取消编辑」按钮，点了后清空 form 并退回新增模式。
+   - 提交时根据 `editingId` 决定 PUT；新增时再 POST。不再用 `list.some(id===form.id)` 推断。
+3. 删除：
+   - 表格每行加「删除」按钮（红色），点击 confirm 后调用 DELETE。
+   - 后端新增 `DELETE /api/admin/sources/{id}`、`DELETE /api/admin/targets/{id}`、`DELETE /api/admin/checks/{id}`、`DELETE /api/admin/agents/{id}`。
+   - sources 删除前如有关联 checks，应 409 + 提示「请先删除关联任务」；targets 同理。
+   - agents 删除即删除 token + 行，下次需要重新创建。
+4. UI 微调：
+   - 表头不要全大写（`text-transform: none`）。
+   - 表格内空字段显示「—」。
+
+验收：
+- `npm run build` 通过。
+- `cd server && go test ./... && go build ./...` 通过。
+- 临时本地 hub 端到端：
+  - 创建 → 编辑（PUT，状态码 200，记录更新而非新增）→ 删除（200/204，记录消失）。
+  - sources 关联 check 时删除返回 409。
+- public snapshot 仍无 host/ip/address/port。
+
+状态：已完成。

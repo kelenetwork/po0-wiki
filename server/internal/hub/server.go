@@ -28,14 +28,18 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("GET /api/admin/sources", s.adminSources)
 	mux.HandleFunc("POST /api/admin/sources", s.adminSources)
 	mux.HandleFunc("PUT /api/admin/sources/{id}", s.adminSource)
+	mux.HandleFunc("DELETE /api/admin/sources/{id}", s.adminSource)
 	mux.HandleFunc("GET /api/admin/targets", s.adminTargets)
 	mux.HandleFunc("POST /api/admin/targets", s.adminTargets)
 	mux.HandleFunc("PUT /api/admin/targets/{id}", s.adminTarget)
+	mux.HandleFunc("DELETE /api/admin/targets/{id}", s.adminTarget)
 	mux.HandleFunc("GET /api/admin/checks", s.adminChecks)
 	mux.HandleFunc("POST /api/admin/checks", s.adminChecks)
 	mux.HandleFunc("PUT /api/admin/checks/{id}", s.adminCheck)
+	mux.HandleFunc("DELETE /api/admin/checks/{id}", s.adminCheck)
 	mux.HandleFunc("GET /api/admin/agents", s.adminAgents)
 	mux.HandleFunc("POST /api/admin/agents", s.adminAgents)
+	mux.HandleFunc("DELETE /api/admin/agents/{id}", s.adminAgent)
 	mux.HandleFunc("POST /api/admin/agents/{id}/reset-token", s.adminAgentResetToken)
 	mux.HandleFunc("GET /api/admin/agents/{id}/install", s.adminAgentInstall)
 	mux.HandleFunc("POST /api/agent/poll", s.agentPoll)
@@ -46,6 +50,18 @@ func (s *Server) Routes() http.Handler {
 func (s *Server) adminSource(w http.ResponseWriter, r *http.Request) {
 	if !s.authorized(r) {
 		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	if r.Method == http.MethodDelete {
+		if err := s.store.DeleteSource(r.Context(), r.PathValue("id")); err != nil {
+			if errors.Is(err, errRelatedChecks) {
+				writeError(w, http.StatusConflict, err.Error())
+				return
+			}
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]bool{"deleted": true})
 		return
 	}
 	var req UpdateSourceRequest
@@ -175,6 +191,18 @@ func (s *Server) adminTarget(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
+	if r.Method == http.MethodDelete {
+		if err := s.store.DeleteTarget(r.Context(), r.PathValue("id")); err != nil {
+			if errors.Is(err, errRelatedChecks) {
+				writeError(w, http.StatusConflict, err.Error())
+				return
+			}
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]bool{"deleted": true})
+		return
+	}
 	var req CreateTargetRequest
 	if err := decodeJSON(r, &req); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
@@ -220,6 +248,14 @@ func (s *Server) adminCheck(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
+	if r.Method == http.MethodDelete {
+		if err := s.store.DeleteCheck(r.Context(), r.PathValue("id")); err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]bool{"deleted": true})
+		return
+	}
 	var req CreateCheckRequest
 	if err := decodeJSON(r, &req); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
@@ -258,6 +294,18 @@ func (s *Server) adminAgents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusCreated, created)
+}
+
+func (s *Server) adminAgent(w http.ResponseWriter, r *http.Request) {
+	if !s.authorized(r) {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	if err := s.store.DeleteAgent(r.Context(), r.PathValue("id")); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]bool{"deleted": true})
 }
 
 func (s *Server) adminAgentResetToken(w http.ResponseWriter, r *http.Request) {
