@@ -42,7 +42,7 @@ func (r *runner) run(ctx context.Context) {
 	_ = r.poll(ctx)
 	r.pollLG(ctx)
 	probeTicker := time.NewTicker(time.Second)
-	lgTicker := time.NewTicker(time.Second)
+	lgTicker := time.NewTicker(2 * time.Second)
 	reportTicker := time.NewTicker(reportInterval)
 	pollTicker := time.NewTicker(pollInterval)
 	defer probeTicker.Stop()
@@ -57,6 +57,8 @@ func (r *runner) run(ctx context.Context) {
 			return
 		case <-pollTicker.C:
 			_ = r.poll(ctx)
+		case <-lgTicker.C:
+			r.pollLG(ctx)
 		case <-probeTicker.C:
 			for _, check := range r.currentChecks() {
 				interval := check.IntervalSeconds
