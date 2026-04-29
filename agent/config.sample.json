@@ -1,0 +1,9 @@
+{
+  "agent_id": "src-xxx",
+  "hub_url": "https://wiki.kele.my/api/agent",
+  "token": "AGENT_TOKEN",
+  "poll_interval_seconds": 30,
+  "report_interval_seconds": 30,
+  "tcp_timeout_ms": 3000,
+  "insecure_skip_verify": false
+}

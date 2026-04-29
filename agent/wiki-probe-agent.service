@@ -1,0 +1,19 @@
+[Unit]
+Description=Wiki Kele outbound probe agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/wiki-probe-agent -config /etc/wiki-probe-agent.json
+Restart=always
+RestartSec=5s
+DynamicUser=yes
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadOnlyPaths=/etc/wiki-probe-agent.json
+
+[Install]
+WantedBy=multi-user.target

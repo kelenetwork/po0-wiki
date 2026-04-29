@@ -87,7 +87,7 @@
 
 ## 批次 D：Probe Agent
 
-范围：新增 `agent/`。
+范围：新增 `agent/`，并扩展 `server/internal/hub/` agent 接口。
 
 要求：
 - Go CLI。
@@ -103,7 +103,7 @@
 - `cd agent && go build ./...`
 - 本机模拟 agent 可上报 demo 结果到本地 hub。
 
-状态：未开始。
+状态：已完成，待验收。
 
 ## 批次 E：管理后台 / 接入命令
 

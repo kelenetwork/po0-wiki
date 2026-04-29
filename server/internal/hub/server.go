@@ -22,6 +22,7 @@ func NewServer(store *Store, adminToken string) *Server {
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.healthz)
+	mux.HandleFunc("GET /api/healthz", s.healthz)
 	mux.HandleFunc("GET /api/public/probes/snapshot", s.publicSnapshot)
 	mux.HandleFunc("GET /api/public/probes/stream", s.publicStream)
 	mux.HandleFunc("GET /api/admin/sources", s.adminSources)
@@ -30,6 +31,10 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("POST /api/admin/targets", s.adminTargets)
 	mux.HandleFunc("GET /api/admin/checks", s.adminChecks)
 	mux.HandleFunc("POST /api/admin/checks", s.adminChecks)
+	mux.HandleFunc("GET /api/admin/agents", s.adminAgents)
+	mux.HandleFunc("POST /api/admin/agents", s.adminAgents)
+	mux.HandleFunc("POST /api/agent/poll", s.agentPoll)
+	mux.HandleFunc("POST /api/agent/report", s.agentReport)
 	return mux
 }
 
@@ -166,11 +171,104 @@ func (s *Server) adminChecks(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, item)
 }
 
+func (s *Server) adminAgents(w http.ResponseWriter, r *http.Request) {
+	if !s.authorized(r) {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	if r.Method == http.MethodGet {
+		agents, err := s.store.ListAgents(r.Context())
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "agents unavailable")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"agents": agents})
+		return
+	}
+	var req CreateAgentRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	created, err := s.store.CreateAgent(r.Context(), req)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusCreated, created)
+}
+
+func (s *Server) agentPoll(w http.ResponseWriter, r *http.Request) {
+	agentID, ok := s.authorizedAgent(w, r)
+	if !ok {
+		return
+	}
+	var req struct {
+		AgentID  string `json:"agent_id"`
+		Version  string `json:"version"`
+		Hostname string `json:"hostname"`
+	}
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if req.AgentID != agentID {
+		writeError(w, http.StatusForbidden, "agent_id does not match token")
+		return
+	}
+	checks, err := s.store.AgentChecks(r.Context(), agentID, req.Version, req.Hostname)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "checks unavailable")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"checks": checks})
+}
+
+func (s *Server) agentReport(w http.ResponseWriter, r *http.Request) {
+	agentID, ok := s.authorizedAgent(w, r)
+	if !ok {
+		return
+	}
+	var req struct {
+		AgentID string        `json:"agent_id"`
+		Results []AgentResult `json:"results"`
+	}
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if req.AgentID != agentID {
+		writeError(w, http.StatusForbidden, "agent_id does not match token")
+		return
+	}
+	accepted, err := s.store.RecordAgentResults(r.Context(), agentID, req.Results)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "results unavailable")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]int{"accepted": accepted})
+}
+
 func (s *Server) authorized(r *http.Request) bool {
 	if s.adminToken == "" {
 		return false
 	}
 	return strings.TrimSpace(r.Header.Get("Authorization")) == "Bearer "+s.adminToken
+}
+
+func (s *Server) authorizedAgent(w http.ResponseWriter, r *http.Request) (string, bool) {
+	const prefix = "Bearer "
+	header := strings.TrimSpace(r.Header.Get("Authorization"))
+	if !strings.HasPrefix(header, prefix) {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return "", false
+	}
+	agentID, err := s.store.AgentIDForToken(r.Context(), strings.TrimSpace(strings.TrimPrefix(header, prefix)))
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return "", false
+	}
+	return agentID, true
 }
 
 func decodeJSON(r *http.Request, v any) error {

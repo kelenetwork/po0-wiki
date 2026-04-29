@@ -176,3 +176,96 @@ func assertNoForbiddenKeys(t *testing.T, value any, forbidden map[string]bool) {
 		}
 	}
 }
+
+func TestAgentPollReportUpdatesPublicSnapshot(t *testing.T) {
+	server := newTestServer(t)
+
+	createAgent := strings.NewReader(`{"id":"src-shanghai-ctc"}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/admin/agents", createAgent)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec := httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create agent status = %d body = %s", rec.Code, rec.Body.String())
+	}
+	var created struct {
+		Token string `json:"token"`
+		Agent Agent  `json:"agent"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &created); err != nil {
+		t.Fatalf("decode create agent: %v", err)
+	}
+	if created.Token == "" || created.Agent.ID != "src-shanghai-ctc" {
+		t.Fatalf("created = %+v", created)
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/admin/agents", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list agents status = %d body = %s", rec.Code, rec.Body.String())
+	}
+	if strings.Contains(rec.Body.String(), created.Token) || strings.Contains(rec.Body.String(), "token_hash") {
+		t.Fatalf("list agents leaked token material: %s", rec.Body.String())
+	}
+
+	pollBody := strings.NewReader(`{"agent_id":"src-shanghai-ctc","version":"test","hostname":"unit"}`)
+	req = httptest.NewRequest(http.MethodPost, "/api/agent/poll", pollBody)
+	req.Header.Set("Authorization", "Bearer "+created.Token)
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("poll status = %d body = %s", rec.Code, rec.Body.String())
+	}
+	var polled struct {
+		Checks []AgentCheck `json:"checks"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &polled); err != nil {
+		t.Fatalf("decode poll: %v", err)
+	}
+	if len(polled.Checks) == 0 || polled.Checks[0].Host == "" || polled.Checks[0].Port == 0 {
+		t.Fatalf("poll checks = %+v", polled.Checks)
+	}
+
+	reportBody := strings.NewReader(`{"agent_id":"src-shanghai-ctc","results":[{"check_id":"chk-shanghai-wiki","tcp_connect_ms":12.3,"loss":0,"jitter_ms":1.2,"status":"ok","observed_at":"2026-04-30T00:00:00Z"}]}`)
+	req = httptest.NewRequest(http.MethodPost, "/api/agent/report", reportBody)
+	req.Header.Set("Authorization", "Bearer "+created.Token)
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("report status = %d body = %s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), `"accepted":1`) {
+		t.Fatalf("report body = %s", rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/public/probes/snapshot", nil)
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("snapshot status = %d body = %s", rec.Code, rec.Body.String())
+	}
+	var snapshot Snapshot
+	if err := json.Unmarshal(rec.Body.Bytes(), &snapshot); err != nil {
+		t.Fatalf("decode snapshot: %v", err)
+	}
+	found := false
+	for _, check := range snapshot.Checks {
+		if check.ID == "chk-shanghai-wiki" {
+			found = true
+			if check.LatencyMS != 12.3 || check.LossPct != 0 || check.JitterMS != 1.2 || check.Status != "ok" {
+				t.Fatalf("updated check = %+v", check)
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("updated check not found")
+	}
+	forbiddenKeys := map[string]bool{"host": true, "ip": true, "address": true, "port": true, "endpoint": true}
+	var public map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &public); err != nil {
+		t.Fatalf("decode public map: %v", err)
+	}
+	assertNoForbiddenKeys(t, public, forbiddenKeys)
+}

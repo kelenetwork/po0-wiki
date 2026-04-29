@@ -2,11 +2,16 @@ package hub
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -41,17 +46,17 @@ type Check struct {
 	TargetID    string   `json:"target_id"`
 	Tags        []string `json:"tags"`
 	Status      string   `json:"status"`
-	LatencyMS   int      `json:"latency_ms"`
+	LatencyMS   float64  `json:"latency_ms"`
 	LossPct     float64  `json:"loss_pct"`
-	JitterMS    int      `json:"jitter_ms"`
+	JitterMS    float64  `json:"jitter_ms"`
 	UpdatedAt   string   `json:"updated_at"`
 }
 
 type SeriesPoint struct {
 	UpdatedAt string  `json:"updated_at"`
-	LatencyMS int     `json:"latency_ms"`
+	LatencyMS float64 `json:"latency_ms"`
 	LossPct   float64 `json:"loss_pct"`
-	JitterMS  int     `json:"jitter_ms"`
+	JitterMS  float64 `json:"jitter_ms"`
 }
 
 type SeriesSummary struct {
@@ -85,15 +90,54 @@ type CreateTargetRequest struct {
 }
 
 type CreateCheckRequest struct {
-	ID          string   `json:"id"`
-	DisplayName string   `json:"display_name"`
-	SourceID    string   `json:"source_id"`
-	TargetID    string   `json:"target_id"`
-	Tags        []string `json:"tags"`
-	Status      string   `json:"status"`
-	LatencyMS   int      `json:"latency_ms"`
-	LossPct     float64  `json:"loss_pct"`
-	JitterMS    int      `json:"jitter_ms"`
+	ID              string   `json:"id"`
+	DisplayName     string   `json:"display_name"`
+	SourceID        string   `json:"source_id"`
+	TargetID        string   `json:"target_id"`
+	Tags            []string `json:"tags"`
+	Status          string   `json:"status"`
+	LatencyMS       float64  `json:"latency_ms"`
+	LossPct         float64  `json:"loss_pct"`
+	JitterMS        float64  `json:"jitter_ms"`
+	IntervalSeconds int      `json:"interval_seconds"`
+}
+
+type Agent struct {
+	ID             string `json:"id"`
+	SourceID       string `json:"source_id"`
+	TokenPrefix    string `json:"token_prefix"`
+	CreatedAt      string `json:"created_at"`
+	LastSeenAt     string `json:"last_seen_at,omitempty"`
+	LastReportedAt string `json:"last_reported_at,omitempty"`
+	Version        string `json:"version,omitempty"`
+	Hostname       string `json:"hostname,omitempty"`
+}
+
+type CreateAgentRequest struct {
+	ID string `json:"id"`
+}
+
+type CreateAgentResponse struct {
+	Agent Agent  `json:"agent"`
+	Token string `json:"token"`
+}
+
+type AgentCheck struct {
+	CheckID         string `json:"check_id"`
+	DisplayName     string `json:"display_name"`
+	Host            string `json:"host"`
+	Port            int    `json:"port"`
+	IntervalSeconds int    `json:"interval_seconds"`
+}
+
+type AgentResult struct {
+	CheckID      string  `json:"check_id"`
+	TCPConnectMS float64 `json:"tcp_connect_ms"`
+	Loss         float64 `json:"loss"`
+	JitterMS     float64 `json:"jitter_ms"`
+	Status       string  `json:"status"`
+	ObservedAt   string  `json:"observed_at"`
+	Error        string  `json:"error,omitempty"`
 }
 
 func OpenStore(dbPath string) (*Store, error) {
@@ -147,18 +191,33 @@ CREATE TABLE IF NOT EXISTS checks (
   latency_ms INTEGER NOT NULL DEFAULT 0,
   loss_pct REAL NOT NULL DEFAULT 0,
   jitter_ms INTEGER NOT NULL DEFAULT 0,
+  interval_seconds INTEGER NOT NULL DEFAULT 30,
   updated_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS series_points (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   check_id TEXT NOT NULL REFERENCES checks(id),
-  latency_ms INTEGER NOT NULL,
+  latency_ms REAL NOT NULL,
   loss_pct REAL NOT NULL,
-  jitter_ms INTEGER NOT NULL,
+  jitter_ms REAL NOT NULL,
   updated_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS agents (
+  id TEXT PRIMARY KEY REFERENCES sources(id),
+  token_hash TEXT NOT NULL UNIQUE,
+  token_prefix TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  last_seen_at TEXT NOT NULL DEFAULT '',
+  last_reported_at TEXT NOT NULL DEFAULT '',
+  version TEXT NOT NULL DEFAULT '',
+  hostname TEXT NOT NULL DEFAULT ''
+);
 `)
-	return err
+	if err != nil {
+		return err
+	}
+	_, _ = s.db.ExecContext(ctx, `ALTER TABLE checks ADD COLUMN interval_seconds INTEGER NOT NULL DEFAULT 30`)
+	return nil
 }
 
 func (s *Store) SeedDemo(ctx context.Context) error {
@@ -209,7 +268,7 @@ func (s *Store) SeedDemo(ctx context.Context) error {
 		}
 		for point := 2; point >= 0; point-- {
 			_, err := tx.ExecContext(ctx, `INSERT INTO series_points (check_id, latency_ms, loss_pct, jitter_ms, updated_at) VALUES (?, ?, ?, ?, ?)`,
-				check.ID, check.LatencyMS-point*3, check.LossPct, check.JitterMS+point, now.Add(-time.Duration(point)*time.Minute).Format(time.RFC3339))
+				check.ID, check.LatencyMS-float64(point*3), check.LossPct, check.JitterMS+float64(point), now.Add(-time.Duration(point)*time.Minute).Format(time.RFC3339))
 			if err != nil {
 				return err
 			}
@@ -349,6 +408,143 @@ func (s *Store) CreateCheck(ctx context.Context, req CreateCheckRequest) (Check,
 	return Check{ID: req.ID, DisplayName: req.DisplayName, SourceID: req.SourceID, TargetID: req.TargetID, Tags: req.Tags, Status: defaultCheckStatus(req.Status), LatencyMS: req.LatencyMS, LossPct: req.LossPct, JitterMS: req.JitterMS, UpdatedAt: now}, nil
 }
 
+func (s *Store) CreateAgent(ctx context.Context, req CreateAgentRequest) (CreateAgentResponse, error) {
+	if req.ID == "" {
+		return CreateAgentResponse{}, errors.New("id is required")
+	}
+	var exists int
+	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM sources WHERE id = ?`, req.ID).Scan(&exists); err != nil {
+		return CreateAgentResponse{}, err
+	}
+	if exists == 0 {
+		return CreateAgentResponse{}, errors.New("source not found")
+	}
+	token, err := newAgentToken()
+	if err != nil {
+		return CreateAgentResponse{}, err
+	}
+	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
+	agent := Agent{ID: req.ID, SourceID: req.ID, TokenPrefix: tokenPrefix(token), CreatedAt: now}
+	_, err = s.db.ExecContext(ctx, `INSERT INTO agents (id, token_hash, token_prefix, created_at) VALUES (?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET token_hash = excluded.token_hash, token_prefix = excluded.token_prefix, created_at = excluded.created_at, last_seen_at = '', last_reported_at = '', version = '', hostname = ''`,
+		req.ID, hashToken(token), agent.TokenPrefix, now)
+	if err != nil {
+		return CreateAgentResponse{}, err
+	}
+	return CreateAgentResponse{Agent: agent, Token: token}, nil
+}
+
+func (s *Store) ListAgents(ctx context.Context) ([]Agent, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT id, id, token_prefix, created_at, last_seen_at, last_reported_at, version, hostname FROM agents ORDER BY id`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var agents []Agent
+	for rows.Next() {
+		var agent Agent
+		if err := rows.Scan(&agent.ID, &agent.SourceID, &agent.TokenPrefix, &agent.CreatedAt, &agent.LastSeenAt, &agent.LastReportedAt, &agent.Version, &agent.Hostname); err != nil {
+			return nil, err
+		}
+		agents = append(agents, agent)
+	}
+	return agents, rows.Err()
+}
+
+func (s *Store) AgentIDForToken(ctx context.Context, token string) (string, error) {
+	var id string
+	err := s.db.QueryRowContext(ctx, `SELECT id FROM agents WHERE token_hash = ?`, hashToken(token)).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", errors.New("invalid agent token")
+	}
+	return id, err
+}
+
+func (s *Store) AgentChecks(ctx context.Context, agentID, version, hostname string) ([]AgentCheck, error) {
+	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
+	_, err := s.db.ExecContext(ctx, `UPDATE agents SET last_seen_at = ?, version = ?, hostname = ? WHERE id = ?`, now, version, hostname, agentID)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := s.db.QueryContext(ctx, `SELECT c.id, c.display_name, t.endpoint, c.interval_seconds FROM checks c JOIN targets t ON t.id = c.target_id WHERE c.source_id = ? ORDER BY c.id`, agentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var checks []AgentCheck
+	for rows.Next() {
+		var endpoint string
+		var check AgentCheck
+		if err := rows.Scan(&check.CheckID, &check.DisplayName, &endpoint, &check.IntervalSeconds); err != nil {
+			return nil, err
+		}
+		host, port, err := splitEndpoint(endpoint)
+		if err != nil {
+			return nil, err
+		}
+		check.Host = host
+		check.Port = port
+		checks = append(checks, check)
+	}
+	return checks, rows.Err()
+}
+
+func (s *Store) RecordAgentResults(ctx context.Context, agentID string, results []AgentResult) (int, error) {
+	if len(results) == 0 {
+		return 0, nil
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+	accepted := 0
+	for _, result := range results {
+		if result.CheckID == "" {
+			continue
+		}
+		var owner string
+		if err := tx.QueryRowContext(ctx, `SELECT source_id FROM checks WHERE id = ?`, result.CheckID).Scan(&owner); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				continue
+			}
+			return accepted, err
+		}
+		if owner != agentID {
+			continue
+		}
+		when := result.ObservedAt
+		if when == "" {
+			when = time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
+		}
+		status := defaultCheckStatus(result.Status)
+		_, err := tx.ExecContext(ctx, `INSERT INTO series_points (check_id, latency_ms, loss_pct, jitter_ms, updated_at) VALUES (?, ?, ?, ?, ?)`, result.CheckID, result.TCPConnectMS, result.Loss, result.JitterMS, when)
+		if err != nil {
+			return accepted, err
+		}
+		_, err = tx.ExecContext(ctx, `UPDATE checks SET latency_ms = ?, loss_pct = ?, jitter_ms = ?, status = ?, updated_at = ? WHERE id = ?`, result.TCPConnectMS, result.Loss, result.JitterMS, status, when, result.CheckID)
+		if err != nil {
+			return accepted, err
+		}
+		accepted++
+	}
+	if accepted > 0 {
+		now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
+		_, err = tx.ExecContext(ctx, `UPDATE agents SET last_reported_at = ?, last_seen_at = ? WHERE id = ?`, now, now, agentID)
+		if err != nil {
+			return accepted, err
+		}
+		_, err = tx.ExecContext(ctx, `UPDATE sources SET status = 'online', updated_at = ? WHERE id = ?`, now, agentID)
+		if err != nil {
+			return accepted, err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return accepted, err
+	}
+	return accepted, nil
+}
+
 type sqlExecer interface {
 	ExecContext(context.Context, string, ...any) (sql.Result, error)
 }
@@ -373,7 +569,11 @@ func insertCheck(ctx context.Context, execer sqlExecer, req CreateCheckRequest, 
 	if req.ID == "" || req.DisplayName == "" || req.SourceID == "" || req.TargetID == "" {
 		return errors.New("id, display_name, source_id, and target_id are required")
 	}
-	_, err := execer.ExecContext(ctx, `INSERT INTO checks (id, display_name, source_id, target_id, tags, status, latency_ms, loss_pct, jitter_ms, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, req.ID, req.DisplayName, req.SourceID, req.TargetID, encodeTags(req.Tags), defaultCheckStatus(req.Status), req.LatencyMS, req.LossPct, req.JitterMS, updatedAt)
+	interval := req.IntervalSeconds
+	if interval <= 0 {
+		interval = 30
+	}
+	_, err := execer.ExecContext(ctx, `INSERT INTO checks (id, display_name, source_id, target_id, tags, status, latency_ms, loss_pct, jitter_ms, interval_seconds, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, req.ID, req.DisplayName, req.SourceID, req.TargetID, encodeTags(req.Tags), defaultCheckStatus(req.Status), req.LatencyMS, req.LossPct, req.JitterMS, interval, updatedAt)
 	return err
 }
 
@@ -382,6 +582,38 @@ func defaultStatus(status string) string {
 		return "online"
 	}
 	return status
+}
+
+func newAgentToken() (string, error) {
+	random := make([]byte, 32)
+	if _, err := rand.Read(random); err != nil {
+		return "", err
+	}
+	return "wpa_" + hex.EncodeToString(random), nil
+}
+
+func hashToken(token string) string {
+	sum := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(sum[:])
+}
+
+func tokenPrefix(token string) string {
+	if len(token) <= 12 {
+		return token
+	}
+	return token[:12]
+}
+
+func splitEndpoint(endpoint string) (string, int, error) {
+	host, portText, err := net.SplitHostPort(endpoint)
+	if err != nil {
+		return "", 0, fmt.Errorf("invalid target endpoint %q", endpoint)
+	}
+	port, err := strconv.Atoi(portText)
+	if err != nil || port <= 0 || port > 65535 {
+		return "", 0, fmt.Errorf("invalid target endpoint %q", endpoint)
+	}
+	return host, port, nil
 }
 
 func defaultCheckStatus(status string) string {

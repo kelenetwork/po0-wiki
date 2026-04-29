@@ -1,0 +1,29 @@
+package main
+
+type Config struct {
+	AgentID               string `json:"agent_id"`
+	HubURL                string `json:"hub_url"`
+	Token                 string `json:"token"`
+	PollIntervalSeconds   int    `json:"poll_interval_seconds"`
+	ReportIntervalSeconds int    `json:"report_interval_seconds"`
+	TCPTimeoutMS          int    `json:"tcp_timeout_ms"`
+	InsecureSkipVerify    bool   `json:"insecure_skip_verify"`
+}
+
+type Check struct {
+	CheckID         string `json:"check_id"`
+	DisplayName     string `json:"display_name"`
+	Host            string `json:"host"`
+	Port            int    `json:"port"`
+	IntervalSeconds int    `json:"interval_seconds"`
+}
+
+type Result struct {
+	CheckID      string  `json:"check_id"`
+	TCPConnectMS float64 `json:"tcp_connect_ms"`
+	Loss         float64 `json:"loss"`
+	JitterMS     float64 `json:"jitter_ms"`
+	Status       string  `json:"status"`
+	ObservedAt   string  `json:"observed_at"`
+	Error        string  `json:"error,omitempty"`
+}
