@@ -54,6 +54,7 @@ func TestPublicSnapshotOmitsPrivateEndpointFields(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &snapshot); err != nil {
 		t.Fatalf("decode snapshot: %v", err)
 	}
+	assertPublicSnapshotSchema(t, snapshot)
 	forbiddenKeys := map[string]bool{
 		"host":     true,
 		"ip":       true,
@@ -68,6 +69,68 @@ func TestPublicSnapshotOmitsPrivateEndpointFields(t *testing.T) {
 			t.Fatalf("snapshot leaked private endpoint value %q in %s", privateValue, body)
 		}
 	}
+}
+
+func assertPublicSnapshotSchema(t *testing.T, snapshot map[string]any) {
+	t.Helper()
+	for _, key := range []string{"sources", "targets", "checks", "series"} {
+		if _, ok := snapshot[key]; !ok {
+			t.Fatalf("snapshot missing %q", key)
+		}
+	}
+	for _, key := range []string{"displayName", "generatedAt", "intervalSeconds"} {
+		if _, ok := snapshot[key]; ok {
+			t.Fatalf("snapshot has camelCase top-level key %q", key)
+		}
+	}
+	sources, ok := snapshot["sources"].([]any)
+	if !ok || len(sources) == 0 {
+		t.Fatalf("sources must be a non-empty array")
+	}
+	assertObjectHasKeys(t, sources[0], "id", "display_name", "region", "tags", "status", "updated_at")
+	targets, ok := snapshot["targets"].([]any)
+	if !ok || len(targets) == 0 {
+		t.Fatalf("targets must be a non-empty array")
+	}
+	assertObjectHasKeys(t, targets[0], "id", "display_name", "region", "tags", "status", "updated_at")
+	checks, ok := snapshot["checks"].([]any)
+	if !ok || len(checks) == 0 {
+		t.Fatalf("checks must be a non-empty array")
+	}
+	check := assertObjectHasKeys(t, checks[0], "id", "display_name", "source_id", "target_id", "tags", "status", "latency_ms", "loss_pct", "jitter_ms", "updated_at")
+	for _, key := range []string{"id", "source_id", "target_id"} {
+		if _, ok := check[key].(string); !ok {
+			t.Fatalf("checks[0].%s must be a string", key)
+		}
+	}
+	series, ok := snapshot["series"].([]any)
+	if !ok {
+		t.Fatalf("series must be an array")
+	}
+	if len(series) > 0 {
+		item := assertObjectHasKeys(t, series[0], "check_id", "points")
+		points, ok := item["points"].([]any)
+		if !ok {
+			t.Fatalf("series[0].points must be an array")
+		}
+		if len(points) > 0 {
+			assertObjectHasKeys(t, points[0], "updated_at", "latency_ms", "loss_pct", "jitter_ms")
+		}
+	}
+}
+
+func assertObjectHasKeys(t *testing.T, value any, keys ...string) map[string]any {
+	t.Helper()
+	object, ok := value.(map[string]any)
+	if !ok {
+		t.Fatalf("value must be an object")
+	}
+	for _, key := range keys {
+		if _, ok := object[key]; !ok {
+			t.Fatalf("object missing %q", key)
+		}
+	}
+	return object
 }
 
 func TestAdminRequiresBearerTokenAndCreatesSource(t *testing.T) {

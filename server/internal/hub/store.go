@@ -178,18 +178,18 @@ func (s *Store) SeedDemo(ctx context.Context) error {
 	defer tx.Rollback()
 
 	sources := []CreateSourceRequest{
-		{ID: "src-us-edge", DisplayName: "US Edge Probe", Region: "us-west", Tags: []string{"edge", "demo"}, Status: "online", Endpoint: "probe-a.example.test:443"},
-		{ID: "src-eu-edge", DisplayName: "EU Edge Probe", Region: "eu-central", Tags: []string{"edge", "demo"}, Status: "online", Endpoint: "probe-b.example.test:443"},
-		{ID: "src-apac-edge", DisplayName: "APAC Edge Probe", Region: "apac-east", Tags: []string{"edge", "demo"}, Status: "degraded", Endpoint: "probe-c.example.test:443"},
+		{ID: "src-shanghai-ctc", DisplayName: "上海电信入口", Region: "华东", Tags: []string{"CTC", "CN2", "出站探测"}, Status: "pending", Endpoint: "probe-a.example.test:443"},
+		{ID: "src-rfc-ctc", DisplayName: "RFC CTC", Region: "华南", Tags: []string{"CTC", "BGP", "备用线路"}, Status: "pending", Endpoint: "probe-b.example.test:443"},
+		{ID: "src-cn-a", DisplayName: "CN-A 采集点", Region: "华北", Tags: []string{"Multi-ISP", "联通", "移动观测"}, Status: "pending", Endpoint: "probe-c.example.test:443"},
 	}
 	targets := []CreateTargetRequest{
-		{ID: "tgt-docs", DisplayName: "Docs Portal", Region: "global", Tags: []string{"web", "demo"}, Status: "online", Endpoint: "docs.example.test:443"},
-		{ID: "tgt-api", DisplayName: "API Gateway", Region: "global", Tags: []string{"api", "demo"}, Status: "online", Endpoint: "api.example.test:443"},
+		{ID: "tgt-wiki", DisplayName: "Wiki 主站", Region: "边缘入口", Tags: []string{"HTTPS", "站点可用性"}, Status: "online", Endpoint: "docs.example.test:443"},
+		{ID: "tgt-api", DisplayName: "API 入口", Region: "中心端", Tags: []string{"HTTPS", "控制面"}, Status: "online", Endpoint: "api.example.test:443"},
 	}
 	checks := []CreateCheckRequest{
-		{ID: "chk-us-docs", DisplayName: "US to Docs", SourceID: "src-us-edge", TargetID: "tgt-docs", Tags: []string{"https"}, Status: "ok", LatencyMS: 41, LossPct: 0, JitterMS: 3},
-		{ID: "chk-eu-docs", DisplayName: "EU to Docs", SourceID: "src-eu-edge", TargetID: "tgt-docs", Tags: []string{"https"}, Status: "ok", LatencyMS: 57, LossPct: 0, JitterMS: 4},
-		{ID: "chk-apac-api", DisplayName: "APAC to API", SourceID: "src-apac-edge", TargetID: "tgt-api", Tags: []string{"https"}, Status: "warn", LatencyMS: 132, LossPct: 1.2, JitterMS: 17},
+		{ID: "chk-shanghai-wiki", DisplayName: "上海电信 → Wiki 主站", SourceID: "src-shanghai-ctc", TargetID: "tgt-wiki", Tags: []string{"HTTPS"}, Status: "pending", LatencyMS: 0, LossPct: 0, JitterMS: 0},
+		{ID: "chk-rfc-wiki", DisplayName: "RFC CTC → Wiki 主站", SourceID: "src-rfc-ctc", TargetID: "tgt-wiki", Tags: []string{"HTTPS"}, Status: "pending", LatencyMS: 0, LossPct: 0, JitterMS: 0},
+		{ID: "chk-cn-a-api", DisplayName: "CN-A → API 入口", SourceID: "src-cn-a", TargetID: "tgt-api", Tags: []string{"HTTPS"}, Status: "pending", LatencyMS: 0, LossPct: 0, JitterMS: 0},
 	}
 
 	for _, source := range sources {

@@ -133,3 +133,31 @@
 - 限制目标白名单或权限，避免成为开放扫描器。
 
 状态：未开始。
+
+## 批次 C.1：Public DTO schema 对齐
+
+背景：批次 C 部署后发现后端返回 `displayName / source / target / generatedAt` (camelCase, checks 内嵌 source/target 对象，无 series)；前端 `probeSnapshot.ts` 期望 `display_name / source_id / target_id / series` (snake_case)，导致 `isPublicProbeSnapshot` 校验失败、`/status` 实际 fallback 到 mock。
+
+范围：只允许修改 `server/internal/hub/*.go`、`server/internal/hub/server_test.go`、`PROBE_IMPLEMENTATION_CHECKLIST.md`。
+
+要求：
+- public DTO 字段切换为 snake_case：`display_name`、`source_id`、`target_id`、`updated_at`、`latency_ms`、`loss_pct`、`jitter_ms`、`tags`（数组）。
+- snapshot 顶层字段：`sources`、`targets`、`checks`、`series`。
+- `checks[].source_id`、`checks[].target_id` 必须返回字符串类型 id（与 sources/targets 的 id 一致）。
+- `series` 数组：每项 `{ check_id, points: [{ updated_at, latency_ms, loss_pct, jitter_ms }] }`，可基于 demo 数据生成或留空数组（但字段必须存在）。
+- 仍然不得返回 `host`、`ip`、`address`、`port` 字段。
+- demo 数据保留中文别名，不出现真实 IP/端口。
+- `go test ./...`、`go build ./...` 通过。
+
+禁止：
+- 不改前端、Docker、nginx、agent。
+- 不部署。
+
+验收：
+- `cd server && go test ./... && go build ./...`
+- 临时启动 hub，curl `/api/public/probes/snapshot`：
+  - 顶层包含 `sources`、`targets`、`checks`、`series`。
+  - check 项含 `source_id`、`target_id`、`latency_ms`、`loss_pct`、`jitter_ms`、`updated_at`。
+  - 不出现 `host`、`ip`、`address`、`port`。
+
+状态：已完成，待验收。

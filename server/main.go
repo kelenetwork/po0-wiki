@@ -46,21 +46,48 @@ type check struct {
 	Enabled         bool  `json:"enabled"`
 }
 type publicCheck struct {
-	ID              int64    `json:"id"`
-	Source          source   `json:"source"`
-	Target          target   `json:"target"`
-	Status          string   `json:"status"`
-	LatencyMS       *float64 `json:"latencyMs,omitempty"`
-	JitterMS        *float64 `json:"jitterMs,omitempty"`
-	LossPercent     *float64 `json:"lossPercent,omitempty"`
-	CheckedAt       string   `json:"checkedAt,omitempty"`
-	IntervalSeconds int      `json:"intervalSeconds"`
+	ID          string   `json:"id"`
+	DisplayName string   `json:"display_name"`
+	SourceID    string   `json:"source_id"`
+	TargetID    string   `json:"target_id"`
+	Tags        []string `json:"tags"`
+	Status      string   `json:"status"`
+	LatencyMS   float64  `json:"latency_ms"`
+	LossPct     float64  `json:"loss_pct"`
+	JitterMS    float64  `json:"jitter_ms"`
+	UpdatedAt   string   `json:"updated_at"`
+}
+type publicSource struct {
+	ID          string   `json:"id"`
+	DisplayName string   `json:"display_name"`
+	Region      string   `json:"region"`
+	Tags        []string `json:"tags"`
+	Status      string   `json:"status"`
+	UpdatedAt   string   `json:"updated_at"`
+}
+type publicTarget struct {
+	ID          string   `json:"id"`
+	DisplayName string   `json:"display_name"`
+	Region      string   `json:"region"`
+	Tags        []string `json:"tags"`
+	Status      string   `json:"status"`
+	UpdatedAt   string   `json:"updated_at"`
+}
+type publicSeriesPoint struct {
+	UpdatedAt string  `json:"updated_at"`
+	LatencyMS float64 `json:"latency_ms"`
+	LossPct   float64 `json:"loss_pct"`
+	JitterMS  float64 `json:"jitter_ms"`
+}
+type publicSeries struct {
+	CheckID string              `json:"check_id"`
+	Points  []publicSeriesPoint `json:"points"`
 }
 type snapshot struct {
-	GeneratedAt string        `json:"generatedAt"`
-	Sources     []source      `json:"sources"`
-	Targets     []target      `json:"targets"`
-	Checks      []publicCheck `json:"checks"`
+	Sources []publicSource `json:"sources"`
+	Targets []publicTarget `json:"targets"`
+	Checks  []publicCheck  `json:"checks"`
+	Series  []publicSeries `json:"series"`
 }
 
 type app struct {
@@ -181,58 +208,149 @@ func (a *app) publicStream(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *app) snapshot(ctx context.Context) (snapshot, error) {
-	var snap snapshot
-	snap.GeneratedAt = time.Now().UTC().Format(time.RFC3339)
-	rows, err := a.db.QueryContext(ctx, "SELECT id,display_name,region,provider,routing_tags,status,load FROM sources ORDER BY id")
+	snap := snapshot{Sources: []publicSource{}, Targets: []publicTarget{}, Checks: []publicCheck{}, Series: []publicSeries{}}
+	rows, err := a.db.QueryContext(ctx, "SELECT id,display_name,region,provider,routing_tags,status,updated_at FROM sources ORDER BY id")
 	if err != nil {
 		return snap, err
 	}
 	for rows.Next() {
-		var s source
-		if err := rows.Scan(&s.ID, &s.DisplayName, &s.Region, &s.Provider, &s.RoutingTags, &s.Status, &s.Load); err != nil {
+		var id int64
+		var displayName, region, provider, routingTags, status, updatedAt string
+		if err := rows.Scan(&id, &displayName, &region, &provider, &routingTags, &status, &updatedAt); err != nil {
 			rows.Close()
 			return snap, err
 		}
-		snap.Sources = append(snap.Sources, s)
+		snap.Sources = append(snap.Sources, publicSource{ID: publicID("src", id, displayName, provider), DisplayName: displayName, Region: region, Tags: publicTags(provider, routingTags), Status: status, UpdatedAt: updatedAt})
 	}
 	rows.Close()
-	rows, err = a.db.QueryContext(ctx, "SELECT id,display_name,region,provider,routing_tags FROM targets ORDER BY id")
+	rows, err = a.db.QueryContext(ctx, "SELECT id,display_name,region,provider,routing_tags,updated_at FROM targets ORDER BY id")
 	if err != nil {
 		return snap, err
 	}
 	for rows.Next() {
-		var t target
-		if err := rows.Scan(&t.ID, &t.DisplayName, &t.Region, &t.Provider, &t.RoutingTags); err != nil {
+		var id int64
+		var displayName, region, provider, routingTags, updatedAt string
+		if err := rows.Scan(&id, &displayName, &region, &provider, &routingTags, &updatedAt); err != nil {
 			rows.Close()
 			return snap, err
 		}
-		snap.Targets = append(snap.Targets, t)
+		snap.Targets = append(snap.Targets, publicTarget{ID: publicID("tgt", id, displayName, provider), DisplayName: displayName, Region: region, Tags: publicTags(provider, routingTags), Status: "online", UpdatedAt: updatedAt})
 	}
 	rows.Close()
-	q := "SELECT c.id,c.interval_seconds,s.id,s.display_name,s.region,s.provider,s.routing_tags,s.status,s.load,t.id,t.display_name,t.region,t.provider,t.routing_tags,COALESCE(r.status,'pending'),r.latency_ms,r.jitter_ms,r.loss_percent,COALESCE(r.checked_at,'') FROM checks c JOIN sources s ON s.id=c.source_id JOIN targets t ON t.id=c.target_id LEFT JOIN results r ON r.id=(SELECT id FROM results WHERE check_id=c.id ORDER BY checked_at DESC,id DESC LIMIT 1) WHERE c.enabled=1 ORDER BY c.id"
+	q := "SELECT c.id,s.id,s.display_name,s.provider,s.routing_tags,t.id,t.display_name,t.provider,t.routing_tags,COALESCE(r.status,'pending'),r.latency_ms,r.loss_percent,r.jitter_ms,COALESCE(r.checked_at,c.updated_at) FROM checks c JOIN sources s ON s.id=c.source_id JOIN targets t ON t.id=c.target_id LEFT JOIN results r ON r.id=(SELECT id FROM results WHERE check_id=c.id ORDER BY checked_at DESC,id DESC LIMIT 1) WHERE c.enabled=1 ORDER BY c.id"
 	rows, err = a.db.QueryContext(ctx, q)
 	if err != nil {
 		return snap, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var c publicCheck
+		var checkID, sourceID, targetID int64
+		var sourceName, sourceProvider, sourceRoutingTags, targetName, targetProvider, targetRoutingTags string
+		var status, updatedAt string
 		var latency, jitter, loss sql.NullFloat64
-		if err := rows.Scan(&c.ID, &c.IntervalSeconds, &c.Source.ID, &c.Source.DisplayName, &c.Source.Region, &c.Source.Provider, &c.Source.RoutingTags, &c.Source.Status, &c.Source.Load, &c.Target.ID, &c.Target.DisplayName, &c.Target.Region, &c.Target.Provider, &c.Target.RoutingTags, &c.Status, &latency, &jitter, &loss, &c.CheckedAt); err != nil {
+		if err := rows.Scan(&checkID, &sourceID, &sourceName, &sourceProvider, &sourceRoutingTags, &targetID, &targetName, &targetProvider, &targetRoutingTags, &status, &latency, &loss, &jitter, &updatedAt); err != nil {
 			return snap, err
 		}
+		sourcePublicID := publicID("src", sourceID, sourceName, sourceProvider)
+		targetPublicID := publicID("tgt", targetID, targetName, targetProvider)
+		c := publicCheck{ID: checkIDFromEndpoints(checkID, sourcePublicID, targetPublicID), DisplayName: sourceName + " → " + targetName, SourceID: sourcePublicID, TargetID: targetPublicID, Tags: publicTags(sourceProvider, sourceRoutingTags, targetProvider, targetRoutingTags), Status: status, UpdatedAt: updatedAt}
 		if latency.Valid {
-			c.LatencyMS = &latency.Float64
+			c.LatencyMS = latency.Float64
 		}
 		if jitter.Valid {
-			c.JitterMS = &jitter.Float64
+			c.JitterMS = jitter.Float64
 		}
 		if loss.Valid {
-			c.LossPercent = &loss.Float64
+			c.LossPct = loss.Float64
 		}
 		snap.Checks = append(snap.Checks, c)
 	}
 	return snap, nil
+}
+
+func publicID(prefix string, id int64, parts ...string) string {
+	slug := slugParts(parts...)
+	if slug == "" {
+		slug = strconv.FormatInt(id, 10)
+	}
+	return prefix + "-" + slug
+}
+
+func checkIDFromEndpoints(id int64, sourceID, targetID string) string {
+	sourceSlug := strings.TrimPrefix(sourceID, "src-")
+	targetSlug := strings.TrimPrefix(targetID, "tgt-")
+	if sourceSlug == "" || targetSlug == "" {
+		return publicID("chk", id)
+	}
+	return "chk-" + sourceSlug + "-" + targetSlug
+}
+
+func slugParts(parts ...string) string {
+	aliases := map[string]string{
+		"上海":   "shanghai ",
+		"电信":   "ctc ",
+		"入口":   " ",
+		"华东":   "east ",
+		"华南":   "south ",
+		"华北":   "north ",
+		"采集点":  " ",
+		"主站":   " ",
+		"静态资源": "static ",
+		"中心端":  "core ",
+		"边缘入口": "edge ",
+		"控制面":  "control ",
+	}
+	tokens := []string{}
+	for _, part := range parts {
+		part = strings.TrimSpace(strings.ToLower(part))
+		for from, to := range aliases {
+			part = strings.ReplaceAll(part, strings.ToLower(from), to)
+		}
+		var b strings.Builder
+		lastDash := true
+		for _, r := range part {
+			if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+				b.WriteRune(r)
+				lastDash = false
+				continue
+			}
+			if !lastDash {
+				b.WriteByte('-')
+				lastDash = true
+			}
+		}
+		for _, token := range strings.Split(strings.Trim(b.String(), "-"), "-") {
+			if token != "" {
+				tokens = append(tokens, token)
+			}
+		}
+	}
+	seen := map[string]bool{}
+	unique := []string{}
+	for _, token := range tokens {
+		if seen[token] {
+			continue
+		}
+		seen[token] = true
+		unique = append(unique, token)
+	}
+	return strings.Join(unique, "-")
+}
+
+func publicTags(parts ...string) []string {
+	seen := map[string]bool{}
+	tags := []string{}
+	for _, part := range parts {
+		for _, tag := range strings.FieldsFunc(part, func(r rune) bool { return r == ',' || r == '/' || r == '|' || r == ';' }) {
+			tag = strings.TrimSpace(tag)
+			if tag == "" || seen[tag] {
+				continue
+			}
+			seen[tag] = true
+			tags = append(tags, tag)
+		}
+	}
+	return tags
 }
 
 type pollTask struct {
