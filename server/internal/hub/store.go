@@ -883,17 +883,25 @@ func (s *Store) ResetAgentToken(ctx context.Context, id string) (CreateAgentResp
 	if id == "" {
 		return CreateAgentResponse{}, errors.New("id is required")
 	}
+	// Make sure the source exists; otherwise creating a dangling agent makes no sense.
+	var exists int
+	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM sources WHERE id = ?`, id).Scan(&exists); err != nil {
+		return CreateAgentResponse{}, err
+	}
+	if exists == 0 {
+		return CreateAgentResponse{}, errors.New("source not found")
+	}
 	token, err := newAgentToken()
 	if err != nil {
 		return CreateAgentResponse{}, err
 	}
 	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
-	result, err := s.db.ExecContext(ctx, `UPDATE agents SET token_hash = ?, token_prefix = ?, token_plain = ?, created_at = ?, pending_token = ?, last_seen_at = '', last_reported_at = '', version = '', hostname = '' WHERE id = ?`, hashToken(token), tokenPrefix(token), token, now, token, id)
+	// Upsert: create the agent row if missing, otherwise rotate token in place.
+	_, err = s.db.ExecContext(ctx, `INSERT INTO agents (id, token_hash, token_prefix, token_plain, created_at, pending_token) VALUES (?, ?, ?, ?, ?, ?)
+			ON CONFLICT(id) DO UPDATE SET token_hash = excluded.token_hash, token_prefix = excluded.token_prefix, token_plain = excluded.token_plain, created_at = excluded.created_at, pending_token = excluded.pending_token, last_seen_at = '', last_reported_at = '', version = '', hostname = ''`,
+		id, hashToken(token), tokenPrefix(token), token, now, token)
 	if err != nil {
 		return CreateAgentResponse{}, err
-	}
-	if rows, _ := result.RowsAffected(); rows == 0 {
-		return CreateAgentResponse{}, errors.New("agent not found")
 	}
 	agent := Agent{ID: id, SourceID: id, Token: token, TokenPrefix: tokenPrefix(token), CreatedAt: now}
 	return CreateAgentResponse{Agent: agent, Token: token}, nil
