@@ -3,78 +3,107 @@ pageType: custom
 title: Po0 Atlas
 ---
 
-import StatusProbe from '../src/components/StatusProbe';
-
-<div className="kele-home">
-  <section className="kele-hero">
-    <div className="kele-hero__copy">
-      <div className="kele-eyebrow">
-        <span className="kele-live-dot" />
-        po0.wiki · Probe Atlas
+<div className="kele-home kele-home--cockpit">
+  <div className="atlas-shell">
+    <header className="atlas-topbar" aria-label="首页导航">
+      <a className="atlas-brand" href="/">
+        <span className="atlas-logo" />
+        <span>
+          <small>PO0.WIKI · PROBE ATLAS</small>
+          <strong>Po0 Atlas</strong>
+        </span>
+      </a>
+      <div className="atlas-topbar__right">
+        <span className="atlas-live"><i />LIVE <b>系统运行正常</b></span>
+        <a className="atlas-search" href="/guide/getting-started">搜索文档、路径、节点…<kbd>⌘K</kbd></a>
+        <a className="atlas-console" href="/admin/sources">控制台</a>
       </div>
-      <h1>Po0 Atlas</h1>
-      <p className="kele-lead">
-        把节点、线路、故障记录和运维手册收进同一个清爽入口。信息密度够高，但不把页面做成说明书。
-      </p>
-      <div className="kele-actions">
-        <a className="kele-button kele-button--primary" href="/guide/getting-started">
-          进入文档
-        </a>
-        <a className="kele-button kele-button--ghost" href="#knowledge-map">
-          查看入口
-        </a>
-        <a className="kele-button kele-button--ghost" href="/status">
-          服务状态
-        </a>
+    </header>
+
+    <section className="atlas-hero" aria-label="Po0 Atlas 首页">
+      <div className="atlas-copy">
+        <p className="atlas-kicker">Network Intelligence</p>
+        <h1>Po0 Atlas</h1>
+        <h2>网络探测 · 链路洞察 · 智能运维</h2>
+        <p>
+          把节点、线路、故障记录和运维手册收进同一个清爽入口。信息密度够高，但不把页面做成说明书。
+        </p>
+        <div className="atlas-actions">
+          <a className="atlas-button atlas-button--primary" href="/guide/getting-started"><span />进入文档</a>
+          <a className="atlas-button" href="/status"><span />服务状态</a>
+          <a className="atlas-button" href="/looking-glass"><span />Looking Glass</a>
+        </div>
+        <div className="atlas-scan" aria-hidden="true">
+          <span>System Scan</span>
+          <i />
+        </div>
       </div>
-    </div>
 
-    <StatusProbe compact />
-  </section>
+      <aside className="atlas-route-panel" aria-label="实时路径">
+        <div className="atlas-panel-corners" />
+        <div className="atlas-panel-head">
+          <div>
+            <h2>实时路径</h2>
+            <span>Realtime Paths</span>
+          </div>
+          <strong><i />Live Monitoring</strong>
+        </div>
 
-  <section className="kele-rail" aria-label="重点能力">
-    <article>
-      <span className="kele-card-index">01</span>
-      <h2>知识库</h2>
-      <p>部署、故障、工具记录都放在能搜索、能长期维护的位置。</p>
-    </article>
-    <article>
-      <span className="kele-card-index">02</span>
-      <h2>链路状态</h2>
-      <p>直接看各源节点到目标的延迟、抖动、丢包和最近上报。</p>
-    </article>
-    <article>
-      <span className="kele-card-index">03</span>
-      <h2>轻量部署</h2>
-      <p>Rspress 前端 + 本机容器，公开入口走现有 Tunnel。</p>
-    </article>
-  </section>
+        <div className="atlas-route-body">
+          <div className="atlas-map" aria-hidden="true">
+            <span className="atlas-map-dot atlas-map-dot--a" />
+            <span className="atlas-map-dot atlas-map-dot--b" />
+            <span className="atlas-map-dot atlas-map-dot--c" />
+            <span className="atlas-map-dot atlas-map-dot--d" />
+            <svg viewBox="0 0 360 260" role="presentation">
+              <defs>
+                <linearGradient id="atlas-route-glow" x1="0" x2="1">
+                  <stop offset="0" stopColor="#2cf6ff" stopOpacity="0.15" />
+                  <stop offset="0.45" stopColor="#42ffd0" stopOpacity="1" />
+                  <stop offset="1" stopColor="#4d80ff" stopOpacity="0.4" />
+                </linearGradient>
+              </defs>
+              <path className="atlas-route-line atlas-route-line--one" d="M35 174 C88 78 122 118 172 78 S260 72 322 42" />
+              <path className="atlas-route-line atlas-route-line--two" d="M42 198 C104 128 144 166 194 134 S284 128 328 94" />
+              <path className="atlas-route-line atlas-route-line--three" d="M58 62 C108 126 152 94 212 160 S282 198 334 176" />
+            </svg>
+          </div>
 
-  <section id="knowledge-map" className="kele-grid-section">
-    <div>
-      <p className="kele-section-kicker">入口</p>
-      <h2>Wiki、状态面板和 Looking Glass 放在同一张地图里</h2>
-      <p>
-        首页负责快速进入；长文继续保持舒服的阅读宽度，工具页负责实时操作。
-      </p>
-    </div>
-    <div className="kele-link-board">
-      <a href="/guide/getting-started">
-        <span>Docs</span>
-        <strong>进入文档</strong>
-      </a>
-      <a href="/guide/content-guide">
-        <span>Rules</span>
-        <strong>内容规范</strong>
-      </a>
-      <a href="/guide/deployment">
-        <span>Deploy</span>
-        <strong>部署说明</strong>
-      </a>
-      <a href="/status">
-        <span>Probe</span>
-        <strong>链路状态</strong>
-      </a>
-    </div>
-  </section>
+          <div className="atlas-route-list">
+            <article className="atlas-route-card atlas-route-card--best">
+              <span className="atlas-route-dot" />
+              <div>
+                <strong>🇨🇳 Po0-Tencent</strong>
+                <small>Po0 上海 → Po0-Tencent</small>
+              </div>
+              <em>23.83 ms<b>优秀</b></em>
+            </article>
+            <article className="atlas-route-card">
+              <span className="atlas-route-dot" />
+              <div>
+                <strong>🇨🇳 Po0-Tencent</strong>
+                <small>Po0 广州 → Po0-Tencent</small>
+              </div>
+              <em>6.40 ms<b>极佳</b></em>
+            </article>
+            <article className="atlas-route-card atlas-route-card--warn">
+              <span className="atlas-route-dot" />
+              <div>
+                <strong>🇨🇳 RFC CTC</strong>
+                <small>Po0 上海 → RFC CTC</small>
+              </div>
+              <em>24.59 ms<b>良好</b></em>
+            </article>
+          </div>
+        </div>
+
+        <div className="atlas-route-stats">
+          <span><b>128</b>源节点</span>
+          <span><b>98</b>在线节点</span>
+          <span><b>18.67 ms</b>平均延迟</span>
+          <span><b>0.01%</b>丢包率</span>
+        </div>
+      </aside>
+    </section>
+  </div>
 </div>
