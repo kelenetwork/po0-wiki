@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"regexp"
 	"os/exec"
 	"strings"
 	"time"
@@ -34,12 +35,12 @@ func runLGJob(parent context.Context, job LGJob) (string, string) {
 		return "", "unsupported lg tool: " + job.Tool
 	}
 	if ctx.Err() == context.DeadlineExceeded {
-		return truncateLGOutput(output), "lg job timed out after 20s"
+		return stripANSI(truncateLGOutput(output)), "lg job timed out after 20s"
 	}
 	if err != nil {
-		return truncateLGOutput(output), err.Error()
+		return stripANSI(truncateLGOutput(output)), err.Error()
 	}
-	return truncateLGOutput(output), ""
+	return stripANSI(truncateLGOutput(output)), ""
 }
 
 func runLGCommand(ctx context.Context, name string, args []string) (string, error) {
@@ -47,6 +48,8 @@ func runLGCommand(ctx context.Context, name string, args []string) (string, erro
 		return "", fmt.Errorf("agent host missing tool: %s (PATH=%s, LookPath=%v)", name, os.Getenv("PATH"), err)
 	}
 	cmd := exec.CommandContext(ctx, name, args...)
+	// Suppress ANSI colors so the output renders cleanly in the LG terminal.
+	cmd.Env = append(os.Environ(), "NO_COLOR=1", "TERM=dumb", "CLICOLOR=0")
 	data, err := cmd.CombinedOutput()
 	output := fmt.Sprintf("$ %s %s\n%s\n", name, strings.Join(args, " "), strings.TrimSpace(string(data)))
 	if err != nil {
@@ -88,6 +91,12 @@ func runLGTCPing(ctx context.Context, host string, port int) (string, error) {
 	loss := 100 - successes*25
 	fmt.Fprintf(&builder, "\nsummary: sent=4 received=%d loss=%d%% avg=%.2f ms\n", successes, loss, avg)
 	return builder.String(), nil
+}
+
+var ansiRE = regexp.MustCompile("\\x1b\\[[0-9;?]*[a-zA-Z]")
+
+func stripANSI(value string) string {
+	return ansiRE.ReplaceAllString(value, "")
 }
 
 func truncateLGOutput(value string) string {
