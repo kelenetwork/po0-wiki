@@ -489,17 +489,18 @@ func (s *Store) LookingGlassEndpoint(ctx context.Context, sourceID string, targe
 		return Source{}, AdminTarget{}, errors.New("source_id and target_id are required")
 	}
 	var source Source
-	if isHubSource(sourceID) {
-		source = Source{ID: "hub", DisplayName: "Hub (上海·wiki.kele.my 服务器)", Region: "上海", Tags: []string{"Hub-local"}, Status: "online", UpdatedAt: time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)}
-	} else {
-		var sourceTags string
-		if err := s.db.QueryRowContext(ctx, `SELECT id, display_name, region, tags, status, updated_at FROM sources WHERE id = ?`, sourceID).Scan(&source.ID, &source.DisplayName, &source.Region, &sourceTags, &source.Status, &source.UpdatedAt); err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				return Source{}, AdminTarget{}, errors.New("source not found")
-			}
-			return Source{}, AdminTarget{}, err
+	var sourceTags string
+	var lastReportedAt string
+	if err := s.db.QueryRowContext(ctx, `SELECT s.id, s.display_name, s.region, s.tags, s.status, s.updated_at, COALESCE(a.last_reported_at, '') FROM sources s LEFT JOIN agents a ON a.id = s.id WHERE s.id = ?`, sourceID).Scan(&source.ID, &source.DisplayName, &source.Region, &sourceTags, &source.Status, &source.UpdatedAt, &lastReportedAt); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return Source{}, AdminTarget{}, errors.New("source not found")
 		}
-		source.Tags = decodeTags(sourceTags)
+		return Source{}, AdminTarget{}, err
+	}
+	source.Tags = decodeTags(sourceTags)
+	source.Status = derivedSourceStatus(lastReportedAt, time.Now().UTC())
+	if strings.TrimSpace(lastReportedAt) != "" {
+		source.UpdatedAt = lastReportedAt
 	}
 
 	var target AdminTarget

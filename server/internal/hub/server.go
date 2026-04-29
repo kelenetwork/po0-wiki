@@ -161,19 +161,17 @@ func (s *Server) publicLGRun(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "unsupported tool")
 		return
 	}
+	if isHubSource(req.SourceID) {
+		writeError(w, http.StatusBadRequest, "hub-local 模式已停用，请选择一个 online 的源节点")
+		return
+	}
 	source, target, err := s.store.LookingGlassEndpoint(r.Context(), req.SourceID, req.TargetID)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	if isHubSource(req.SourceID) {
-		ctx, cancel := context.WithTimeout(r.Context(), 18*time.Second)
-		defer cancel()
-		output := runLocalLookingGlass(ctx, req.Tool, source, target)
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(output))
+	if !strings.EqualFold(source.Status, "online") && !strings.EqualFold(source.Status, "ok") {
+		writeError(w, http.StatusBadRequest, "该源节点不在线，无法下发任务（请等待 agent 上线或选择其他节点）")
 		return
 	}
 
