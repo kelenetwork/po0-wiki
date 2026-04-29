@@ -210,11 +210,6 @@ export default function LookingGlass() {
           </button>
         </div>
 
-        <div className="lg-mode-banner lg-mode-banner--dispatch" role="note">
-          <strong>Agent dispatch 模式</strong>
-          <span>{selectedSource ? `测试将下发到 ${selectedSource.display_name} 执行。` : '请先选择一个 online 源节点。'}</span>
-        </div>
-
         <div className="lg-summary-grid">
           <article>
             <span>当前源</span>
