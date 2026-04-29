@@ -102,7 +102,9 @@ chmod 0644 "$UNIT_PATH"
 
 log "starting ${SERVICE_NAME}"
 systemctl daemon-reload
-systemctl enable --now "$SERVICE_NAME"
+systemctl enable "$SERVICE_NAME" >/dev/null 2>&1 || true
+# Always restart so an in-place upgrade picks up the new binary/unit/config.
+systemctl restart "$SERVICE_NAME"
 sleep 5
 if ! systemctl is-active --quiet "$SERVICE_NAME"; then
   log "${SERVICE_NAME} is not active; recent logs:"
