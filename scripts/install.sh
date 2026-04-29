@@ -86,7 +86,8 @@ proxy_env_lines=""
 if [ -n "$PROXY_URL" ]; then
   proxy_env_lines="Environment=HTTPS_PROXY=${PROXY_URL}
 Environment=HTTP_PROXY=${PROXY_URL}
-Environment=NO_PROXY=localhost,127.0.0.1,::1"
+Environment=NO_PROXY=localhost,127.0.0.1,::1
+"
 fi
 
 log "writing systemd unit to ${UNIT_PATH}"
