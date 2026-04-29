@@ -63,7 +63,8 @@ cat > "$CONFIG_PATH" <<JSON
   "insecure_skip_verify": false
 }
 JSON
-chmod 0600 "$CONFIG_PATH"
+# 0644 so systemd DynamicUser can read it; root-owned, ReadOnlyPaths-protected.
+chmod 0644 "$CONFIG_PATH"
 
 log "writing systemd unit to ${UNIT_PATH}"
 cat > "$UNIT_PATH" <<UNIT
