@@ -36,8 +36,27 @@ export default defineConfig({
       { text: '首页', link: '/' },
       { text: '指南', link: '/guide/getting-started' },
       { text: '服务状态', link: '/status' },
+      { text: 'Looking Glass', link: '/looking-glass' },
     ],
     sidebar: {
+      '/status': [
+        {
+          text: '网络工具',
+          items: [
+            { text: '服务状态', link: '/status' },
+            { text: 'Looking Glass', link: '/looking-glass' },
+          ],
+        },
+      ],
+      '/looking-glass': [
+        {
+          text: '网络工具',
+          items: [
+            { text: '服务状态', link: '/status' },
+            { text: 'Looking Glass', link: '/looking-glass' },
+          ],
+        },
+      ],
       '/guide/': [
         {
           text: '指南',

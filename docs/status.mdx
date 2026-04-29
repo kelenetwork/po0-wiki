@@ -7,22 +7,22 @@ import StatusProbe from '../src/components/StatusProbe';
 
 <div className="kele-status-page">
   <section className="kele-status-hero">
-    <p className="kele-section-kicker">Service Status</p>
-    <h1>服务状态</h1>
+    <p className="kele-section-kicker">Network Status</p>
+    <h1>网络监控</h1>
     <p>
-      这里是未来实时 TCPing / HTTP 探测面板的占位页。当前展示静态模拟数据，方便后续接入真实接口。
+      轻量 Looking Glass + 延迟监控面板原型。当前仅展示静态模拟数据，源节点、目标与时间范围均按可扩展结构组织，后续可接入真实探测接口。
     </p>
   </section>
 
   <StatusProbe />
 
   <section className="kele-status-roadmap">
-    <h2>后续开发计划</h2>
+    <h2>原型边界</h2>
     <ul>
-      <li>接入后端探测 API，返回目标、延迟、丢包率和最近更新时间。</li>
-      <li>增加 TCPing 历史趋势图和异常事件时间线。</li>
-      <li>支持按地域、协议和业务分组筛选。</li>
-      <li>对接告警渠道，展示最近恢复记录。</li>
+      <li>本页不执行真实探测，不创建 probe / agent / hub / server。</li>
+      <li>Mock 数据覆盖香港、日本、新加坡、大陆源节点，后续可替换为接口返回列表。</li>
+      <li>趋势图、延迟卡片与图例均为 SVG / React 静态展示。</li>
+      <li>需要执行网络工具时，可从导航进入 Looking Glass 工具台原型。</li>
     </ul>
   </section>
 </div>
