@@ -497,3 +497,38 @@ I. 后端补齐
   - 创建 target kind=https port=18801（指向本地 TLS testserver）失败时 last_error 体现 TLS 错误
   - admin 列表能看到「最近错误」列
   - public snapshot 不含 host/port/path/last_error
+
+## 批次 E.5：admin 全屏布局 + 脱离 Rspress 外壳
+
+允许修改：
+- `src/components/admin/*`、`src/pages/admin/*`、`src/styles/*`
+- `rspress.config.ts`（仅当需要给 admin 路由独立布局/无 nav）
+- `PROBE_IMPLEMENTATION_CHECKLIST.md`
+
+禁止修改：
+- `Dockerfile`、`docker-compose.yml`、`nginx/default.conf`、`server/Dockerfile`
+- `agent/`、`server/internal/hub/*`、`StatusProbe/LookingGlass/probeSnapshot`
+
+要求：
+1. /admin* 路由完全占满 viewport：
+   - 不显示 Rspress 顶部 nav、搜索、主题切换、GitHub 链接、首页/指南菜单
+   - 不显示 Rspress 默认左侧 sidebar 空槽
+   - 不显示 doc-container 的 max-width / 居中 padding
+   - 用全局 css 限定 `body[data-page-type="admin"]` 或基于 `:where(.rp-doc, .rspress-nav, .rspress-sidebar)` 的 admin 路由覆写
+2. admin shell 保持 `display:flex`，左侧自有 sidebar（约 240px），右侧主区域 `flex:1; min-width:0;` 占满。
+3. 表格 wrapper 横向滚动只在表内出现；操作列 sticky 右侧带左阴影。
+4. Header 右上角 Token + 退出 不被截。
+5. 暗色模式不要破坏；保留可读对比度。
+
+操作要求：
+- 不要部署。
+- npm run build 必须通过。
+- 完成后列出修改文件、运行命令。
+
+验收：
+- `npm run build` 通过。
+- 本地或线上访问 /admin 应没有 Rspress nav/sidebar，admin sidebar 在最左，主区域占满到右边。
+- 表格操作列可见，不被遮。
+- /status、/looking-glass 这些 doc 页样式不受影响。
+
+状态：已完成，待验收。

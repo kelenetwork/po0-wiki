@@ -91,6 +91,15 @@ export default function AdminApp({ page }: AdminAppProps) {
   const sortedSources = useMemo(() => [...sources].sort((a, b) => (a.region || '').localeCompare(b.region || '') || a.display_name.localeCompare(b.display_name)), [sources]);
   const checkByPair = useMemo(() => new Map(checks.map((item) => [`${item.source_id}::${item.target_id}`, item])), [checks]);
 
+  useEffect(() => {
+    document.documentElement.dataset.admin = '1';
+    document.body.dataset.pageType = 'admin';
+    return () => {
+      delete document.documentElement.dataset.admin;
+      delete document.body.dataset.pageType;
+    };
+  }, []);
+
   useEffect(() => { const saved = localStorage.getItem(TOKEN_KEY) ?? ''; setToken(saved); setTokenInput(saved); setAuthReady(true); }, []);
   useEffect(() => { if (!authReady || !token) return; loadAll().catch(showError); }, [authReady, token]);
   useEffect(() => { if (!notice) return; const timer = window.setTimeout(() => setNotice(''), 3000); return () => window.clearTimeout(timer); }, [notice]);
