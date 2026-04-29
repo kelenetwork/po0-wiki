@@ -70,7 +70,7 @@ chmod 0644 "$CONFIG_PATH"
 icmp_capability_lines=""
 case "$ENABLE_ICMP" in
   true|TRUE|1|yes|YES)
-    icmp_capability_lines=$'AmbientCapabilities=CAP_NET_RAW\nCapabilityBoundingSet=CAP_NET_RAW'
+    icmp_capability_lines=$'AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN\nCapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN'
     ;;
 esac
 
