@@ -41,6 +41,7 @@ type Target struct {
 	Tags        []string `json:"tags"`
 	Status      string   `json:"status"`
 	Kind        string   `json:"kind"`
+	ShowInLG    bool     `json:"show_in_lg"`
 	UpdatedAt   string   `json:"updated_at"`
 }
 
@@ -54,6 +55,7 @@ type AdminTarget struct {
 	Host        string   `json:"host"`
 	Port        int      `json:"port"`
 	Path        string   `json:"path"`
+	ShowInLG    bool     `json:"show_in_lg"`
 	UpdatedAt   string   `json:"updated_at"`
 }
 
@@ -127,6 +129,7 @@ type CreateTargetRequest struct {
 	Host        string   `json:"host"`
 	Port        int      `json:"port"`
 	Path        string   `json:"path"`
+	ShowInLG    *bool    `json:"show_in_lg"`
 }
 
 type CreateCheckRequest struct {
@@ -257,6 +260,7 @@ CREATE TABLE IF NOT EXISTS sources (
   tags TEXT NOT NULL DEFAULT '[]',
   status TEXT NOT NULL,
   endpoint TEXT NOT NULL DEFAULT '',
+  sort_order INTEGER NOT NULL DEFAULT 0,
   updated_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS targets (
@@ -268,6 +272,8 @@ CREATE TABLE IF NOT EXISTS targets (
   endpoint TEXT NOT NULL DEFAULT '',
   kind TEXT NOT NULL DEFAULT 'tcp',
   path TEXT NOT NULL DEFAULT '',
+  show_in_lg INTEGER NOT NULL DEFAULT 1,
+  sort_order INTEGER NOT NULL DEFAULT 0,
   updated_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS checks (
@@ -329,6 +335,9 @@ CREATE INDEX IF NOT EXISTS idx_lg_jobs_agent_pending ON lg_jobs(agent_id, status
 	_, _ = s.db.ExecContext(ctx, `ALTER TABLE checks ADD COLUMN last_error TEXT NOT NULL DEFAULT ''`)
 	_, _ = s.db.ExecContext(ctx, `ALTER TABLE targets ADD COLUMN kind TEXT NOT NULL DEFAULT 'tcp'`)
 	_, _ = s.db.ExecContext(ctx, `ALTER TABLE targets ADD COLUMN path TEXT NOT NULL DEFAULT ''`)
+	_, _ = s.db.ExecContext(ctx, `ALTER TABLE sources ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0`)
+	_, _ = s.db.ExecContext(ctx, `ALTER TABLE targets ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0`)
+	_, _ = s.db.ExecContext(ctx, `ALTER TABLE targets ADD COLUMN show_in_lg INTEGER NOT NULL DEFAULT 1`)
 	_, err = s.db.ExecContext(ctx, `UPDATE targets SET kind = 'https' WHERE kind = 'http' AND endpoint LIKE '%:443'`)
 	if err != nil {
 		return err
@@ -417,7 +426,7 @@ func (s *Store) Snapshot(ctx context.Context) (Snapshot, error) {
 }
 
 func (s *Store) ListSources(ctx context.Context) ([]Source, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT s.id, s.display_name, s.region, s.tags, s.status, s.updated_at, COALESCE(MAX(a.last_reported_at, a.last_seen_at), '') FROM sources s LEFT JOIN agents a ON a.id = s.id ORDER BY s.id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT s.id, s.display_name, s.region, s.tags, s.status, s.updated_at, COALESCE(MAX(a.last_reported_at, a.last_seen_at), '') FROM sources s LEFT JOIN agents a ON a.id = s.id ORDER BY s.sort_order, s.id`)
 	if err != nil {
 		return nil, err
 	}
@@ -442,7 +451,7 @@ func (s *Store) ListSources(ctx context.Context) ([]Source, error) {
 }
 
 func (s *Store) ListTargets(ctx context.Context) ([]Target, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, region, tags, status, kind, updated_at FROM targets ORDER BY id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, region, tags, status, kind, show_in_lg, updated_at FROM targets ORDER BY sort_order, id`)
 	if err != nil {
 		return nil, err
 	}
@@ -451,7 +460,7 @@ func (s *Store) ListTargets(ctx context.Context) ([]Target, error) {
 	for rows.Next() {
 		var target Target
 		var tags string
-		if err := rows.Scan(&target.ID, &target.DisplayName, &target.Region, &tags, &target.Status, &target.Kind, &target.UpdatedAt); err != nil {
+		if err := rows.Scan(&target.ID, &target.DisplayName, &target.Region, &tags, &target.Status, &target.Kind, &target.ShowInLG, &target.UpdatedAt); err != nil {
 			return nil, err
 		}
 		target.Tags = decodeTags(tags)
@@ -462,7 +471,7 @@ func (s *Store) ListTargets(ctx context.Context) ([]Target, error) {
 }
 
 func (s *Store) ListAdminTargets(ctx context.Context) ([]AdminTarget, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, region, tags, status, endpoint, kind, path, updated_at FROM targets ORDER BY id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, region, tags, status, endpoint, kind, path, show_in_lg, updated_at FROM targets ORDER BY sort_order, id`)
 	if err != nil {
 		return nil, err
 	}
@@ -472,7 +481,7 @@ func (s *Store) ListAdminTargets(ctx context.Context) ([]AdminTarget, error) {
 		var target AdminTarget
 		var tags string
 		var endpoint string
-		if err := rows.Scan(&target.ID, &target.DisplayName, &target.Region, &tags, &target.Status, &endpoint, &target.Kind, &target.Path, &target.UpdatedAt); err != nil {
+		if err := rows.Scan(&target.ID, &target.DisplayName, &target.Region, &tags, &target.Status, &endpoint, &target.Kind, &target.Path, &target.ShowInLG, &target.UpdatedAt); err != nil {
 			return nil, err
 		}
 		target.Tags = decodeTags(tags)
@@ -506,7 +515,7 @@ func (s *Store) LookingGlassEndpoint(ctx context.Context, sourceID string, targe
 	var target AdminTarget
 	var targetTags string
 	var endpoint string
-	if err := s.db.QueryRowContext(ctx, `SELECT id, display_name, region, tags, status, endpoint, kind, path, updated_at FROM targets WHERE id = ?`, targetID).Scan(&target.ID, &target.DisplayName, &target.Region, &targetTags, &target.Status, &endpoint, &target.Kind, &target.Path, &target.UpdatedAt); err != nil {
+	if err := s.db.QueryRowContext(ctx, `SELECT id, display_name, region, tags, status, endpoint, kind, path, show_in_lg, updated_at FROM targets WHERE id = ?`, targetID).Scan(&target.ID, &target.DisplayName, &target.Region, &targetTags, &target.Status, &endpoint, &target.Kind, &target.Path, &target.ShowInLG, &target.UpdatedAt); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return Source{}, AdminTarget{}, errors.New("target not found")
 		}
@@ -515,7 +524,10 @@ func (s *Store) LookingGlassEndpoint(ctx context.Context, sourceID string, targe
 	target.Tags = decodeTags(targetTags)
 	target.Kind = normalizeTargetKind(target.Kind)
 	target.Path = normalizeTargetPath(target.Kind, target.Path)
-	target.Host, target.Port, _ = splitEndpoint(endpoint)
+	target.Host, target.Port, _ = splitEndpointForKind(endpoint, target.Kind)
+	if !target.ShowInLG {
+		return Source{}, AdminTarget{}, errors.New("target is disabled for looking glass")
+	}
 	if target.Host == "" {
 		return Source{}, AdminTarget{}, errors.New("target endpoint is empty")
 	}
@@ -523,7 +535,7 @@ func (s *Store) LookingGlassEndpoint(ctx context.Context, sourceID string, targe
 }
 
 func (s *Store) ListChecks(ctx context.Context) ([]Check, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, source_id, target_id, tags, status, latency_ms, loss_pct, jitter_ms, updated_at FROM checks ORDER BY id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT c.id, c.display_name, c.source_id, c.target_id, c.tags, c.status, c.latency_ms, c.loss_pct, c.jitter_ms, c.updated_at FROM checks c JOIN sources s ON s.id = c.source_id JOIN targets t ON t.id = c.target_id ORDER BY s.sort_order, t.sort_order, c.id`)
 	if err != nil {
 		return nil, err
 	}
@@ -542,7 +554,7 @@ func (s *Store) ListChecks(ctx context.Context) ([]Check, error) {
 }
 
 func (s *Store) ListAdminChecks(ctx context.Context) ([]AdminCheck, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT id, display_name, source_id, target_id, tags, status, latency_ms, loss_pct, jitter_ms, interval_seconds, enabled, last_error, updated_at FROM checks ORDER BY id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT c.id, c.display_name, c.source_id, c.target_id, c.tags, c.status, c.latency_ms, c.loss_pct, c.jitter_ms, c.interval_seconds, c.enabled, c.last_error, c.updated_at FROM checks c JOIN sources s ON s.id = c.source_id JOIN targets t ON t.id = c.target_id ORDER BY s.sort_order, t.sort_order, c.id`)
 	if err != nil {
 		return nil, err
 	}
@@ -563,7 +575,7 @@ func (s *Store) ListAdminChecks(ctx context.Context) ([]AdminCheck, error) {
 }
 
 func (s *Store) ListSeriesSummary(ctx context.Context) ([]SeriesSummary, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT check_id, latency_ms, loss_pct, jitter_ms, updated_at FROM series_points ORDER BY check_id, updated_at`)
+	rows, err := s.db.QueryContext(ctx, `SELECT p.check_id, p.latency_ms, p.loss_pct, p.jitter_ms, p.updated_at FROM series_points p JOIN checks c ON c.id = p.check_id JOIN sources s ON s.id = c.source_id JOIN targets t ON t.id = c.target_id ORDER BY s.sort_order, t.sort_order, c.id, p.updated_at`)
 	if err != nil {
 		return nil, err
 	}
@@ -616,7 +628,7 @@ func (s *Store) CreateTarget(ctx context.Context, req CreateTargetRequest) (Targ
 	if err := insertTarget(ctx, s.db, req, now); err != nil {
 		return Target{}, err
 	}
-	return Target{ID: req.ID, DisplayName: req.DisplayName, Region: req.Region, Tags: req.Tags, Status: defaultStatus(req.Status), Kind: normalizeTargetKind(req.Kind), UpdatedAt: now}, nil
+	return Target{ID: req.ID, DisplayName: req.DisplayName, Region: req.Region, Tags: req.Tags, Status: defaultStatus(req.Status), Kind: normalizeTargetKind(req.Kind), ShowInLG: targetShowInLG(req.ShowInLG), UpdatedAt: now}, nil
 }
 
 func (s *Store) UpdateSource(ctx context.Context, id string, req UpdateSourceRequest) (Source, error) {
@@ -649,14 +661,14 @@ func (s *Store) UpdateTarget(ctx context.Context, id string, req CreateTargetReq
 		return AdminTarget{}, err
 	}
 	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
-	result, err := s.db.ExecContext(ctx, `UPDATE targets SET display_name = ?, region = ?, tags = ?, status = ?, endpoint = ?, kind = ?, path = ?, updated_at = ? WHERE id = ?`, req.DisplayName, req.Region, encodeTags(req.Tags), defaultStatus(req.Status), prepared.Endpoint, prepared.Kind, prepared.Path, now, id)
+	result, err := s.db.ExecContext(ctx, `UPDATE targets SET display_name = ?, region = ?, tags = ?, status = ?, endpoint = ?, kind = ?, path = ?, show_in_lg = ?, updated_at = ? WHERE id = ?`, req.DisplayName, req.Region, encodeTags(req.Tags), defaultStatus(req.Status), prepared.Endpoint, prepared.Kind, prepared.Path, boolToInt(targetShowInLG(req.ShowInLG)), now, id)
 	if err != nil {
 		return AdminTarget{}, err
 	}
 	if rows, _ := result.RowsAffected(); rows == 0 {
 		return AdminTarget{}, errors.New("target not found")
 	}
-	return AdminTarget{ID: id, DisplayName: req.DisplayName, Region: req.Region, Tags: req.Tags, Status: defaultStatus(req.Status), Kind: prepared.Kind, Host: prepared.Host, Port: prepared.Port, Path: prepared.Path, UpdatedAt: now}, nil
+	return AdminTarget{ID: id, DisplayName: req.DisplayName, Region: req.Region, Tags: req.Tags, Status: defaultStatus(req.Status), Kind: prepared.Kind, Host: prepared.Host, Port: prepared.Port, Path: prepared.Path, ShowInLG: targetShowInLG(req.ShowInLG), UpdatedAt: now}, nil
 }
 
 func (s *Store) CreateCheck(ctx context.Context, req CreateCheckRequest) (Check, error) {
@@ -1128,7 +1140,7 @@ func insertSource(ctx context.Context, execer sqlExecer, req CreateSourceRequest
 	if req.ID == "" || req.DisplayName == "" {
 		return errors.New("id and display_name are required")
 	}
-	_, err := execer.ExecContext(ctx, `INSERT INTO sources (id, display_name, region, tags, status, endpoint, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, req.ID, req.DisplayName, req.Region, encodeTags(req.Tags), defaultStatus(req.Status), req.Endpoint, updatedAt)
+	_, err := execer.ExecContext(ctx, `INSERT INTO sources (id, display_name, region, tags, status, endpoint, sort_order, updated_at) VALUES (?, ?, ?, ?, ?, ?, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM sources), ?)`, req.ID, req.DisplayName, req.Region, encodeTags(req.Tags), defaultStatus(req.Status), req.Endpoint, updatedAt)
 	return err
 }
 
@@ -1140,7 +1152,7 @@ func insertTarget(ctx context.Context, execer sqlExecer, req CreateTargetRequest
 	if err != nil {
 		return err
 	}
-	_, err = execer.ExecContext(ctx, `INSERT INTO targets (id, display_name, region, tags, status, endpoint, kind, path, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, req.ID, req.DisplayName, req.Region, encodeTags(req.Tags), defaultStatus(req.Status), prepared.Endpoint, prepared.Kind, prepared.Path, updatedAt)
+	_, err = execer.ExecContext(ctx, `INSERT INTO targets (id, display_name, region, tags, status, endpoint, kind, path, show_in_lg, sort_order, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM targets), ?)`, req.ID, req.DisplayName, req.Region, encodeTags(req.Tags), defaultStatus(req.Status), prepared.Endpoint, prepared.Kind, prepared.Path, boolToInt(targetShowInLG(req.ShowInLG)), updatedAt)
 	return err
 }
 func insertCheck(ctx context.Context, execer sqlExecer, req CreateCheckRequest, updatedAt string) error {
@@ -1243,6 +1255,66 @@ func splitEndpointForKind(endpoint string, kind string) (string, int, error) {
 		return endpoint, 0, nil
 	}
 	return splitEndpoint(endpoint)
+}
+
+func targetShowInLG(value *bool) bool {
+	if value == nil {
+		return true
+	}
+	return *value
+}
+
+func (s *Store) SaveSourceOrder(ctx context.Context, ids []string) error {
+	return s.saveOrder(ctx, "sources", ids)
+}
+
+func (s *Store) SaveTargetOrder(ctx context.Context, ids []string) error {
+	return s.saveOrder(ctx, "targets", ids)
+}
+
+func (s *Store) saveOrder(ctx context.Context, table string, ids []string) error {
+	if len(ids) == 0 {
+		return errors.New("ids are required")
+	}
+	seen := make(map[string]bool, len(ids))
+	for _, id := range ids {
+		if strings.TrimSpace(id) == "" || seen[id] {
+			return errors.New("ids must be unique and non-empty")
+		}
+		seen[id] = true
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var count int
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE id IN (%s)", table, placeholders(len(ids)))
+	args := make([]any, 0, len(ids))
+	for _, id := range ids {
+		args = append(args, id)
+	}
+	if err := tx.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
+		return err
+	}
+	if count != len(ids) {
+		return errors.New("unknown id in order list")
+	}
+	update := fmt.Sprintf("UPDATE %s SET sort_order = ? WHERE id = ?", table)
+	for index, id := range ids {
+		if _, err := tx.ExecContext(ctx, update, index, id); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+func placeholders(count int) string {
+	parts := make([]string, count)
+	for index := range parts {
+		parts[index] = "?"
+	}
+	return strings.Join(parts, ",")
 }
 
 func boolToInt(value bool) int {

@@ -9,6 +9,7 @@ export type PublicProbeItem = {
   tags: string[];
   status: PublicProbeStatus;
   updated_at: string;
+  show_in_lg?: boolean;
 };
 
 export type PublicProbeCheck = {
@@ -53,10 +54,10 @@ export const mockProbeSnapshot: PublicProbeSnapshot = {
     { id: 'src-cn-probe', display_name: 'CN-Probe-01', region: '大陆源', tags: ['待接入'], status: 'pending', updated_at: MOCK_UPDATED_AT },
   ],
   targets: [
-    { id: 'tgt-wiki', display_name: 'Wiki Portal', region: 'Global', tags: ['web'], status: 'online', updated_at: MOCK_UPDATED_AT },
-    { id: 'tgt-api', display_name: 'API Gateway', region: 'Global', tags: ['api'], status: 'online', updated_at: MOCK_UPDATED_AT },
-    { id: 'tgt-cdn', display_name: 'CDN Edge', region: 'Global', tags: ['cdn'], status: 'warn', updated_at: MOCK_UPDATED_AT },
-    { id: 'tgt-origin', display_name: 'Origin Service', region: 'Private', tags: ['internal'], status: 'pending', updated_at: MOCK_UPDATED_AT },
+    { id: 'tgt-wiki', display_name: 'Wiki Portal', region: 'Global', tags: ['web'], status: 'online', updated_at: MOCK_UPDATED_AT, show_in_lg: true },
+    { id: 'tgt-api', display_name: 'API Gateway', region: 'Global', tags: ['api'], status: 'online', updated_at: MOCK_UPDATED_AT, show_in_lg: true },
+    { id: 'tgt-cdn', display_name: 'CDN Edge', region: 'Global', tags: ['cdn'], status: 'warn', updated_at: MOCK_UPDATED_AT, show_in_lg: true },
+    { id: 'tgt-origin', display_name: 'Origin Service', region: 'Private', tags: ['internal'], status: 'pending', updated_at: MOCK_UPDATED_AT, show_in_lg: true },
   ],
   checks: [
     { id: 'chk-hk-wiki', display_name: '香港 → Wiki', source_id: 'src-hk-edge', target_id: 'tgt-wiki', tags: ['tcp'], status: 'ok', latency_ms: 18, loss_pct: 0, jitter_ms: 2, updated_at: MOCK_UPDATED_AT },

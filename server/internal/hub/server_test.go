@@ -366,6 +366,73 @@ func TestAdminPostAcceptsNameAndGeneratesUniqueIDs(t *testing.T) {
 	}
 }
 
+
+func TestAdminOrderingAndLookingGlassTargetVisibility(t *testing.T) {
+	server := newTestServer(t)
+
+	// Reorder sources and targets through admin APIs.
+	for _, tc := range []struct {
+		path string
+		body string
+	}{
+		{path: "/api/admin/sources/order", body: `{"ids":["src-rfc-ctc","src-shanghai-ctc","src-cn-a"]}`},
+		{path: "/api/admin/targets/order", body: `{"ids":["tgt-api","tgt-wiki"]}`},
+	} {
+		req := httptest.NewRequest(http.MethodPost, tc.path, strings.NewReader(tc.body))
+		req.Header.Set("Authorization", "Bearer test-token")
+		rec := httptest.NewRecorder()
+		server.Routes().ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("order %s status = %d body = %s", tc.path, rec.Code, rec.Body.String())
+		}
+	}
+
+	// Hide one target from Looking Glass only.
+	req := httptest.NewRequest(http.MethodPut, "/api/admin/targets/tgt-api", strings.NewReader(`{"display_name":"API Gateway","region":"Global","tags":["api"],"kind":"tcp","host":"api.example.test","port":443,"show_in_lg":false}`))
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec := httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("update target status = %d body = %s", rec.Code, rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/public/probes/snapshot", nil)
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("snapshot status = %d body = %s", rec.Code, rec.Body.String())
+	}
+	var snapshot Snapshot
+	if err := json.Unmarshal(rec.Body.Bytes(), &snapshot); err != nil {
+		t.Fatalf("decode snapshot: %v", err)
+	}
+	if got := snapshot.Sources[0].ID; got != "src-rfc-ctc" {
+		t.Fatalf("first source = %q, want reordered src-rfc-ctc", got)
+	}
+	if got := snapshot.Targets[0].ID; got != "tgt-api" {
+		t.Fatalf("first target = %q, want reordered tgt-api", got)
+	}
+	foundAPI := false
+	for _, target := range snapshot.Targets {
+		if target.ID == "tgt-api" {
+			foundAPI = true
+			if target.ShowInLG {
+				t.Fatalf("tgt-api show_in_lg = true, want false")
+			}
+		}
+	}
+	if !foundAPI {
+		t.Fatalf("status snapshot should still include hidden LG target tgt-api")
+	}
+
+	req = httptest.NewRequest(http.MethodPost, "/api/public/lg/run", strings.NewReader(`{"tool":"ping","source_id":"src-rfc-ctc","target_id":"tgt-api"}`))
+	rec = httptest.NewRecorder()
+	server.Routes().ServeHTTP(rec, req)
+	if rec.Code == http.StatusAccepted {
+		t.Fatalf("LG accepted disabled target: %s", rec.Body.String())
+	}
+}
+
 func TestAgentPollReportUpdatesPublicSnapshot(t *testing.T) {
 	server := newTestServer(t)
 

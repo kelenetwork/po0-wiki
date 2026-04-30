@@ -40,10 +40,12 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("GET /api/public/lg/result", s.publicLGResult)
 	mux.HandleFunc("GET /api/admin/sources", s.adminSources)
 	mux.HandleFunc("POST /api/admin/sources", s.adminSources)
+	mux.HandleFunc("POST /api/admin/sources/order", s.adminSourceOrder)
 	mux.HandleFunc("PUT /api/admin/sources/{id}", s.adminSource)
 	mux.HandleFunc("DELETE /api/admin/sources/{id}", s.adminSource)
 	mux.HandleFunc("GET /api/admin/targets", s.adminTargets)
 	mux.HandleFunc("POST /api/admin/targets", s.adminTargets)
+	mux.HandleFunc("POST /api/admin/targets/order", s.adminTargetOrder)
 	mux.HandleFunc("PUT /api/admin/targets/{id}", s.adminTarget)
 	mux.HandleFunc("DELETE /api/admin/targets/{id}", s.adminTarget)
 	mux.HandleFunc("GET /api/admin/checks", s.adminChecks)
@@ -324,6 +326,44 @@ func (s *Server) adminSources(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, item)
 }
 
+func (s *Server) adminSourceOrder(w http.ResponseWriter, r *http.Request) {
+	if !s.authorized(r) {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	var req struct {
+		IDs []string `json:"ids"`
+	}
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := s.store.SaveSourceOrder(r.Context(), req.IDs); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
+}
+
+func (s *Server) adminTargetOrder(w http.ResponseWriter, r *http.Request) {
+	if !s.authorized(r) {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	var req struct {
+		IDs []string `json:"ids"`
+	}
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := s.store.SaveTargetOrder(r.Context(), req.IDs); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
+}
+
 func (s *Server) adminTargets(w http.ResponseWriter, r *http.Request) {
 	if !s.authorized(r) {
 		writeError(w, http.StatusUnauthorized, "unauthorized")
@@ -349,7 +389,7 @@ func (s *Server) adminTargets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	prepared, _ := prepareTarget(req)
-	item := AdminTarget{ID: created.ID, DisplayName: created.DisplayName, Region: created.Region, Tags: created.Tags, Status: created.Status, Kind: prepared.Kind, Host: prepared.Host, Port: prepared.Port, Path: prepared.Path, UpdatedAt: created.UpdatedAt}
+	item := AdminTarget{ID: created.ID, DisplayName: created.DisplayName, Region: created.Region, Tags: created.Tags, Status: created.Status, Kind: prepared.Kind, Host: prepared.Host, Port: prepared.Port, Path: prepared.Path, ShowInLG: created.ShowInLG, UpdatedAt: created.UpdatedAt}
 	writeJSON(w, http.StatusCreated, item)
 }
 

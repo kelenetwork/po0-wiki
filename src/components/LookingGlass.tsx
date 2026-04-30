@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import './LookingGlass.css';
 import { PublicProbeItem, usePublicProbeSnapshot } from './probeSnapshot';
 
@@ -66,9 +66,10 @@ const initialTerminal = [
 
 export default function LookingGlass() {
   const { snapshot, origin } = usePublicProbeSnapshot();
+  const lgTargets = useMemo(() => snapshot.targets.filter((target) => target.show_in_lg !== false), [snapshot.targets]);
   const regionGroups = groupSources(snapshot.sources);
   const [selectedSourceId, setSelectedSourceId] = useState(defaultOnlineSourceId(snapshot.sources));
-  const [selectedTargetId, setSelectedTargetId] = useState(snapshot.targets[0]?.id ?? '');
+  const [selectedTargetId, setSelectedTargetId] = useState(lgTargets[0]?.id ?? '');
   const [selectedTool, setSelectedTool] = useState<LGTool>('mtr');
   const [terminalOutput, setTerminalOutput] = useState(initialTerminal);
   const [running, setRunning] = useState(false);
@@ -78,11 +79,14 @@ export default function LookingGlass() {
       if (current && snapshot.sources.some((s) => s.id === current && isOnline(s.status))) return current;
       return defaultOnlineSourceId(snapshot.sources);
     });
-    setSelectedTargetId((current) => current || snapshot.targets[0]?.id || '');
-  }, [snapshot.sources, snapshot.targets]);
+    setSelectedTargetId((current) => {
+      if (current && lgTargets.some((target) => target.id === current)) return current;
+      return lgTargets[0]?.id || '';
+    });
+  }, [snapshot.sources, lgTargets]);
 
   const selectedSource = snapshot.sources.find((source) => source.id === selectedSourceId);
-  const selectedTarget = snapshot.targets.find((target) => target.id === selectedTargetId);
+  const selectedTarget = lgTargets.find((target) => target.id === selectedTargetId);
   const sourceOnline = !!selectedSource && isOnline(selectedSource.status);
   const canRun = sourceOnline && !!selectedTargetId && !running;
 
@@ -190,7 +194,7 @@ export default function LookingGlass() {
           <label className="lg-target">
             <span>目标</span>
             <select value={selectedTargetId} aria-label="选择目标" onChange={(event) => setSelectedTargetId(event.target.value)}>
-              {snapshot.targets.map((target) => (
+              {lgTargets.map((target) => (
                 <option value={target.id} key={target.id}>{target.display_name}</option>
               ))}
             </select>

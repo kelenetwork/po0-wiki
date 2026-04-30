@@ -514,3 +514,145 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
   .admin-drawer-backdrop { align-items: flex-end; }
   .admin-drawer { width: 100%; height: min(86vh, 720px); border-radius: 24px 24px 0 0; }
 }
+
+/* Light admin console overrides aligned with /looking-glass. */
+[data-admin="1"] body,
+[data-admin="1"] .po0-shell {
+  color: #132f3a;
+  background: #f6fbff !important;
+}
+
+.admin-layout {
+  color: #132f3a;
+  background:
+    radial-gradient(circle at 16% 0, rgba(44, 171, 226, 0.18), transparent 28rem),
+    radial-gradient(circle at 92% 12%, rgba(14, 165, 233, 0.14), transparent 26rem),
+    linear-gradient(90deg, rgba(14, 116, 144, 0.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(14, 116, 144, 0.07) 1px, transparent 1px),
+    linear-gradient(135deg, #f7fcff, #edf7ff 48%, #f8fbff);
+  background-size: auto, auto, 44px 44px, 44px 44px, auto;
+}
+
+.admin-sidebar {
+  color: #113445;
+  background: rgba(255, 255, 255, 0.78);
+  border-right-color: rgba(14, 116, 144, 0.16);
+  box-shadow: 24px 0 80px rgba(14, 116, 144, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.admin-brand,
+.admin-sidebar a,
+.admin-sidebar button {
+  color: #174258;
+}
+
+.admin-sidebar a.active,
+.admin-sidebar a:hover,
+.admin-sidebar button:hover {
+  border-color: rgba(14, 165, 233, 0.32);
+  color: #075985;
+  background: rgba(224, 242, 254, 0.86);
+}
+
+.admin-card,
+.admin-table-wrap,
+.admin-matrix,
+.admin-form.admin-card,
+.admin-stat,
+.admin-drawer {
+  border-color: rgba(14, 116, 144, 0.15);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 24px 70px rgba(14, 116, 144, 0.12);
+}
+
+.admin-form input,
+.admin-form select,
+.admin-shell button {
+  color: #133344;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(14, 116, 144, 0.18);
+}
+
+.admin-form input:focus,
+.admin-form select:focus {
+  outline: 3px solid rgba(14, 165, 233, 0.18);
+  border-color: rgba(14, 165, 233, 0.52);
+}
+
+.admin-shell button:hover,
+.admin-shell button.active {
+  border-color: rgba(8, 145, 178, 0.48);
+  color: #ffffff;
+  background: linear-gradient(135deg, #0891b2, #0ea5e9);
+}
+
+.admin-shell th,
+.admin-shell td,
+.admin-actions {
+  color: #133344;
+  background: rgba(255, 255, 255, 0.72) !important;
+}
+
+.admin-shell th {
+  color: #4b6b7a;
+  background: rgba(240, 249, 255, 0.94) !important;
+}
+
+.admin-shell tr:hover td {
+  background: rgba(224, 242, 254, 0.7) !important;
+}
+
+.admin-drawer-backdrop {
+  background: rgba(15, 23, 42, 0.24);
+}
+
+.admin-drawer {
+  background:
+    linear-gradient(90deg, rgba(14, 116, 144, 0.07) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(14, 116, 144, 0.06) 1px, transparent 1px),
+    #f8fcff;
+  background-size: 40px 40px, 40px 40px, auto;
+}
+
+.admin-drag-handle {
+  min-width: 36px;
+  cursor: grab !important;
+  color: #075985 !important;
+  background: rgba(224, 242, 254, 0.9) !important;
+}
+
+.admin-drag-handle:active { cursor: grabbing !important; }
+
+.admin-lg-pill {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.admin-lg-pill.on {
+  color: #0369a1;
+  background: rgba(186, 230, 253, 0.78);
+}
+
+.admin-lg-pill.off {
+  color: #9a3412;
+  background: rgba(255, 237, 213, 0.9);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-admin="1"] .admin-layout,
+  [data-admin="1"] .admin-card,
+  [data-admin="1"] .admin-table-wrap,
+  [data-admin="1"] .admin-matrix,
+  [data-admin="1"] .admin-stat,
+  [data-admin="1"] .admin-drawer,
+  [data-admin="1"] .admin-shell td,
+  [data-admin="1"] .admin-shell th,
+  [data-admin="1"] .admin-actions {
+    color: #133344;
+    background-color: rgba(255, 255, 255, 0.88) !important;
+  }
+}
