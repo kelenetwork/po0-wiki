@@ -1353,7 +1353,7 @@ func agentInstallCommand() string {
 
 func agentOneLineInstall(agentID, token, hubURL, releaseBaseURL string) string {
 	releaseBaseURL = strings.TrimRight(releaseBaseURL, "/")
-	return fmt.Sprintf("curl -fsSL %s | sudo AGENT_ID=%s TOKEN=%s HUB_URL=%s bash", shellQuote(releaseBaseURL+"/install.sh"), shellQuote(agentID), shellQuote(token), shellQuote(hubURL))
+	return fmt.Sprintf("curl -fsSL %s | sudo AGENT_ID=%s TOKEN=%s HUB_URL=%s ENABLE_ICMP=true bash", shellQuote(releaseBaseURL+"/install.sh"), shellQuote(agentID), shellQuote(token), shellQuote(hubURL))
 }
 
 func agentOneLineUninstall(releaseBaseURL string) string {
