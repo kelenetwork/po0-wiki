@@ -1,0 +1,777 @@
+/* ============================================================
+   Po0 unified theme overrides for /status, /looking-glass, /admin
+   - Reuses existing markup (kele-status-page / kele-lg-page / admin-*)
+   - Forces dark Po0 palette and shared typography
+   ============================================================ */
+
+:root {
+  --po0-bg: #050d1a;
+  --po0-bg-2: #0a1628;
+  --po0-bg-3: #0d1b30;
+  --po0-text: #e7eef9;
+  --po0-text-strong: #ffffff;
+  --po0-muted: #7d92ad;
+  --po0-faint: rgba(231, 238, 249, 0.32);
+  --po0-line: rgba(120, 170, 220, 0.16);
+  --po0-line-strong: rgba(120, 170, 220, 0.42);
+  --po0-accent: #3ad4ff;
+  --po0-accent-soft: rgba(58, 212, 255, 0.14);
+  --po0-accent-strong: #6fe6ff;
+  --po0-amber: #ffb84d;
+  --po0-violet: #8c7dff;
+  --po0-good: #4dffb8;
+  --po0-warn: #ffb04a;
+  --po0-pending: #6f7c8e;
+  --po0-font-display: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
+  --po0-font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Inter", system-ui, sans-serif;
+  --po0-font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+/* Hide Rspress nav on Po0 themed pages — we ship our own header */
+html body:has(.po0-shell) header.rp-nav,
+html body:has(.po0-shell) header.rspress-nav,
+html body:has(.po0-shell) .rp-nav,
+html body:has(.po0-shell) .rspress-nav {
+  display: none !important;
+}
+
+html body:has(.po0-shell) .rp-doc,
+html body:has(.po0-shell) .rp-content,
+html body:has(.po0-shell) .rp-container,
+html body:has(.po0-shell) .rp-doc-container,
+html body:has(.po0-shell) .rspress-doc,
+html body:has(.po0-shell) .rspress-doc-container,
+html body:has(.po0-shell) main {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+html:has(.po0-shell),
+html:has(.po0-shell) body,
+html:has(.po0-shell) #root {
+  background: #050d1a !important;
+}
+
+/* Shared shell wrapper */
+.po0-shell {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-top: -1.5rem;
+  min-height: 100vh;
+  color: var(--po0-text);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(58, 212, 255, 0.16), transparent 28rem),
+    radial-gradient(circle at 92% 60%, rgba(140, 125, 255, 0.12), transparent 26rem),
+    linear-gradient(180deg, var(--po0-bg) 0%, var(--po0-bg-2) 60%, var(--po0-bg-3) 100%);
+  font-family: var(--po0-font-body);
+  overflow-x: hidden;
+}
+
+.po0-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(120, 170, 220, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 170, 220, 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at 50% 22%, black 18%, transparent 78%);
+  -webkit-mask-image: radial-gradient(circle at 50% 22%, black 18%, transparent 78%);
+}
+
+.po0-shell__nav,
+.po0-shell__main {
+  position: relative;
+  z-index: 1;
+}
+
+.po0-shell__nav {
+  width: min(1480px, 100%);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(20px, 2vw, 28px) clamp(24px, 5vw, 76px);
+}
+
+.po0-shell__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--po0-text-strong);
+  text-decoration: none;
+  font-family: var(--po0-font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-size: clamp(20px, 1.6vw, 26px);
+}
+
+.po0-shell__brand i {
+  width: 1px;
+  height: 18px;
+  background: var(--po0-faint);
+}
+
+.po0-shell__brand svg {
+  filter: drop-shadow(0 0 18px rgba(58, 212, 255, 0.45));
+  animation: po0Spin 22s linear infinite;
+}
+
+.po0-shell__nav nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 36px);
+}
+
+.po0-shell__nav nav a {
+  position: relative;
+  color: var(--po0-text);
+  font-family: var(--po0-font-display);
+  font-size: clamp(15px, 1.1vw, 17px);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.po0-shell__nav nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 1px;
+  background: var(--po0-accent);
+  transition: width 0.25s ease;
+}
+
+.po0-shell__nav nav a:hover,
+.po0-shell__nav nav a[aria-current="page"] {
+  color: var(--po0-accent-strong);
+}
+
+.po0-shell__nav nav a[aria-current="page"]::after,
+.po0-shell__nav nav a:hover::after {
+  width: 100%;
+}
+
+.po0-shell__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--po0-line);
+  text-decoration: none;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  opacity: 0.55;
+}
+
+.po0-shell__cta:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.po0-shell__cta span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--po0-good);
+  box-shadow: 0 0 0 3px rgba(77, 255, 184, 0.18);
+  animation: po0Pulse 1.6s ease-in-out infinite;
+}
+
+.po0-shell__main {
+  width: min(1480px, 100%);
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 36px) clamp(24px, 5vw, 76px) clamp(80px, 10vw, 140px);
+}
+
+/* Hero block (page intro) */
+.po0-shell__hero {
+  margin-bottom: clamp(28px, 4vw, 56px);
+}
+
+.po0-shell__eyebrow {
+  margin: 0 0 14px;
+  color: var(--po0-accent-strong);
+  font-family: var(--po0-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.po0-shell__title {
+  margin: 0;
+  font-family: var(--po0-font-display);
+  font-size: clamp(2.4rem, 4.6vw, 4rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  color: var(--po0-text-strong);
+  line-height: 1.12;
+}
+
+.po0-shell__title em {
+  font-style: italic;
+  background: linear-gradient(120deg, var(--po0-accent-strong) 0%, var(--po0-violet) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.po0-shell__lead {
+  margin: 18px 0 0;
+  max-width: 720px;
+  color: var(--po0-muted);
+  font-family: var(--po0-font-display);
+  font-size: clamp(1rem, 1.2vw, 1.18rem);
+  line-height: 1.85;
+}
+
+/* ------------------------------------------------------------ */
+/* Status page - dark Po0 theme                                  */
+/* ------------------------------------------------------------ */
+.kele-status-page,
+.kele-lg-page {
+  background: transparent !important;
+  border-top: 0 !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  color: var(--po0-text) !important;
+  font-family: var(--po0-font-body) !important;
+}
+
+.kele-status-page::before,
+.kele-lg-page::before {
+  display: none !important;
+}
+
+.kele-status-hero {
+  width: 100% !important;
+  margin: 0 0 clamp(24px, 4vw, 40px) !important;
+  padding: 0 !important;
+  text-align: left;
+}
+
+.kele-status-hero p.kele-section-kicker,
+.kele-section-kicker {
+  margin: 0 0 14px !important;
+  color: var(--po0-accent-strong) !important;
+  font-family: var(--po0-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.kele-status-hero h1 {
+  margin: 0 !important;
+  font-family: var(--po0-font-display) !important;
+  font-size: clamp(2.4rem, 4.6vw, 4rem) !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.025em !important;
+  color: var(--po0-text-strong) !important;
+  line-height: 1.12 !important;
+  text-shadow: none !important;
+}
+
+.kele-status-hero p:not(.kele-section-kicker) {
+  margin: 18px 0 0 !important;
+  max-width: 720px !important;
+  color: var(--po0-muted) !important;
+  font-family: var(--po0-font-display) !important;
+  font-size: clamp(1rem, 1.2vw, 1.18rem) !important;
+  line-height: 1.85 !important;
+}
+
+.kele-status-page > .status-probe,
+.kele-status-page .status-probe,
+.kele-lg-page .looking-glass-console,
+.kele-status-roadmap {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 clamp(20px, 3vw, 32px) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(160deg, rgba(13, 27, 48, 0.85), rgba(7, 16, 32, 0.55)) !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.42) !important;
+  backdrop-filter: blur(16px) !important;
+  color: var(--po0-text) !important;
+}
+
+.kele-status-roadmap h2 {
+  margin: 0 0 14px !important;
+  font-family: var(--po0-font-display) !important;
+  color: var(--po0-text-strong) !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.02em !important;
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem) !important;
+}
+
+.kele-status-roadmap ul {
+  color: var(--po0-muted) !important;
+}
+
+.kele-status-roadmap li {
+  color: var(--po0-muted) !important;
+  line-height: 1.85 !important;
+}
+
+/* Probe dashboard internals re-themed */
+.status-probe.kele-status,
+.status-probe.compact,
+.status-probe {
+  color: var(--po0-text) !important;
+}
+
+.status-probe::after { display: none !important; }
+
+.status-dashboard__topbar h2,
+.status-head h3 {
+  color: var(--po0-text-strong) !important;
+  font-family: var(--po0-font-display) !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.02em !important;
+  text-shadow: none !important;
+}
+
+.status-kicker {
+  color: var(--po0-accent-strong) !important;
+  font-family: var(--po0-font-mono) !important;
+}
+
+.status-pill {
+  border-color: var(--po0-line-strong) !important;
+  color: var(--po0-accent-strong) !important;
+  background: rgba(58, 212, 255, 0.12) !important;
+}
+
+.status-tabs {
+  background: rgba(13, 27, 48, 0.7) !important;
+  border-color: var(--po0-line) !important;
+}
+
+.status-tabs button {
+  color: var(--po0-muted) !important;
+  background: transparent !important;
+}
+
+.status-tabs button.active {
+  color: var(--po0-bg) !important;
+  background: var(--po0-accent-strong) !important;
+  box-shadow: 0 0 22px rgba(58, 212, 255, 0.32) !important;
+}
+
+.status-source-panel,
+.status-chart-card,
+.latency-card,
+.source-filter,
+.status-chart-card .status-chart-head,
+.source-node-card,
+.probe-row {
+  background: rgba(7, 16, 32, 0.58) !important;
+  border-color: var(--po0-line) !important;
+  color: var(--po0-text) !important;
+  backdrop-filter: blur(12px);
+}
+
+.source-node-card strong,
+.latency-card__value,
+.latency-card__target,
+.probe-row strong {
+  color: var(--po0-text-strong) !important;
+}
+
+.source-node-card small,
+.source-node-card__meta,
+.latency-card__route,
+.latency-card__meta small,
+.probe-row small,
+.status-dashboard__topbar span,
+.status-chart-head small,
+.status-legend {
+  color: var(--po0-muted) !important;
+}
+
+.probe-row em { color: var(--po0-accent-strong) !important; }
+
+.dot.online,
+.node-status--online {
+  color: var(--po0-good) !important;
+  background: rgba(77, 255, 184, 0.12) !important;
+}
+
+.dot.warn,
+.node-status--warn {
+  color: var(--po0-warn) !important;
+  background: rgba(255, 176, 74, 0.12) !important;
+}
+
+.dot.pending,
+.node-status--pending {
+  color: var(--po0-pending) !important;
+  background: rgba(111, 124, 142, 0.14) !important;
+}
+
+.source-filter button,
+.status-legend button {
+  color: var(--po0-muted) !important;
+  background: rgba(7, 16, 32, 0.6) !important;
+  border-color: var(--po0-line) !important;
+}
+
+.source-filter button.active,
+.status-legend button.active {
+  color: var(--po0-accent-strong) !important;
+  background: rgba(58, 212, 255, 0.12) !important;
+  border-color: var(--po0-line-strong) !important;
+}
+
+.latency-card--green { color: var(--po0-good) !important; }
+.latency-card--blue { color: var(--po0-accent-strong) !important; }
+.latency-card--amber { color: var(--po0-warn) !important; }
+.latency-card--violet { color: var(--po0-violet) !important; }
+
+.latency-chart line.chart-grid {
+  stroke: var(--po0-line) !important;
+}
+
+.chart-axis,
+.chart-empty {
+  fill: var(--po0-muted) !important;
+}
+
+/* ------------------------------------------------------------ */
+/* Looking Glass console                                         */
+/* ------------------------------------------------------------ */
+.lg-sidebar,
+.lg-workbench {
+  background: rgba(7, 16, 32, 0.6) !important;
+  border-color: var(--po0-line) !important;
+  color: var(--po0-text) !important;
+  box-shadow: none !important;
+}
+
+.lg-workbench::before {
+  background: radial-gradient(circle, rgba(58, 212, 255, 0.18), transparent 65%) !important;
+}
+
+.lg-sidebar__head h2 { color: var(--po0-text-strong) !important; font-family: var(--po0-font-display) !important; font-weight: 400 !important; letter-spacing: -0.02em !important; }
+.lg-sidebar__head span,
+.lg-region__title small,
+.lg-node small,
+.lg-summary-grid small,
+.lg-summary-grid span,
+.lg-toolbar label span,
+.lg-empty {
+  color: var(--po0-muted) !important;
+}
+
+.lg-region {
+  background: rgba(7, 16, 32, 0.6) !important;
+  border-color: var(--po0-line) !important;
+}
+
+.lg-node {
+  color: var(--po0-text) !important;
+}
+
+.lg-node:hover {
+  border-color: var(--po0-line-strong) !important;
+  background: rgba(58, 212, 255, 0.08) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.45) !important;
+}
+
+.lg-node.is-active {
+  border-color: var(--po0-accent-strong) !important;
+  background: rgba(58, 212, 255, 0.18) !important;
+  box-shadow: 0 0 32px rgba(58, 212, 255, 0.22) !important;
+}
+
+.lg-toolbar select,
+.lg-toolbar input,
+.lg-source-readonly strong {
+  background: rgba(13, 27, 48, 0.85) !important;
+  color: var(--po0-text) !important;
+  border-color: var(--po0-line) !important;
+}
+
+.lg-source-readonly strong {
+  background: rgba(58, 212, 255, 0.12) !important;
+  color: var(--po0-text-strong) !important;
+}
+
+.lg-run {
+  background: linear-gradient(135deg, var(--po0-accent-strong) 0%, var(--po0-accent) 100%) !important;
+  color: var(--po0-bg) !important;
+  box-shadow: 0 16px 38px rgba(58, 212, 255, 0.28) !important;
+}
+
+.lg-summary-grid article {
+  background: rgba(7, 16, 32, 0.6) !important;
+  border-color: var(--po0-line) !important;
+}
+
+.lg-summary-grid strong { color: var(--po0-text-strong) !important; }
+
+.lg-terminal-card {
+  border-color: rgba(58, 212, 255, 0.22) !important;
+  background:
+    radial-gradient(circle at 100% 0, rgba(58, 212, 255, 0.12), transparent 30%),
+    #04101e !important;
+}
+
+.lg-terminal-card pre {
+  color: #c5f4ff !important;
+}
+
+.lg-mode-banner {
+  background: rgba(255, 80, 90, 0.12) !important;
+  color: #ffb1b8 !important;
+  border-color: rgba(255, 80, 90, 0.34) !important;
+}
+
+.lg-mode-banner--dispatch {
+  background: rgba(58, 212, 255, 0.12) !important;
+  color: var(--po0-accent-strong) !important;
+  border-color: var(--po0-line-strong) !important;
+}
+
+/* ------------------------------------------------------------ */
+/* Admin pages - dark Po0 theme                                  */
+/* ------------------------------------------------------------ */
+.admin-layout {
+  background:
+    radial-gradient(circle at 14% 0, rgba(58, 212, 255, 0.16), transparent 28rem),
+    radial-gradient(circle at 90% 14%, rgba(140, 125, 255, 0.12), transparent 24rem),
+    linear-gradient(180deg, var(--po0-bg) 0%, var(--po0-bg-2) 60%, var(--po0-bg-3) 100%) !important;
+  color: var(--po0-text) !important;
+  font-family: var(--po0-font-body) !important;
+}
+
+.admin-sidebar {
+  background:
+    radial-gradient(circle at 30% 0, rgba(58, 212, 255, 0.18), transparent 18rem),
+    rgba(7, 16, 32, 0.96) !important;
+  border-right: 1px solid var(--po0-line) !important;
+  color: var(--po0-text) !important;
+}
+
+.admin-brand {
+  color: var(--po0-text-strong) !important;
+  font-family: var(--po0-font-display) !important;
+  letter-spacing: -0.02em !important;
+  font-size: 22px !important;
+}
+
+.admin-sidebar a,
+.admin-sidebar button {
+  color: rgba(231, 238, 249, 0.7) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  font-family: var(--po0-font-display) !important;
+  letter-spacing: 0.02em !important;
+}
+
+.admin-sidebar a.active,
+.admin-sidebar a:hover,
+.admin-sidebar button:hover {
+  color: var(--po0-text-strong) !important;
+  background: rgba(58, 212, 255, 0.12) !important;
+  border-color: var(--po0-line-strong) !important;
+}
+
+.admin-card,
+.admin-table-wrap,
+.admin-matrix,
+.admin-form.admin-card,
+.admin-stat,
+.admin-shell .admin-form {
+  background: rgba(7, 16, 32, 0.6) !important;
+  border-color: var(--po0-line) !important;
+  color: var(--po0-text) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(14px);
+}
+
+.admin-shell h1,
+.admin-shell h2,
+.admin-shell h3 { color: var(--po0-text-strong) !important; font-family: var(--po0-font-display) !important; font-weight: 400 !important; letter-spacing: -0.02em !important; }
+.admin-shell .admin-kicker { color: var(--po0-accent-strong) !important; font-family: var(--po0-font-mono) !important; }
+.admin-shell small,
+.admin-form label,
+.admin-stat span,
+.admin-auth { color: var(--po0-muted) !important; }
+
+.admin-stat strong { color: var(--po0-accent-strong) !important; font-family: var(--po0-font-mono) !important; }
+
+.admin-form input,
+.admin-form select {
+  background: rgba(13, 27, 48, 0.85) !important;
+  color: var(--po0-text) !important;
+  border-color: var(--po0-line) !important;
+}
+
+.admin-form input:disabled {
+  background: rgba(31, 47, 70, 0.6) !important;
+  color: var(--po0-faint) !important;
+}
+
+.admin-shell button {
+  background: rgba(13, 27, 48, 0.85) !important;
+  color: var(--po0-text) !important;
+  border-color: var(--po0-line) !important;
+  font-family: var(--po0-font-display) !important;
+}
+
+.admin-shell button:hover,
+.admin-shell button.active {
+  background: linear-gradient(135deg, var(--po0-accent-strong) 0%, var(--po0-accent) 100%) !important;
+  color: var(--po0-bg) !important;
+  border-color: transparent !important;
+}
+
+.admin-shell button.danger {
+  color: #ff7a80 !important;
+  border-color: rgba(255, 122, 128, 0.34) !important;
+}
+
+.admin-shell button.danger:hover {
+  color: var(--po0-bg) !important;
+  background: #ff7a80 !important;
+}
+
+.admin-shell table {
+  background: transparent !important;
+}
+
+.admin-shell th,
+.admin-shell td {
+  border-color: var(--po0-line) !important;
+}
+
+.admin-shell th {
+  background: rgba(13, 27, 48, 0.7) !important;
+  color: var(--po0-muted) !important;
+}
+
+.admin-shell td {
+  background: rgba(7, 16, 32, 0.5) !important;
+  color: var(--po0-text) !important;
+}
+
+.admin-shell tr:hover td {
+  background: rgba(58, 212, 255, 0.08) !important;
+}
+
+.admin-actions {
+  background: rgba(7, 16, 32, 0.92) !important;
+  box-shadow: -16px 0 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+.admin-detail td { background: rgba(13, 27, 48, 0.55) !important; color: var(--po0-muted) !important; }
+
+.admin-token-row code,
+.install-view code {
+  color: var(--po0-accent-strong) !important;
+  background: rgba(58, 212, 255, 0.1) !important;
+}
+
+.admin-chips span {
+  color: var(--po0-accent-strong) !important;
+  background: rgba(58, 212, 255, 0.1) !important;
+}
+
+.admin-drawer {
+  background: var(--po0-bg) !important;
+  color: var(--po0-text) !important;
+}
+
+.install-view pre,
+.lg-terminal-card pre {
+  background: #04101e !important;
+}
+
+.install-primary,
+.install-hero {
+  background: rgba(58, 212, 255, 0.08) !important;
+  border-color: var(--po0-line-strong) !important;
+}
+
+.install-details summary,
+.install-advanced summary {
+  color: var(--po0-accent-strong) !important;
+}
+
+.matrix-cell { color: var(--po0-text-strong) !important; }
+.matrix-empty { color: var(--po0-muted) !important; }
+.status-ok { background: rgba(77, 255, 184, 0.12) !important; }
+.status-warn { background: rgba(255, 176, 74, 0.16) !important; }
+.status-fail { background: rgba(255, 80, 90, 0.18) !important; }
+.status-pending { background: rgba(111, 124, 142, 0.16) !important; }
+
+.admin-notice {
+  background: rgba(58, 212, 255, 0.12) !important;
+  color: var(--po0-accent-strong) !important;
+  border-color: var(--po0-line-strong) !important;
+}
+
+.admin-error {
+  background: rgba(255, 80, 90, 0.12) !important;
+  color: #ffb1b8 !important;
+  border-color: rgba(255, 80, 90, 0.34) !important;
+}
+
+@keyframes po0Spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes po0Pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+}
+
+/* Status panel polish */
+.status-panel-title { color: var(--po0-text-strong) !important; }
+.status-panel-title span { color: var(--po0-text) !important; }
+.status-panel-title strong { color: var(--po0-accent-strong) !important; }
+
+.status-source-meta {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--po0-line);
+  color: var(--po0-accent-strong);
+  font-family: var(--po0-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* chart axis tick labels */
+.latency-chart text { fill: var(--po0-text) !important; }
+.chart-axis-title { fill: var(--po0-accent-strong) !important; }
+.chart-grid--vertical { stroke: rgba(120,170,220,0.18) !important; }
+
+/* source-node-card status pill alignment */
+.source-node-card__meta { color: var(--po0-muted) !important; }
+.source-node-card__meta .node-status i { background: currentColor; box-shadow: 0 0 0 4px rgba(77,255,184,0.18); }
+
+/* Looking Glass dedupe with Po0Shell hero */
+.lg-sidebar__head { display: none !important; }
+.po0-shell .looking-glass-console { gap: 18px !important; }
+
+/* Admin login form inputs need brighter visibility */
+.admin-login .admin-form input { background: rgba(13, 27, 48, 0.95) !important; }
+

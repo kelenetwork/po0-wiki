@@ -4,25 +4,13 @@ title: 服务状态
 ---
 
 import StatusProbe from '../src/components/StatusProbe';
+import Po0Shell from '../src/components/Po0Shell';
 
-<div className="kele-status-page">
-  <section className="kele-status-hero">
-    <p className="kele-section-kicker">Probe Atlas</p>
-    <h1>链路状态</h1>
-    <p>
-      从公开快照读取各源节点到目标的延迟、抖动和丢包。前台只展示脱敏后的状态，不暴露真实连接信息。
-    </p>
-  </section>
-
+<Po0Shell
+  current="status"
+  eyebrow="PROBE ATLAS"
+  title={<>看见每一条<em>实时链路</em>。</>}
+  lead="从公开快照读取各源节点到目标的延迟、抖动和丢包，前台只展示脱敏后的状态，不暴露真实连接信息。"
+>
   <StatusProbe />
-
-  <section className="kele-status-roadmap">
-    <h2>读法</h2>
-    <ul>
-      <li>页面只消费公开快照，不展示真实 host、端口或 token。</li>
-      <li>没有快照时显示备用样例，避免页面空白。</li>
-      <li>卡片、节点和曲线都由 sources / targets / checks / series 派生。</li>
-      <li>需要实际探测时，从 Looking Glass 选择在线源节点执行。</li>
-    </ul>
-  </section>
-</div>
+</Po0Shell>

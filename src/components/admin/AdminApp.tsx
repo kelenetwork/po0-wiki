@@ -1,6 +1,35 @@
 import type { FormEvent, ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import './AdminApp.css';
+import '../Po0Theme.css';
+
+function AdminTopBar({ current }: { current: 'admin' }) {
+  return (
+    <header className="po0-shell__nav">
+      <a className="po0-shell__brand" href="/">
+        <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="1.4" />
+          <circle cx="16" cy="16" r="3" fill="currentColor" />
+          <path d="M16 2v28M2 16h28" stroke="currentColor" strokeWidth="0.6" opacity="0.4" />
+          <ellipse cx="16" cy="16" rx="8" ry="14" stroke="currentColor" strokeWidth="0.8" opacity="0.6" />
+        </svg>
+        <span>Po0</span>
+        <i />
+        <span>Wiki</span>
+      </a>
+      <nav>
+        <a href="/guide/getting-started">指南</a>
+        <a href="/status">服务状态</a>
+        <a href="/looking-glass">Looking Glass</a>
+        <a href="/admin/sources" aria-current="page">控制台</a>
+      </nav>
+      <a className="po0-shell__cta" href="/admin/sources" aria-label="控制台" data-current={current}>
+        <span />
+      </a>
+    </header>
+  );
+}
+
 
 type AdminPage = 'home' | 'sources' | 'targets' | 'checks' | 'agents';
 type TargetKind = 'tcp' | 'icmp' | 'http' | 'https';
@@ -163,9 +192,9 @@ export default function AdminApp({ page }: AdminAppProps) {
   async function copyUninstall(id: string) { try { const install = await adminFetch<InstallPayload>(`/api/admin/agents/${encodeURIComponent(id)}/install`); await copyText(install.one_line_uninstall || install.install_command); } catch (error) { showError(error); } }
   async function copyText(text: string) { await writeClipboard(text); setNotice('已复制到剪贴板。'); }
 
-  if (!authReady) return <section className="admin-shell">加载中…</section>;
-  if (!token) return <section className="admin-shell admin-login"><p className="admin-kicker">Control Room</p><h1>Probe Admin</h1><p>输入后台 Token，开始管理源节点、目标和探测任务。</p><form className="admin-card admin-form" onSubmit={login}><label>Token<input type="password" value={tokenInput} onChange={(event) => setTokenInput(event.target.value)} autoComplete="off" /></label><button type="submit">进入后台</button></form><Toast notice={notice} /><ErrorBanner message={errorBanner} onClose={() => setErrorBanner('')} /></section>;
-  return <section className="admin-layout"><aside className="admin-sidebar"><a className="admin-brand" href="/admin/sources">Probe Admin</a><nav>{navItems.map((item) => <a key={item.page} className={normalizedPage === item.page ? 'active' : ''} href={item.href}>{item.label}</a>)}<button type="button" onClick={logout}>退出</button></nav></aside><main className="admin-shell"><header className="admin-header"><div><p className="admin-kicker">Probe Admin</p><h1>{pageTitles[normalizedPage]}</h1></div><div className="admin-auth"><span>Token {maskToken(token)}</span><button type="button" onClick={logout}>退出登录</button></div></header><Toast notice={notice} /><ErrorBanner message={errorBanner} onClose={() => setErrorBanner('')} />{normalizedPage === 'home' && <Dashboard sources={sources} targets={targets} checks={checks} />}{normalizedPage === 'sources' && <SourcesPage sources={sources} agents={agentBySource} visibleTokens={visibleTokens} onToggleToken={(id) => setVisibleTokens((items) => ({ ...items, [id]: !items[id] }))} onCopy={copyText} onUninstall={copyUninstall} onNew={() => setDrawer({ kind: 'source', mode: 'create', title: '新增源节点', form: blankSource })} onEdit={(item) => setDrawer({ kind: 'source', mode: 'edit', title: `编辑：${item.display_name}`, form: sourceForm(item) })} onDelete={(id) => deleteResource('sources', id)} onReset={resetToken} onInstall={showInstall} />}{normalizedPage === 'targets' && <TargetsPage targets={targets} onNew={() => setDrawer({ kind: 'target', mode: 'create', title: '新增目标', form: blankTarget })} onEdit={(item) => setDrawer({ kind: 'target', mode: 'edit', title: `编辑：${item.display_name}`, form: targetForm(item) })} onDelete={(id) => deleteResource('targets', id)} />}{normalizedPage === 'checks' && <ChecksPage view={checksView} setView={setChecksView} sources={sortedSources} targets={targets} checks={checks} sourceName={sourceName} targetName={targetName} checkByPair={checkByPair} onNew={() => setDrawer({ kind: 'check', mode: 'create', title: '新增任务', form: blankCheck })} onCreatePair={(source, target) => setDrawer({ kind: 'check', mode: 'create', title: `${source.display_name} → ${target.display_name}`, form: checkForm(undefined, source, target) })} onEdit={(item) => setDrawer({ kind: 'check', mode: 'edit', title: `编辑：${item.display_name}`, form: checkForm(item), deletable: true })} />}</main>{drawer && <Drawer drawer={drawer} setDrawer={setDrawer} sources={sources} targets={targets} onClose={() => setDrawer(null)} onCopy={copyText} onSaveSource={saveSource} onSaveTarget={saveTarget} onSaveCheck={saveCheck} onDeleteCheck={(id) => deleteResource('checks', id)} />}</section>;
+  if (!authReady) return <div className="po0-shell"><AdminTopBar current="admin" /><main className="po0-shell__main"><section className="admin-shell">加载中…</section></main></div>;
+  if (!token) return <div className="po0-shell"><AdminTopBar current="admin" /><main className="po0-shell__main"><section className="admin-shell admin-login"><p className="admin-kicker po0-shell__eyebrow">CONTROL ROOM</p><h1 className="po0-shell__title">登录控制台<em>。</em></h1><p className="po0-shell__lead">输入后台 Token，开始管理源节点、目标和探测任务。</p><form className="admin-card admin-form" onSubmit={login}><label>Token<input type="password" value={tokenInput} onChange={(event) => setTokenInput(event.target.value)} autoComplete="off" /></label><button type="submit">进入后台</button></form><Toast notice={notice} /><ErrorBanner message={errorBanner} onClose={() => setErrorBanner('')} /></section></main></div>;
+  return <div className="po0-shell"><AdminTopBar current="admin" /><section className="admin-layout"><aside className="admin-sidebar"><a className="admin-brand" href="/admin/sources">Probe Admin</a><nav>{navItems.map((item) => <a key={item.page} className={normalizedPage === item.page ? 'active' : ''} href={item.href}>{item.label}</a>)}<button type="button" onClick={logout}>退出</button></nav></aside><main className="admin-shell"><header className="admin-header"><div><p className="admin-kicker">Probe Admin</p><h1>{pageTitles[normalizedPage]}</h1></div><div className="admin-auth"><span>Token {maskToken(token)}</span><button type="button" onClick={logout}>退出登录</button></div></header><Toast notice={notice} /><ErrorBanner message={errorBanner} onClose={() => setErrorBanner('')} />{normalizedPage === 'home' && <Dashboard sources={sources} targets={targets} checks={checks} />}{normalizedPage === 'sources' && <SourcesPage sources={sources} agents={agentBySource} visibleTokens={visibleTokens} onToggleToken={(id) => setVisibleTokens((items) => ({ ...items, [id]: !items[id] }))} onCopy={copyText} onUninstall={copyUninstall} onNew={() => setDrawer({ kind: 'source', mode: 'create', title: '新增源节点', form: blankSource })} onEdit={(item) => setDrawer({ kind: 'source', mode: 'edit', title: `编辑：${item.display_name}`, form: sourceForm(item) })} onDelete={(id) => deleteResource('sources', id)} onReset={resetToken} onInstall={showInstall} />}{normalizedPage === 'targets' && <TargetsPage targets={targets} onNew={() => setDrawer({ kind: 'target', mode: 'create', title: '新增目标', form: blankTarget })} onEdit={(item) => setDrawer({ kind: 'target', mode: 'edit', title: `编辑：${item.display_name}`, form: targetForm(item) })} onDelete={(id) => deleteResource('targets', id)} />}{normalizedPage === 'checks' && <ChecksPage view={checksView} setView={setChecksView} sources={sortedSources} targets={targets} checks={checks} sourceName={sourceName} targetName={targetName} checkByPair={checkByPair} onNew={() => setDrawer({ kind: 'check', mode: 'create', title: '新增任务', form: blankCheck })} onCreatePair={(source, target) => setDrawer({ kind: 'check', mode: 'create', title: `${source.display_name} → ${target.display_name}`, form: checkForm(undefined, source, target) })} onEdit={(item) => setDrawer({ kind: 'check', mode: 'edit', title: `编辑：${item.display_name}`, form: checkForm(item), deletable: true })} />}</main>{drawer && <Drawer drawer={drawer} setDrawer={setDrawer} sources={sources} targets={targets} onClose={() => setDrawer(null)} onCopy={copyText} onSaveSource={saveSource} onSaveTarget={saveTarget} onSaveCheck={saveCheck} onDeleteCheck={(id) => deleteResource('checks', id)} />}</section></div>;
 }
 
 function Dashboard({ sources, targets, checks }: { sources: Source[]; targets: Target[]; checks: Check[] }) { return <div className="admin-grid"><a className="admin-card admin-stat" href="/admin/sources"><span>源节点</span><strong>{sources.length}</strong></a><a className="admin-card admin-stat" href="/admin/targets"><span>目标</span><strong>{targets.length}</strong></a><a className="admin-card admin-stat" href="/admin/checks"><span>任务</span><strong>{checks.length}</strong></a></div>; }

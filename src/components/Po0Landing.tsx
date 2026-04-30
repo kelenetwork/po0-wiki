@@ -271,10 +271,10 @@ export default function Po0Landing() {
             </a>
             <a className="po0-landing__how-step po0-reveal" href="/guide/getting-started">
               <span className="po0-landing__how-step-num">02</span>
-              <span className="po0-landing__how-step-flag">RFC</span>
-              <h3>接入廉价落地</h3>
-              <p>把市场上的 RFC 落地鸡当成你的境外节点，由 Po0 入口前置加速。</p>
-              <em>RFC 接入指南 <i>↗</i></em>
+              <span className="po0-landing__how-step-flag">EXIT</span>
+              <h3>多种出口可选</h3>
+              <p>CNIX、Po0 国际出口、RFC 香港 / 日本全系产品，按方向和预算自由组合。</p>
+              <em>查看出口对比 <i>↗</i></em>
             </a>
             <a className="po0-landing__how-step po0-reveal" href="/looking-glass">
               <span className="po0-landing__how-step-num">03</span>
