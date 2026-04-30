@@ -30,7 +30,7 @@ function withCurrent(items: NavItem[], current: Po0ShellProps['current']): NavIt
 export default function Po0Shell({ current, eyebrow, title, lead, children }: Po0ShellProps) {
   const items = withCurrent(NAV, current);
   return (
-    <div className="po0-shell">
+    <div className={`po0-shell po0-shell--${current}`}>
       <header className="po0-shell__nav">
         <a className="po0-shell__brand" href="/">
           <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
