@@ -7,7 +7,7 @@
   position: relative;
   border: 1px solid var(--kele-line, rgba(20, 32, 31, 0.14));
   border-radius: 28px;
-  padding: 22px;
+  padding: clamp(20px, 2.2vw, 32px);
   color: var(--kele-ink, #14201f);
   background: var(--kele-card, rgba(255, 252, 243, 0.9));
   box-shadow: var(--kele-shadow, 0 30px 80px rgba(37, 45, 41, 0.13));
@@ -232,8 +232,8 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(260px, 0.33fr) minmax(0, 1fr);
-  gap: 20px;
+  grid-template-columns: minmax(280px, 0.24fr) minmax(0, 1fr);
+  gap: clamp(18px, 2vw, 28px);
 }
 
 .status-source-panel,
@@ -364,8 +364,8 @@
 
 .latency-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(14px, 1.5vw, 20px);
 }
 
 .latency-card {

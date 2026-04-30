@@ -323,7 +323,7 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
     <section className="status-probe status-dashboard kele-status" aria-label="链路状态">
       <div className="status-dashboard__topbar">
         <div>
-          <span className="status-source-meta">{origin === 'api' ? '公网快照 · 已脱敏' : '读取快照中'}</span>
+          <span className="status-source-meta">{origin === 'api' ? '实时状态已更新' : '正在同步状态'}</span>
         </div>
         <div className="status-tabs" aria-label="时间范围">
           <button type="button" className="active">1天</button>

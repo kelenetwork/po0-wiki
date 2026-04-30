@@ -60,8 +60,8 @@ function renderTerminalOutput(value: string) {
 }
 
 const initialTerminal = [
-  '选择发起点、目标和工具，Run 后从 agent 发起测试',
-  'Hub 只派单，结果由发起点回传。',
+  '选择发起点、目标和工具后开始检测。',
+  '结果会在这里实时显示，适合排查访问路径与响应情况。',
 ].join('\n');
 
 export default function LookingGlass() {
@@ -91,7 +91,7 @@ export default function LookingGlass() {
     const sourceName = selectedSource.display_name;
     const targetName = selectedTarget?.display_name ?? selectedTargetId;
     setRunning(true);
-    setTerminalOutput(`✓ 测试发起点：${sourceName}\n$ ${selectedTool} ${targetName} --from ${sourceName}\n等待 agent 执行中...`);
+    setTerminalOutput(`✓ 测试发起点：${sourceName}\n$ ${selectedTool} ${targetName} --from ${sourceName}\n正在等待检测结果...`);
     try {
       const response = await fetch('/api/public/lg/run', {
         method: 'POST',
@@ -100,12 +100,12 @@ export default function LookingGlass() {
       });
 
       if (response.status !== 202) {
-        setTerminalOutput(`Looking Glass 任务创建失败：HTTP ${response.status}\n${await response.text()}`);
+        setTerminalOutput(`检测任务创建失败：HTTP ${response.status}\n${await response.text()}`);
         return;
       }
       const payload = await response.json() as { job_id?: string };
       if (!payload.job_id) {
-        setTerminalOutput('Looking Glass 任务创建失败：后端没有返回 job_id。');
+        setTerminalOutput('检测任务创建失败：未收到任务编号。');
         return;
       }
 
@@ -114,21 +114,21 @@ export default function LookingGlass() {
         const resultResponse = await fetch(`/api/public/lg/result?job_id=${encodeURIComponent(payload.job_id)}`, { headers: { Accept: 'application/json' } });
         const result = await resultResponse.json() as LGResult;
         if (result.status === 'completed' || result.status === 'failed') {
-          setTerminalOutput(`✓ 测试发起点：${sourceName}\n# job_id: ${payload.job_id} · status=${result.status}\n${result.output || ''}${result.error ? `\nerror: ${result.error}` : ''}`);
+          setTerminalOutput(`✓ 测试发起点：${sourceName}\n# 检测编号：${payload.job_id} · 状态：${result.status}\n${result.output || ''}${result.error ? `\n错误：${result.error}` : ''}`);
           return;
         }
-        setTerminalOutput(`✓ 测试发起点：${sourceName}\n# job_id: ${payload.job_id} · status=${result.status}\n等待 ${sourceName} 执行中... ${second + 1}s`);
+        setTerminalOutput(`✓ 测试发起点：${sourceName}\n# 检测编号：${payload.job_id} · 状态：${result.status}\n${sourceName} 正在检测... ${second + 1}s`);
       }
-      setTerminalOutput(`✓ 测试发起点：${sourceName}\n# job 超时（30s 内 agent 未上报结果）\n请稍后重试或检查 agent 日志：journalctl -u wiki-probe-agent`);
+      setTerminalOutput(`✓ 测试发起点：${sourceName}\n# 检测超时（30s 内暂无结果）\n请稍后重试，或换一个发起点。`);
     } catch (error) {
-      setTerminalOutput(`Looking Glass 请求失败：${error instanceof Error ? error.message : 'unknown error'}`);
+      setTerminalOutput(`检测请求失败：${error instanceof Error ? error.message : 'unknown error'}`);
     } finally {
       setRunning(false);
     }
   }
 
   const runDisabledHint = !sourceOnline
-    ? '请先在左侧选择一个 online 的发起点'
+    ? '请先在左侧选择一个可用发起点'
     : !selectedTargetId
       ? '请选择一个目标'
       : '';
@@ -139,7 +139,7 @@ export default function LookingGlass() {
         <div className="lg-sidebar__head">
           <p className="status-kicker">Nodes</p>
           <h2>发起点</h2>
-          <span>{origin === 'api' ? '在线节点可执行测试。' : '同步节点中。'}</span>
+          <span>{origin === 'api' ? '选择一个可用发起点开始检测。' : '正在同步可用发起点。'}</span>
         </div>
         <div className="lg-region-list">
           {regionGroups.map((group) => (
@@ -170,7 +170,7 @@ export default function LookingGlass() {
             </article>
           ))}
           {snapshot.sources.length === 0 && (
-            <p className="lg-empty">还没有任何 agent 上报。先部署一个发起点 agent。</p>
+            <p className="lg-empty">暂时没有可用发起点，请稍后再试。</p>
           )}
         </div>
       </aside>
@@ -206,7 +206,7 @@ export default function LookingGlass() {
             disabled={!canRun}
             title={runDisabledHint}
           >
-            {running ? 'Running…' : 'Run'}
+            {running ? '检测中…' : '开始检测'}
           </button>
         </div>
 
@@ -223,8 +223,8 @@ export default function LookingGlass() {
           </article>
           <article>
             <span>执行方式</span>
-            <strong>{running ? '运行中' : 'Agent 派发'}</strong>
-            <small>发起点 agent 执行，轮询结果</small>
+            <strong>{running ? '运行中' : '即时检测'}</strong>
+            <small>结果会在下方窗口更新</small>
           </article>
         </div>
 
@@ -233,7 +233,7 @@ export default function LookingGlass() {
             <span />
             <span />
             <span />
-            <strong>Agent Output</strong>
+            <strong>检测结果</strong>
           </div>
           <pre>{renderTerminalOutput(terminalOutput)}</pre>
         </div>

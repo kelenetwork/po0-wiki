@@ -5,23 +5,26 @@
    ============================================================ */
 
 :root {
-  --po0-bg: #050d1a;
-  --po0-bg-2: #0a1628;
-  --po0-bg-3: #0d1b30;
-  --po0-text: #e7eef9;
+  --po0-bg: #0a1628;
+  --po0-bg-2: #122441;
+  --po0-bg-3: #16294b;
+  --po0-text: #f0f5fc;
   --po0-text-strong: #ffffff;
-  --po0-muted: #7d92ad;
-  --po0-faint: rgba(231, 238, 249, 0.32);
-  --po0-line: rgba(120, 170, 220, 0.16);
-  --po0-line-strong: rgba(120, 170, 220, 0.42);
+  --po0-muted: #a3b3c8;
+  --po0-muted-strong: #d2dfef;
+  --po0-faint: rgba(231, 238, 249, 0.5);
+  --po0-line: rgba(140, 195, 240, 0.22);
+  --po0-line-strong: rgba(140, 195, 240, 0.5);
   --po0-accent: #3ad4ff;
-  --po0-accent-soft: rgba(58, 212, 255, 0.14);
+  --po0-accent-soft: rgba(58, 212, 255, 0.18);
   --po0-accent-strong: #6fe6ff;
-  --po0-amber: #ffb84d;
-  --po0-violet: #8c7dff;
-  --po0-good: #4dffb8;
-  --po0-warn: #ffb04a;
-  --po0-pending: #6f7c8e;
+  --po0-amber: #ffc06a;
+  --po0-violet: #aea5ff;
+  --po0-good: #6effc4;
+  --po0-warn: #ffb966;
+  --po0-pending: #97a4b6;
+  --po0-surface: rgba(22, 41, 75, 0.72);
+  --po0-surface-strong: rgba(28, 50, 88, 0.86);
   --po0-font-display: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
   --po0-font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Inter", system-ui, sans-serif;
   --po0-font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
@@ -189,9 +192,19 @@ html:has(.po0-shell) #root {
 }
 
 .po0-shell__main {
-  width: min(1480px, 100%);
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
-  padding: clamp(20px, 3vw, 36px) clamp(24px, 5vw, 76px) clamp(80px, 10vw, 140px);
+  padding: clamp(20px, 3vw, 36px) clamp(20px, 3.2vw, 56px) clamp(80px, 10vw, 140px);
+}
+
+.po0-shell__main > :not(.po0-shell__hero) {
+  width: 100%;
+}
+
+.po0-shell__nav {
+  width: 100% !important;
+  max-width: none !important;
 }
 
 /* Hero block (page intro) */
@@ -302,11 +315,11 @@ html:has(.po0-shell) #root {
   width: 100% !important;
   max-width: none !important;
   margin: 0 0 clamp(20px, 3vw, 32px) !important;
-  border: 1px solid var(--po0-line) !important;
+  border: 1px solid var(--po0-line-strong) !important;
   border-radius: 22px !important;
-  background: linear-gradient(160deg, rgba(13, 27, 48, 0.85), rgba(7, 16, 32, 0.55)) !important;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.42) !important;
-  backdrop-filter: blur(16px) !important;
+  background: linear-gradient(160deg, rgba(47, 78, 126, 0.86), rgba(28, 52, 92, 0.74)) !important;
+  box-shadow: 0 24px 60px rgba(8, 18, 36, 0.38) !important;
+  backdrop-filter: blur(14px) !important;
   color: var(--po0-text) !important;
 }
 
@@ -380,10 +393,10 @@ html:has(.po0-shell) #root {
 .status-chart-card .status-chart-head,
 .source-node-card,
 .probe-row {
-  background: rgba(7, 16, 32, 0.58) !important;
-  border-color: var(--po0-line) !important;
+  background: rgba(48, 81, 131, 0.72) !important;
+  border-color: var(--po0-line-strong) !important;
   color: var(--po0-text) !important;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
 }
 
 .source-node-card strong,
@@ -401,7 +414,7 @@ html:has(.po0-shell) #root {
 .status-dashboard__topbar span,
 .status-chart-head small,
 .status-legend {
-  color: var(--po0-muted) !important;
+  color: var(--po0-muted-strong) !important;
 }
 
 .probe-row em { color: var(--po0-accent-strong) !important; }
@@ -426,9 +439,9 @@ html:has(.po0-shell) #root {
 
 .source-filter button,
 .status-legend button {
-  color: var(--po0-muted) !important;
-  background: rgba(7, 16, 32, 0.6) !important;
-  border-color: var(--po0-line) !important;
+  color: var(--po0-text-strong) !important;
+  background: rgba(54, 88, 139, 0.72) !important;
+  border-color: var(--po0-line-strong) !important;
 }
 
 .source-filter button.active,
@@ -444,12 +457,12 @@ html:has(.po0-shell) #root {
 .latency-card--violet { color: var(--po0-violet) !important; }
 
 .latency-chart line.chart-grid {
-  stroke: var(--po0-line) !important;
+  stroke: var(--po0-line-strong) !important;
 }
 
 .chart-axis,
 .chart-empty {
-  fill: var(--po0-muted) !important;
+  fill: var(--po0-text) !important;
 }
 
 /* ------------------------------------------------------------ */
@@ -457,10 +470,10 @@ html:has(.po0-shell) #root {
 /* ------------------------------------------------------------ */
 .lg-sidebar,
 .lg-workbench {
-  background: rgba(7, 16, 32, 0.6) !important;
-  border-color: var(--po0-line) !important;
+  background: rgba(48, 81, 131, 0.76) !important;
+  border-color: var(--po0-line-strong) !important;
   color: var(--po0-text) !important;
-  box-shadow: none !important;
+  box-shadow: 0 18px 48px rgba(8, 18, 36, 0.35) !important;
 }
 
 .lg-workbench::before {
@@ -475,36 +488,53 @@ html:has(.po0-shell) #root {
 .lg-summary-grid span,
 .lg-toolbar label span,
 .lg-empty {
-  color: var(--po0-muted) !important;
+  color: var(--po0-muted-strong) !important;
 }
 
 .lg-region {
-  background: rgba(7, 16, 32, 0.6) !important;
-  border-color: var(--po0-line) !important;
+  background: rgba(42, 72, 119, 0.72) !important;
+  border-color: var(--po0-line-strong) !important;
 }
 
 .lg-node {
-  color: var(--po0-text) !important;
+  color: var(--po0-text-strong) !important;
+  background: rgba(16, 35, 66, 0.3) !important;
+}
+
+.lg-node strong {
+  color: var(--po0-text-strong) !important;
+}
+
+.lg-node small {
+  color: var(--po0-muted-strong) !important;
+}
+
+.lg-region__title strong {
+  color: var(--po0-text-strong) !important;
+}
+
+.lg-region__title small {
+  color: var(--po0-muted-strong) !important;
 }
 
 .lg-node:hover {
   border-color: var(--po0-line-strong) !important;
-  background: rgba(58, 212, 255, 0.08) !important;
+  background: rgba(58, 212, 255, 0.14) !important;
   box-shadow: 0 12px 30px rgba(0,0,0,0.45) !important;
 }
 
 .lg-node.is-active {
   border-color: var(--po0-accent-strong) !important;
-  background: rgba(58, 212, 255, 0.18) !important;
+  background: rgba(58, 212, 255, 0.24) !important;
   box-shadow: 0 0 32px rgba(58, 212, 255, 0.22) !important;
 }
 
 .lg-toolbar select,
 .lg-toolbar input,
 .lg-source-readonly strong {
-  background: rgba(13, 27, 48, 0.85) !important;
-  color: var(--po0-text) !important;
-  border-color: var(--po0-line) !important;
+  background: rgba(59, 94, 146, 0.9) !important;
+  color: var(--po0-text-strong) !important;
+  border-color: var(--po0-line-strong) !important;
 }
 
 .lg-source-readonly strong {
@@ -519,7 +549,7 @@ html:has(.po0-shell) #root {
 }
 
 .lg-summary-grid article {
-  background: rgba(7, 16, 32, 0.6) !important;
+  background: rgba(43, 75, 125, 0.72) !important;
   border-color: var(--po0-line) !important;
 }
 
@@ -529,7 +559,7 @@ html:has(.po0-shell) #root {
   border-color: rgba(58, 212, 255, 0.22) !important;
   background:
     radial-gradient(circle at 100% 0, rgba(58, 212, 255, 0.12), transparent 30%),
-    #04101e !important;
+    #0b1c33 !important;
 }
 
 .lg-terminal-card pre {
@@ -552,19 +582,16 @@ html:has(.po0-shell) #root {
 /* Admin pages - dark Po0 theme                                  */
 /* ------------------------------------------------------------ */
 .admin-layout {
-  background:
-    radial-gradient(circle at 14% 0, rgba(58, 212, 255, 0.16), transparent 28rem),
-    radial-gradient(circle at 90% 14%, rgba(140, 125, 255, 0.12), transparent 24rem),
-    linear-gradient(180deg, var(--po0-bg) 0%, var(--po0-bg-2) 60%, var(--po0-bg-3) 100%) !important;
+  background: transparent !important;
   color: var(--po0-text) !important;
   font-family: var(--po0-font-body) !important;
 }
 
 .admin-sidebar {
   background:
-    radial-gradient(circle at 30% 0, rgba(58, 212, 255, 0.18), transparent 18rem),
-    rgba(7, 16, 32, 0.96) !important;
-  border-right: 1px solid var(--po0-line) !important;
+    radial-gradient(circle at 30% 0, rgba(58, 212, 255, 0.22), transparent 18rem),
+    rgba(28, 50, 88, 0.92) !important;
+  border-right: 1px solid var(--po0-line-strong) !important;
   color: var(--po0-text) !important;
 }
 
@@ -598,10 +625,10 @@ html:has(.po0-shell) #root {
 .admin-form.admin-card,
 .admin-stat,
 .admin-shell .admin-form {
-  background: rgba(7, 16, 32, 0.6) !important;
-  border-color: var(--po0-line) !important;
+  background: rgba(48, 81, 131, 0.72) !important;
+  border-color: var(--po0-line-strong) !important;
   color: var(--po0-text) !important;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 24px 60px rgba(8, 18, 36, 0.42) !important;
   backdrop-filter: blur(14px);
 }
 
@@ -672,7 +699,7 @@ html:has(.po0-shell) #root {
 }
 
 .admin-shell tr:hover td {
-  background: rgba(58, 212, 255, 0.08) !important;
+  background: rgba(58, 212, 255, 0.14) !important;
 }
 
 .admin-actions {
@@ -705,7 +732,7 @@ html:has(.po0-shell) #root {
 
 .install-primary,
 .install-hero {
-  background: rgba(58, 212, 255, 0.08) !important;
+  background: rgba(58, 212, 255, 0.14) !important;
   border-color: var(--po0-line-strong) !important;
 }
 
@@ -775,3 +802,144 @@ html:has(.po0-shell) #root {
 /* Admin login form inputs need brighter visibility */
 .admin-login .admin-form input { background: rgba(13, 27, 48, 0.95) !important; }
 
+
+/* v11 usability pass: true full-width functional layout + clearer copy spacing */
+.po0-shell__hero {
+  max-width: min(1120px, calc(100vw - clamp(40px, 6.4vw, 112px)));
+}
+
+.kele-status-page > .status-probe,
+.kele-status-page .status-probe,
+.kele-lg-page .looking-glass-console {
+  box-sizing: border-box !important;
+  width: calc(100vw - clamp(40px, 6.4vw, 112px)) !important;
+  max-width: none !important;
+  margin-left: calc(-1 * clamp(20px, 3.2vw, 56px)) !important;
+  margin-right: 0 !important;
+}
+
+.status-probe::before,
+.status-probe::after,
+.looking-glass-console::before,
+.looking-glass-console::after {
+  display: none !important;
+}
+
+.status-dashboard {
+  background: linear-gradient(155deg, rgba(55, 88, 138, 0.9), rgba(31, 58, 100, 0.82)) !important;
+}
+
+.status-dashboard-grid {
+  grid-template-columns: minmax(280px, 0.22fr) minmax(0, 1fr) !important;
+}
+
+.status-chart-card {
+  min-width: 0 !important;
+}
+
+.status-chart-card .status-chart-head {
+  align-items: flex-start !important;
+}
+
+.status-chart-card .status-chart-head h3 {
+  color: var(--po0-text-strong) !important;
+  font-size: clamp(1.1rem, 1.7vw, 1.45rem) !important;
+  line-height: 1.2 !important;
+  max-width: 220px;
+}
+
+.status-chart-head small,
+.status-source-meta {
+  color: var(--po0-muted-strong) !important;
+}
+
+.source-node-card {
+  background: rgba(27, 55, 98, 0.72) !important;
+}
+
+.latency-card,
+.status-chart-card,
+.status-source-panel {
+  background: rgba(58, 91, 142, 0.72) !important;
+}
+
+.kele-lg-page .looking-glass-console {
+  grid-template-columns: minmax(320px, 0.23fr) minmax(0, 1fr) !important;
+}
+
+.lg-sidebar,
+.lg-workbench {
+  background: linear-gradient(155deg, rgba(55, 88, 138, 0.9), rgba(31, 58, 100, 0.82)) !important;
+}
+
+.lg-region,
+.lg-node,
+.lg-summary-grid article {
+  background: rgba(32, 62, 109, 0.76) !important;
+}
+
+.lg-node:not(:disabled) strong,
+.lg-region__title strong {
+  color: #ffffff !important;
+  text-shadow: 0 1px 14px rgba(111, 230, 255, 0.18);
+}
+
+.lg-node:disabled {
+  opacity: 0.82 !important;
+}
+
+.lg-node:disabled strong {
+  color: rgba(255,255,255,0.84) !important;
+}
+
+.lg-node small,
+.lg-region__title small,
+.lg-summary-grid span,
+.lg-toolbar label span,
+.lg-empty {
+  color: #dbe8f7 !important;
+}
+
+.lg-terminal-card {
+  background:
+    radial-gradient(circle at 100% 0, rgba(58, 212, 255, 0.16), transparent 30%),
+    #0e223c !important;
+}
+
+@media (max-width: 980px) {
+  .kele-status-page > .status-probe,
+  .kele-status-page .status-probe,
+  .kele-lg-page .looking-glass-console {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  .status-dashboard-grid,
+  .kele-lg-page .looking-glass-console {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* fix Rspress global main reset overriding the Po0 shell padding */
+html body:has(.po0-shell) main.po0-shell__main {
+  padding: clamp(20px, 3vw, 36px) clamp(20px, 3.2vw, 56px) clamp(80px, 10vw, 140px) !important;
+}
+
+/* keep the route chart title horizontal and compact */
+.status-chart-head {
+  display: grid !important;
+  grid-template-columns: minmax(180px, 0.22fr) minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: clamp(16px, 2vw, 26px) !important;
+}
+
+.status-chart-head > div:first-child {
+  min-width: 180px !important;
+}
+
+.status-chart-card .status-chart-head h3 {
+  writing-mode: horizontal-tb !important;
+  white-space: normal !important;
+  word-break: keep-all !important;
+  max-width: 220px !important;
+}

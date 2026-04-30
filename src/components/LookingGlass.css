@@ -5,8 +5,8 @@
 
 .looking-glass-console {
   display: grid;
-  grid-template-columns: minmax(300px, 0.32fr) minmax(0, 1fr);
-  gap: 22px;
+  grid-template-columns: minmax(320px, 0.26fr) minmax(0, 1fr);
+  gap: clamp(18px, 2vw, 28px);
 }
 
 .lg-sidebar,
@@ -99,6 +99,8 @@
 
 .lg-region__title strong {
   color: var(--kele-ink, #14201f);
+  font-size: 0.98rem;
+  letter-spacing: 0.01em;
 }
 
 .lg-node {
@@ -143,6 +145,8 @@
 
 .lg-node strong {
   color: var(--kele-ink, #14201f);
+  font-size: 0.98rem;
+  letter-spacing: 0.01em;
 }
 
 .lg-node-dot {
