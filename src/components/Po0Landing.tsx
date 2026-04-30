@@ -156,8 +156,8 @@ export default function Po0Landing() {
               <a className="po0-landing__btn po0-landing__btn--secondary" href="/looking-glass">
                 <span>Looking Glass</span>
               </a>
-              <a className="po0-landing__btn po0-landing__btn--secondary" href="/guide/getting-started">
-                <span>阅读文档</span>
+              <a className="po0-landing__btn po0-landing__btn--secondary" href="/guide/buying/status-and-looking-glass">
+                <span>购买前测试</span>
               </a>
             </div>
             <p className="po0-landing__hero-hint" aria-hidden="true">
@@ -262,26 +262,26 @@ export default function Po0Landing() {
           </header>
 
           <div className="po0-landing__how-track">
-            <a className="po0-landing__how-step po0-reveal" href="/guide/getting-started">
+            <a className="po0-landing__how-step po0-reveal" href="/guide/buying/choose-entry-region">
               <span className="po0-landing__how-step-num">01</span>
               <span className="po0-landing__how-step-flag">START</span>
-              <h3>选购 Po0 入口</h3>
-              <p>挑一台 Po0 上海 / 广州入口，5 分钟下单，BGP IP 即开即用。</p>
-              <em>查看入口套餐 <i>↗</i></em>
+              <h3>选择 Po0 入口</h3>
+              <p>先判断广州、华东、香港、美国哪类入口更适合你的使用地区和目标方向。</p>
+              <em>查看入口选择 <i>↗</i></em>
             </a>
-            <a className="po0-landing__how-step po0-reveal" href="/guide/getting-started">
+            <a className="po0-landing__how-step po0-reveal" href="/guide/tutorials/nftables-script">
               <span className="po0-landing__how-step-num">02</span>
-              <span className="po0-landing__how-step-flag">EXIT</span>
-              <h3>多种出口可选</h3>
-              <p>CNIX、Po0 国际出口、RFC 香港 / 日本全系产品，按方向和预算自由组合。</p>
-              <em>查看出口对比 <i>↗</i></em>
+              <span className="po0-landing__how-step-flag">RELAY</span>
+              <h3>配置端口转发</h3>
+              <p>用脚本菜单或手动规则把 Po0 入口转发到香港、日本或自备落地。</p>
+              <em>查看转发教程 <i>↗</i></em>
             </a>
-            <a className="po0-landing__how-step po0-reveal" href="/looking-glass">
+            <a className="po0-landing__how-step po0-reveal" href="/guide/buying/status-and-looking-glass">
               <span className="po0-landing__how-step-num">03</span>
               <span className="po0-landing__how-step-flag">LIVE</span>
-              <h3>验证实时状态</h3>
-              <p>从 Looking Glass 直接发起 Ping / TCPing / MTR，看到的就是真实路径。</p>
-              <em>打开 Looking Glass <i>↗</i></em>
+              <h3>测试线路表现</h3>
+              <p>结合状态页和 Looking Glass，判断延迟、丢包、路由和晚高峰稳定性。</p>
+              <em>查看测试方法 <i>↗</i></em>
             </a>
           </div>
 
@@ -293,8 +293,8 @@ export default function Po0Landing() {
                 <path d="m12 5 7 7-7 7" />
               </svg>
             </a>
-            <a className="po0-landing__btn po0-landing__btn--secondary" href="/guide/deployment">
-              <span>部署速查表</span>
+            <a className="po0-landing__btn po0-landing__btn--secondary" href="/guide/faq">
+              <span>常见问题 FAQ</span>
             </a>
           </div>
         </section>

@@ -4,23 +4,22 @@ title: 注意事项
 
 # 注意事项
 
-这里整理 Po0 使用前和使用中的常见误区、限制说明与反馈建议，帮助用户更准确地判断问题并提高沟通效率。
+这一组文章整理购买和使用前必须知道的边界：常见误解、端口和用途限制、延迟/丢包判断方式，以及反馈故障时应该提供的信息。
 
-## 适合谁阅读
+## 推荐阅读顺序
 
-- 购买前希望了解边界和限制的用户。
-- 使用中遇到延迟、丢包、波动等情况的用户。
-- 需要提交故障反馈，希望一次提供完整信息的客户。
+1. [常见问题 FAQ](/guide/faq)
+2. [常见误区](/guide/notes/common-misunderstandings)
+3. [怎么看延迟、丢包和路由波动](/guide/notes/latency-packet-loss-routing)
+4. [使用前需要确认的限制](/guide/notes/pre-use-limitations)
+5. [故障反馈应该提供哪些信息](/guide/notes/troubleshooting-feedback)
 
-## 文章列表
+## 排障原则
 
-- [常见误区](/guide/notes/common-misunderstandings)
-- [怎么看延迟、丢包和路由波动](/guide/notes/latency-packet-loss-routing)
-- [使用前需要确认的限制](/guide/notes/pre-use-limitations)
-- [故障反馈应该提供哪些信息](/guide/notes/troubleshooting-feedback)
+先拆链路，再下结论：
 
-## 后续待补内容
+```text
+客户端 → Po0 → 出口机 → 目标服务
+```
 
-- 增加购买前限制确认清单。
-- 补充常见异常场景的判断流程。
-- 增加标准化故障反馈模板下载或复制版本。
+确认是哪一段出问题，比直接说“线路不行”更有用。
