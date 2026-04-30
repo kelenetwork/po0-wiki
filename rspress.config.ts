@@ -89,11 +89,30 @@ export default defineConfig({
       ],
       '/guide/': [
         {
-          text: '指南',
+          text: '选购指南',
           items: [
-            { text: '开始使用', link: '/guide/getting-started' },
-            { text: '内容规范', link: '/guide/content-guide' },
-            { text: '部署说明', link: '/guide/deployment' },
+            { text: 'Po0 适合谁', link: '/guide/buying/who-is-po0-for' },
+            { text: '如何选择入口地区', link: '/guide/buying/choose-entry-region' },
+            { text: '如何选择出口/落地', link: '/guide/buying/choose-exit-location' },
+            { text: '成本与稳定性取舍', link: '/guide/buying/cost-vs-stability' },
+          ],
+        },
+        {
+          text: '使用教程',
+          items: [
+            { text: '快速开始', link: '/guide/tutorials/quick-start' },
+            { text: '接入前准备', link: '/guide/tutorials/before-onboarding' },
+            { text: '购买后的配置流程', link: '/guide/tutorials/post-purchase-setup' },
+            { text: '用状态页与 Looking Glass 判断效果', link: '/guide/tutorials/status-and-looking-glass' },
+          ],
+        },
+        {
+          text: '注意事项',
+          items: [
+            { text: '常见误区', link: '/guide/notes/common-misunderstandings' },
+            { text: '怎么看延迟、丢包和路由波动', link: '/guide/notes/latency-packet-loss-routing' },
+            { text: '使用前需要确认的限制', link: '/guide/notes/pre-use-limitations' },
+            { text: '故障反馈应该提供哪些信息', link: '/guide/notes/troubleshooting-feedback' },
           ],
         },
       ],
