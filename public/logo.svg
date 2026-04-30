@@ -1,6 +1,13 @@
 <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="128" height="128" rx="30" fill="#2563EB"/>
-  <path d="M31 75.5L54.5 28H75L51.5 75.5H31Z" fill="white"/>
-  <path d="M53 79L78 51H101L76 79L101 100H77.5L53 79Z" fill="#BFDBFE"/>
-  <circle cx="35" cy="98" r="8" fill="#DBEAFE"/>
+  <rect width="128" height="128" rx="32" fill="#06111F"/>
+  <circle cx="64" cy="64" r="46" fill="url(#g)" opacity="0.22"/>
+  <path d="M34 84V36h35c15.8 0 27 10.2 27 24.2S84.8 84 69 84H52v-16h15.2C73.8 68 78 65 78 60s-4.2-8-10.8-8H52v32H34Z" fill="#E8FAFF"/>
+  <path d="M88 42c8.2 0 14.4 6.2 14.4 14.4S96.2 70.8 88 70.8 73.6 64.6 73.6 56.4 79.8 42 88 42Zm0 10.2a4.2 4.2 0 1 0 0 8.4 4.2 4.2 0 0 0 0-8.4Z" fill="#3AD4FF"/>
+  <path d="M28 94c19.6-2.4 32.8-6.6 47-17.8 6.4-5 14.4-6.8 25-5.4" stroke="#8C7DFF" stroke-width="6.8" stroke-linecap="round"/>
+  <defs>
+    <radialGradient id="g" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(52 40) rotate(51.3) scale(91.2)">
+      <stop stop-color="#3AD4FF"/>
+      <stop offset="1" stop-color="#8C7DFF"/>
+    </radialGradient>
+  </defs>
 </svg>
