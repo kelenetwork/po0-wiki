@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -101,6 +102,7 @@ func (s *Server) healthz(w http.ResponseWriter, _ *http.Request) {
 func (s *Server) publicSnapshot(w http.ResponseWriter, r *http.Request) {
 	snapshot, err := s.store.Snapshot(r.Context())
 	if err != nil {
+		log.Printf("hub: publicSnapshot: Snapshot failed: %v", err)
 		writeError(w, http.StatusInternalServerError, "snapshot unavailable")
 		return
 	}
@@ -110,6 +112,7 @@ func (s *Server) publicSnapshot(w http.ResponseWriter, r *http.Request) {
 func (s *Server) publicStream(w http.ResponseWriter, r *http.Request) {
 	flusher, ok := w.(http.Flusher)
 	if !ok {
+		log.Printf("hub: publicStream: Flusher failed: %v", http.ErrNotSupported)
 		writeError(w, http.StatusInternalServerError, "streaming unavailable")
 		return
 	}
@@ -179,6 +182,7 @@ func (s *Server) publicLGRun(w http.ResponseWriter, r *http.Request) {
 
 	job, err := s.store.CreateLGJob(r.Context(), source.ID, req.Tool, target.ID, target.Host, target.Port)
 	if err != nil {
+		log.Printf("hub: publicLGRun: CreateLGJob failed: %v", err)
 		writeError(w, http.StatusInternalServerError, "job unavailable")
 		return
 	}
@@ -307,6 +311,7 @@ func (s *Server) adminSources(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		items, err := s.store.ListSources(r.Context())
 		if err != nil {
+			log.Printf("hub: adminSources: ListSources failed: %v", err)
 			writeError(w, http.StatusInternalServerError, "sources unavailable")
 			return
 		}
@@ -372,6 +377,7 @@ func (s *Server) adminTargets(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		items, err := s.store.ListAdminTargets(r.Context())
 		if err != nil {
+			log.Printf("hub: adminTargets: ListAdminTargets failed: %v", err)
 			writeError(w, http.StatusInternalServerError, "targets unavailable")
 			return
 		}
@@ -431,6 +437,7 @@ func (s *Server) adminChecks(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		items, err := s.store.ListAdminChecks(r.Context())
 		if err != nil {
+			log.Printf("hub: adminChecks: ListAdminChecks failed: %v", err)
 			writeError(w, http.StatusInternalServerError, "checks unavailable")
 			return
 		}
@@ -484,6 +491,7 @@ func (s *Server) adminAgents(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		agents, err := s.store.ListAgents(r.Context())
 		if err != nil {
+			log.Printf("hub: adminAgents: ListAgents failed: %v", err)
 			writeError(w, http.StatusInternalServerError, "agents unavailable")
 			return
 		}
@@ -565,6 +573,7 @@ func (s *Server) agentPoll(w http.ResponseWriter, r *http.Request) {
 	}
 	checks, err := s.store.AgentChecks(r.Context(), agentID, req.Version, req.Hostname)
 	if err != nil {
+		log.Printf("hub: agentPoll: AgentChecks failed: %v", err)
 		writeError(w, http.StatusInternalServerError, "checks unavailable")
 		return
 	}
@@ -590,6 +599,7 @@ func (s *Server) agentReport(w http.ResponseWriter, r *http.Request) {
 	}
 	accepted, err := s.store.RecordAgentResults(r.Context(), agentID, req.Results)
 	if err != nil {
+		log.Printf("hub: agentReport: RecordAgentResults failed: %v", err)
 		writeError(w, http.StatusInternalServerError, "results unavailable")
 		return
 	}
@@ -614,6 +624,7 @@ func (s *Server) agentLGPoll(w http.ResponseWriter, r *http.Request) {
 	}
 	job, ok, err := s.store.ClaimLGJob(r.Context(), agentID)
 	if err != nil {
+		log.Printf("hub: agentLGPoll: ClaimLGJob failed: %v", err)
 		writeError(w, http.StatusInternalServerError, "job unavailable")
 		return
 	}
@@ -644,6 +655,7 @@ func (s *Server) agentLGReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := s.store.CompleteLGJob(r.Context(), agentID, req.JobID, req.Output, req.Error); err != nil {
+		log.Printf("hub: agentLGReport: CompleteLGJob failed: %v", err)
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}

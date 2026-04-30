@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"path/filepath"
@@ -20,7 +21,8 @@ import (
 )
 
 type Store struct {
-	db *sql.DB
+	db         *sql.DB
+	fileBacked bool
 }
 
 var errRelatedChecks = errors.New("请先删除关联任务")
@@ -234,17 +236,30 @@ func OpenStore(dbPath string) (*Store, error) {
 	if dbPath == "" {
 		dbPath = defaultDBPath
 	}
+	fileBacked := dbPath != ":memory:"
 	if dbPath != ":memory:" {
 		if err := os.MkdirAll(filepath.Dir(dbPath), 0o755); err != nil {
 			return nil, fmt.Errorf("create database directory: %w", err)
 		}
 	}
-	db, err := sql.Open("sqlite", dbPath)
+	dsn := sqliteDSN(dbPath)
+	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return nil, err
 	}
 	db.SetMaxOpenConns(1)
-	return &Store{db: db}, nil
+	return &Store{db: db, fileBacked: fileBacked}, nil
+}
+
+func sqliteDSN(dbPath string) string {
+	if dbPath == ":memory:" {
+		return dbPath
+	}
+	separator := "?"
+	if strings.Contains(dbPath, "?") {
+		separator = "&"
+	}
+	return dbPath + separator + "_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)&_pragma=foreign_keys(ON)"
 }
 
 func (s *Store) Close() error {
@@ -252,6 +267,11 @@ func (s *Store) Close() error {
 }
 
 func (s *Store) Migrate(ctx context.Context) error {
+	if s.fileBacked {
+		if _, err := s.db.ExecContext(ctx, `PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA synchronous=NORMAL; PRAGMA foreign_keys=ON;`); err != nil {
+			log.Printf("hub: migrate: sqlite pragma failed: %v", err)
+		}
+	}
 	_, err := s.db.ExecContext(ctx, `
 CREATE TABLE IF NOT EXISTS sources (
   id TEXT PRIMARY KEY,
