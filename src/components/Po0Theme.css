@@ -1975,3 +1975,135 @@ html[data-admin="1"] .admin-login .admin-form input {
   -webkit-text-fill-color: #07172b !important;
   background: #ffffff !important;
 }
+
+/* Status latency trace clarity pass */
+.po0-shell--status .status-legend,
+html:has(.kele-status-page) .status-legend {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(210px, 1fr)) !important;
+  flex: 1 1 620px !important;
+  width: auto !important;
+}
+
+.po0-shell--status .status-legend button,
+html:has(.kele-status-page) .status-legend button {
+  display: grid !important;
+  grid-template-columns: 10px minmax(0, 1fr) auto !important;
+  gap: 4px 8px !important;
+  align-items: center !important;
+  min-height: 54px !important;
+  padding: 9px 11px !important;
+  text-align: left !important;
+}
+
+.po0-shell--status .status-legend .legend-label,
+html:has(.kele-status-page) .status-legend .legend-label {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.po0-shell--status .status-legend button > strong,
+html:has(.kele-status-page) .status-legend button > strong {
+  color: #062033 !important;
+  font-family: var(--po0-mono, ui-monospace, monospace) !important;
+  font-size: 0.82rem !important;
+}
+
+.po0-shell--status .status-legend button > small,
+html:has(.kele-status-page) .status-legend button > small {
+  grid-column: 2 / 4 !important;
+  color: #627790 !important;
+  font-family: var(--po0-mono, ui-monospace, monospace) !important;
+  font-size: 0.68rem !important;
+  font-weight: 800 !important;
+}
+
+.po0-shell--status .chart-plot-bg,
+html:has(.kele-status-page) .chart-plot-bg {
+  fill: rgba(255, 255, 255, 0.46) !important;
+  stroke: rgba(58, 107, 160, 0.18) !important;
+}
+
+.po0-shell--status .chart-smoke,
+html:has(.kele-status-page) .chart-smoke {
+  opacity: 0.16 !important;
+  mix-blend-mode: multiply !important;
+}
+
+.po0-shell--status .chart-line-underlay,
+html:has(.kele-status-page) .chart-line-underlay {
+  fill: none !important;
+  stroke: rgba(255, 255, 255, 0.9) !important;
+  stroke-width: 6.4 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+.po0-shell--status .chart-line,
+html:has(.kele-status-page) .chart-line {
+  stroke-width: 2.65 !important;
+  filter: drop-shadow(0 6px 10px rgba(37, 82, 130, 0.16)) !important;
+}
+
+.po0-shell--status .chart-last-point,
+html:has(.kele-status-page) .chart-last-point {
+  stroke: rgba(255, 255, 255, 0.94) !important;
+  stroke-width: 2.2 !important;
+  filter: drop-shadow(0 3px 8px rgba(37, 82, 130, 0.25)) !important;
+}
+
+.po0-shell--status .chart-loss-label,
+html:has(.kele-status-page) .chart-loss-label {
+  fill: #637a92 !important;
+  font-size: 10px !important;
+  opacity: 0.78 !important;
+}
+
+@media (max-width: 900px) {
+  .po0-shell--status .status-legend,
+  html:has(.kele-status-page) .status-legend {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    flex-basis: 100% !important;
+  }
+}
+
+/* Status latency trace v3 compact chips */
+.po0-shell--status .status-legend,
+html:has(.kele-status-page) .status-legend {
+  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)) !important;
+  flex: 0 1 760px !important;
+}
+
+.po0-shell--status .status-legend button,
+html:has(.kele-status-page) .status-legend button {
+  min-height: 42px !important;
+  padding: 7px 9px !important;
+  grid-template-columns: 8px minmax(0, 1fr) auto !important;
+  border-radius: 18px !important;
+}
+
+.po0-shell--status .status-legend i,
+html:has(.kele-status-page) .status-legend i {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+.po0-shell--status .status-legend button > strong,
+html:has(.kele-status-page) .status-legend button > strong {
+  font-size: 0.76rem !important;
+}
+
+.po0-shell--status .status-legend button > small,
+html:has(.kele-status-page) .status-legend button > small {
+  font-size: 0.59rem !important;
+  opacity: 0.76 !important;
+}
+
+.po0-shell--status .chart-tooltip text,
+html:has(.kele-status-page) .chart-tooltip text {
+  font-size: 9.4px !important;
+  letter-spacing: -0.03em !important;
+}

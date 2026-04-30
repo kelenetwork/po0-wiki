@@ -577,3 +577,131 @@
   .probe-row { grid-template-columns: auto 1fr; }
   .probe-row em { grid-column: 2; }
 }
+
+/* v2: clearer SmokePing/Grafana-style 24h trace */
+.status-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(210px, 1fr));
+  flex: 1 1 620px;
+  width: auto;
+  align-items: stretch;
+}
+
+.status-legend button {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  gap: 4px 8px;
+  align-items: center;
+  min-height: 54px;
+  padding: 9px 11px;
+  text-align: left;
+}
+
+.status-legend .legend-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-legend button > strong {
+  color: var(--kele-ink, #14201f);
+  font-family: var(--kele-mono, monospace);
+  font-size: 0.82rem;
+  letter-spacing: -0.03em;
+}
+
+.status-legend button > small {
+  grid-column: 2 / 4;
+  color: var(--kele-muted, #66716f);
+  font-family: var(--kele-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.chart-plot-bg {
+  fill: rgba(255, 255, 255, 0.38);
+  stroke: rgba(20, 32, 31, 0.12);
+  stroke-width: 1;
+}
+
+.chart-smoke {
+  opacity: 0.13;
+  mix-blend-mode: multiply;
+}
+
+.chart-line-underlay {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.82);
+  stroke-width: 6.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-line {
+  stroke-width: 2.65;
+}
+
+.chart-last-point {
+  stroke: rgba(255, 255, 255, 0.94);
+  stroke-width: 2.2;
+  filter: drop-shadow(0 3px 8px rgba(20, 32, 31, 0.24));
+}
+
+.chart-loss-bin {
+  rx: 3px;
+  opacity: 0.9;
+}
+
+.chart-loss-label {
+  font-size: 10px;
+  opacity: 0.76;
+}
+
+.chart-tooltip rect {
+  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.26));
+}
+
+@media (max-width: 900px) {
+  .status-legend {
+    grid-template-columns: 1fr;
+    width: 100%;
+    flex-basis: 100%;
+  }
+}
+
+/* v3: compact legend chips + smaller hover card */
+.status-legend {
+  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+  flex: 0 1 760px;
+}
+
+.status-legend button {
+  min-height: 42px;
+  padding: 7px 9px;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  border-radius: 18px;
+}
+
+.status-legend i {
+  width: 8px;
+  height: 8px;
+}
+
+.status-legend button > strong {
+  font-size: 0.76rem;
+}
+
+.status-legend button > small {
+  font-size: 0.59rem;
+  opacity: 0.76;
+}
+
+.chart-tooltip rect {
+  rx: 10px;
+}
+
+.chart-tooltip text {
+  font-size: 9.4px;
+  letter-spacing: -0.03em;
+}
