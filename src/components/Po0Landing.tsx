@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './Po0Landing.css';
 import chinaMapSvg from '../assets/china-map.svg?raw';
+import AgentDocCard from './AgentDocCard';
 import { mockProbeSnapshot, PublicProbeSnapshot, usePublicProbeSnapshot } from './probeSnapshot';
 
 const MAP_VIEWBOX = '0 0 774 569';
@@ -284,6 +285,8 @@ export default function Po0Landing() {
               <em>查看测试方法 <i>↗</i></em>
             </a>
           </div>
+
+          <AgentDocCard className="po0-landing__agent po0-reveal" />
 
           <div className="po0-landing__how-cta">
             <a className="po0-landing__btn po0-landing__btn--primary" href="/guide/getting-started">
