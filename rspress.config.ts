@@ -62,7 +62,7 @@ function fallbackDocContent(title: string, routePath: string) {
   const summaries: Record<string, string> = {
     '/': 'Po0 Wiki 首页。Po0 Wiki 是 Po0 的中文用户指南入口，面向用户提供选购参考、接入教程、Looking Glass、实时线路状态、常见问题与排障反馈信息。',
     '/looking-glass': 'Looking Glass 页面。用于选择发起点与目标，快速查看不同区域到 Po0 服务的连通表现与路径结果。',
-    '/status': '服务状态页面。用于查看 Po0 Wiki 当前可用性、响应趋势与区域表现，快速判断访问体验是否稳定。',
+    '/status': '服务状态页面。用于查看 Po0 线路的实时延迟、丢包趋势与区域表现，快速判断访问体验是否稳定。',
   };
 
   return summaries[routePath] ?? `${title}。此页面主要由交互式组件渲染，请结合页面 URL 与站点上下文理解。`;
