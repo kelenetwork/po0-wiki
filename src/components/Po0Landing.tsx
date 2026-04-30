@@ -208,27 +208,94 @@ export default function Po0Landing() {
           </aside>
         </section>
 
-        <section className="po0-landing__pillars po0-reveal" id="why-po0">
+        <section className="po0-landing__why po0-reveal" id="why-po0">
           <header>
-            <p className="po0-landing__eyebrow">为什么选择 Po0</p>
-            <h2>占位 · 这里之后会写为什么用 Po0。</h2>
+            <p className="po0-landing__eyebrow">为什么推荐购买</p>
+            <h2>用一份订阅，<em>买下两件事</em>。</h2>
+            <p className="po0-landing__why-lead">不是简单转售机房。Po0 把企业级网络入口和廉价境外落地节点串成一条线，让你拿一台 RFC 的钱，吃到接近腾讯云一档的体验。</p>
           </header>
-          <div className="po0-landing__pillars-grid">
-            <article className="po0-reveal"><span>01</span><p>稍后补充</p></article>
-            <article className="po0-reveal"><span>02</span><p>稍后补充</p></article>
-            <article className="po0-reveal"><span>03</span><p>稍后补充</p></article>
+          <div className="po0-landing__why-grid">
+            <article className="po0-landing__why-card po0-reveal">
+              <span className="po0-landing__why-num">01</span>
+              <div className="po0-landing__why-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M24 4 6 12v12c0 11 8 18 18 20 10-2 18-9 18-20V12L24 4Z" />
+                  <path d="m17 24 5 5 9-10" />
+                </svg>
+              </div>
+              <h3>企业级稳定性</h3>
+              <p>享受与腾讯云同等级别的 SLA 保障 —— 高可用、低延迟的入口前置架构，让你的业务拥有坚如磐石的网络基础，告别频繁掉线和不稳定的烦恼。</p>
+              <ul className="po0-landing__why-tags">
+                <li>SLA 99.9%</li>
+                <li>BGP 入口</li>
+                <li>低抖动</li>
+              </ul>
+            </article>
+            <article className="po0-landing__why-card po0-reveal">
+              <span className="po0-landing__why-num">02</span>
+              <div className="po0-landing__why-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="24" cy="24" r="18" />
+                  <path d="M16 28c2 2 6 3 8 3s6-1 6-4-3-3-6-3-6 0-6-3 3-4 6-4 6 1 8 3" />
+                  <path d="M24 8v4M24 36v4" />
+                </svg>
+              </div>
+              <h3>大幅节省成本</h3>
+              <p>有 <em>🇯🇵 日本 / 🇭🇰 香港 / 🇺🇸 美国</em> 方向的网络需求？无需再花高价买 IX 产品，仅需购买市场上流通的 RFC 廉价落地鸡即可满足。一步到位，覆盖核心线路，省下的不止一笔小钱。</p>
+              <ul className="po0-landing__why-tags">
+                <li>RFC 落地</li>
+                <li>覆盖 JP / HK / US</li>
+                <li>免 IX 溢价</li>
+              </ul>
+            </article>
           </div>
         </section>
 
-        <section className="po0-landing__pillars po0-reveal" id="how-to-use">
+        <section className="po0-landing__how po0-reveal" id="how-to-use">
+          <div className="po0-landing__how-orbit" aria-hidden="true">
+            <span /><span /><span />
+          </div>
           <header>
-            <p className="po0-landing__eyebrow">如何使用 Po0</p>
-            <h2>占位 · 这里之后会写如何接入和使用 Po0。</h2>
+            <p className="po0-landing__eyebrow">如何接入和使用 Po0</p>
+            <h2>三步上手，<em>剩下交给文档</em>。</h2>
+            <p className="po0-landing__how-lead">不想在首页堆 README，下面是一条最短路径，每一步都有详细文档。点开就走。</p>
           </header>
-          <div className="po0-landing__pillars-grid">
-            <article className="po0-reveal"><span>STEP 1</span><p>稍后补充</p></article>
-            <article className="po0-reveal"><span>STEP 2</span><p>稍后补充</p></article>
-            <article className="po0-reveal"><span>STEP 3</span><p>稍后补充</p></article>
+
+          <div className="po0-landing__how-track">
+            <a className="po0-landing__how-step po0-reveal" href="/guide/getting-started">
+              <span className="po0-landing__how-step-num">01</span>
+              <span className="po0-landing__how-step-flag">START</span>
+              <h3>选购 Po0 入口</h3>
+              <p>挑一台 Po0 上海 / 广州入口，5 分钟下单，BGP IP 即开即用。</p>
+              <em>查看入口套餐 <i>↗</i></em>
+            </a>
+            <a className="po0-landing__how-step po0-reveal" href="/guide/getting-started">
+              <span className="po0-landing__how-step-num">02</span>
+              <span className="po0-landing__how-step-flag">RFC</span>
+              <h3>接入廉价落地</h3>
+              <p>把市场上的 RFC 落地鸡当成你的境外节点，由 Po0 入口前置加速。</p>
+              <em>RFC 接入指南 <i>↗</i></em>
+            </a>
+            <a className="po0-landing__how-step po0-reveal" href="/looking-glass">
+              <span className="po0-landing__how-step-num">03</span>
+              <span className="po0-landing__how-step-flag">LIVE</span>
+              <h3>验证实时状态</h3>
+              <p>从 Looking Glass 直接发起 Ping / TCPing / MTR，看到的就是真实路径。</p>
+              <em>打开 Looking Glass <i>↗</i></em>
+            </a>
+          </div>
+
+          <div className="po0-landing__how-cta">
+            <a className="po0-landing__btn po0-landing__btn--primary" href="/guide/getting-started">
+              <span>跳转完整文档</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </a>
+            <a className="po0-landing__btn po0-landing__btn--secondary" href="/guide/deployment">
+              <span>部署速查表</span>
+            </a>
           </div>
         </section>
       </main>
