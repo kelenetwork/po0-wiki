@@ -17,14 +17,6 @@ const TARGET_POINTS = {
 };
 
 const HERO_LINES = ['Po0', 'Routing', 'Atlas'];
-const HERO_DRIFTS = [
-  '× RFC',
-  '使用手册',
-  '实时状态',
-  'Looking Glass',
-  '故障复盘',
-];
-
 function nowHHMM() {
   const d = new Date();
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -85,20 +77,10 @@ function useReveal() {
   }, []);
 }
 
-function useDriftCycle(intervalMs = 2400) {
-  const [index, setIndex] = useState(0);
-  useEffect(() => {
-    const t = window.setInterval(() => setIndex((i) => (i + 1) % HERO_DRIFTS.length), intervalMs);
-    return () => window.clearInterval(t);
-  }, [intervalMs]);
-  return HERO_DRIFTS[index];
-}
-
 export default function Po0Landing() {
   const { snapshot } = usePublicProbeSnapshot();
   const safeSnapshot = snapshot.checks.length > 0 ? snapshot : mockProbeSnapshot;
   useReveal();
-  const drift = useDriftCycle();
 
   const [clock, setClock] = useState(nowHHMM());
   useEffect(() => {
@@ -141,8 +123,7 @@ export default function Po0Landing() {
         <section className="po0-landing__hero">
           <div className="po0-landing__hero-text po0-reveal">
             <p className="po0-landing__hero-kicker">
-              Po0 <em>×</em> RFC ·
-              <span className="po0-landing__drift" key={drift}>{drift}</span>
+              Po0 <em>×</em> RFC
             </p>
             <h1 className="po0-landing__hero-title">
               <span className="po0-landing__hero-word" style={{ animationDelay: '0.05s' }}>Po0</span>
@@ -177,7 +158,6 @@ export default function Po0Landing() {
 
           <aside className="po0-landing__atlas po0-reveal" aria-label="实时路径地图">
             <div className="po0-landing__atlas-canvas">
-              <span className="po0-landing__atlas-scan" aria-hidden="true" />
               <div className="po0-landing__atlas-map" dangerouslySetInnerHTML={{ __html: chinaMapSvg }} />
               <svg className="po0-landing__atlas-overlay" viewBox={MAP_VIEWBOX} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                 <defs>

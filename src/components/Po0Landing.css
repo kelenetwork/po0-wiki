@@ -33,7 +33,7 @@
   background:
     radial-gradient(circle at 12% 8%, rgba(58, 212, 255, 0.16), transparent 28rem),
     radial-gradient(circle at 92% 58%, rgba(140, 125, 255, 0.12), transparent 26rem),
-    linear-gradient(180deg, var(--po0-bg) 0%, var(--po0-bg-2) 60%, var(--po0-bg-3) 100%);
+    linear-gradient(180deg, var(--po0-bg) 0%, var(--po0-bg-2) 35%, var(--po0-bg-3) 100%);
   font-family: var(--po0-font-body);
   overflow-x: hidden;
 }
@@ -197,16 +197,6 @@
   color: var(--po0-violet);
 }
 
-.po0-landing__drift {
-  display: inline-block;
-  color: var(--po0-text);
-  font-family: var(--po0-font-display);
-  font-size: clamp(13px, 1vw, 15px);
-  letter-spacing: 0.04em;
-  text-transform: none;
-  animation: po0DriftIn 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
 .po0-landing__hero-title {
   margin: 0;
   display: flex;
@@ -355,12 +345,11 @@
   border-radius: 28px;
   background:
     radial-gradient(circle at 52% 48%, rgba(58, 212, 255, 0.12), transparent 34%),
-    linear-gradient(180deg, rgba(5, 13, 26, 0.28), rgba(5, 13, 26, 0.08));
+    linear-gradient(180deg, rgba(5, 13, 26, 0.18), rgba(5, 13, 26, 0));
   filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.5));
 }
 
-.po0-landing__atlas-canvas::before,
-.po0-landing__atlas-canvas::after {
+.po0-landing__atlas-canvas::before {
   content: "";
   position: absolute;
   pointer-events: none;
@@ -379,30 +368,6 @@
   -webkit-mask-image: radial-gradient(circle at 54% 50%, black 8%, transparent 72%);
   mix-blend-mode: screen;
   animation: po0AtlasGridPan 30s linear infinite;
-}
-
-.po0-landing__atlas-canvas::after {
-  inset: 10px;
-  z-index: 4;
-  border: 1px solid rgba(80, 255, 255, 0.22);
-  clip-path: polygon(0 0, 16px 0, 16px 1px, 1px 1px, 1px 16px, 0 16px, 0 0, 100% 0, calc(100% - 16px) 0, calc(100% - 16px) 1px, calc(100% - 1px) 1px, calc(100% - 1px) 16px, 100% 16px, 100% 0, 100% 100%, calc(100% - 16px) 100%, calc(100% - 16px) calc(100% - 1px), calc(100% - 1px) calc(100% - 1px), calc(100% - 1px) calc(100% - 16px), 100% calc(100% - 16px), 100% 100%, 0 100%, 16px 100%, 16px calc(100% - 1px), 1px calc(100% - 1px), 1px calc(100% - 16px), 0 calc(100% - 16px));
-  filter: drop-shadow(0 0 8px rgba(80, 255, 255, 0.32));
-}
-
-.po0-landing__atlas-scan {
-  position: absolute;
-  left: 7%;
-  right: 7%;
-  top: 0;
-  z-index: 3;
-  height: 80px;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(80, 255, 255, 0), rgba(80, 255, 255, 0.34) 48%, rgba(80, 255, 255, 0));
-  border-top: 1px solid rgba(143, 245, 255, 0.5);
-  border-bottom: 1px solid rgba(143, 245, 255, 0.24);
-  mix-blend-mode: screen;
-  filter: blur(0.2px) drop-shadow(0 0 16px rgba(80, 255, 255, 0.55));
-  animation: po0AtlasScan 5.2s linear infinite;
 }
 
 .po0-landing__atlas-map,
@@ -696,19 +661,8 @@
   100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
 }
 
-@keyframes po0DriftIn {
-  0% { opacity: 0; transform: translate3d(0, 4px, 0); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0); }
-}
-
 @keyframes po0AtlasGridPan {
   to { background-position: 72px 72px, 72px 72px, 18px 18px, 18px 18px; }
-}
-
-@keyframes po0AtlasScan {
-  0% { transform: translateY(-110%); opacity: 0; }
-  10%, 82% { opacity: 1; }
-  100% { transform: translateY(760%); opacity: 0; }
 }
 
 @keyframes po0AtlasLabel {
@@ -730,9 +684,6 @@
     will-change: auto !important;
   }
 
-  .po0-landing__atlas-scan {
-    display: none;
-  }
 }
 
 @media (max-width: 1180px) {
