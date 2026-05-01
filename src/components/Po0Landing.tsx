@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import './Po0Landing.css';
 import chinaMapSvg from '../assets/china-map.svg?raw';
 import AgentDocCard from './AgentDocCard';
@@ -44,36 +44,43 @@ function buildPath(a: { x: number; y: number }, b: { x: number; y: number }) {
   return `M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`;
 }
 
-function useScrollReveal() {
+function useReveal() {
   useEffect(() => {
-    const targets = document.querySelectorAll<HTMLElement>('.po0-reveal');
-    if (typeof IntersectionObserver === 'undefined') {
-      targets.forEach((node) => node.classList.add('is-visible'));
+    const targets = Array.from(document.querySelectorAll<HTMLElement>('.po0-reveal'));
+    targets.forEach((node, index) => {
+      node.dataset.reveal = '';
+      node.style.setProperty('--reveal-delay', `${Math.min(index % 6, 5) * 80}ms`);
+    });
+
+    const reveal = (node: HTMLElement) => {
+      node.dataset.revealed = 'true';
+      node.classList.add('is-revealed');
+    };
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      targets.forEach(reveal);
       return undefined;
     }
+
+    if (typeof IntersectionObserver === 'undefined') {
+      targets.forEach(reveal);
+      return undefined;
+    }
+
     const io = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
+          reveal(entry.target as HTMLElement);
           io.unobserve(entry.target);
         }
       }
-    }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
+    }, { threshold: 0, rootMargin: '0px 0px -10% 0px' });
+
     targets.forEach((node) => io.observe(node));
-    // Fallback: also reveal everything after the first frame so even slow / headless renders never stay blank.
-    const raf = window.requestAnimationFrame(() => {
-      targets.forEach((node) => {
-        const rect = node.getBoundingClientRect();
-        if (rect.top < window.innerHeight) node.classList.add('is-visible');
-      });
-    });
-    const fallback = window.setTimeout(() => {
-      targets.forEach((node) => node.classList.add('is-visible'));
-    }, 1500);
+
     return () => {
       io.disconnect();
-      window.cancelAnimationFrame(raf);
-      window.clearTimeout(fallback);
     };
   }, []);
 }
@@ -90,7 +97,7 @@ function useDriftCycle(intervalMs = 2400) {
 export default function Po0Landing() {
   const { snapshot } = usePublicProbeSnapshot();
   const safeSnapshot = snapshot.checks.length > 0 ? snapshot : mockProbeSnapshot;
-  useScrollReveal();
+  useReveal();
   const drift = useDriftCycle();
 
   const [clock, setClock] = useState(nowHHMM());
@@ -170,6 +177,7 @@ export default function Po0Landing() {
 
           <aside className="po0-landing__atlas po0-reveal" aria-label="实时路径地图">
             <div className="po0-landing__atlas-canvas">
+              <span className="po0-landing__atlas-scan" aria-hidden="true" />
               <div className="po0-landing__atlas-map" dangerouslySetInnerHTML={{ __html: chinaMapSvg }} />
               <svg className="po0-landing__atlas-overlay" viewBox={MAP_VIEWBOX} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                 <defs>
@@ -178,29 +186,53 @@ export default function Po0Landing() {
                     <stop offset="100%" stopColor="rgba(80,200,255,0)" />
                   </radialGradient>
                 </defs>
-                {links.map((link, idx) => (
-                  <path
-                    key={`link-${idx}`}
-                    className={`po0-landing__atlas-line po0-landing__atlas-line--${link.color}`}
-                    d={buildPath(CITY_POINTS[link.from], TARGET_POINTS[link.to])}
-                    style={{ animationDelay: `${idx * 0.4}s` }}
-                  />
-                ))}
+                {links.map((link, idx) => {
+                  const source = CITY_POINTS[link.from];
+                  const target = TARGET_POINTS[link.to];
+                  const path = buildPath(source, target);
+                  const midX = (source.x + target.x) / 2;
+                  const midY = (source.y + target.y) / 2;
+                  return (
+                    <g key={`link-${idx}`} className={`po0-landing__atlas-link po0-landing__atlas-link--${link.color}`}>
+                      <path className="po0-landing__atlas-line po0-landing__atlas-line--base" d={path} />
+                      <path
+                        className="po0-landing__atlas-line po0-landing__atlas-line--flow"
+                        d={path}
+                        style={{ animationDelay: `${idx * 0.34}s` }}
+                      />
+                      <text className="po0-landing__atlas-link-label" x={midX} y={midY - 10} textAnchor="middle">LINK</text>
+                    </g>
+                  );
+                })}
                 {(['shanghai', 'guangzhou'] as const).map((id) => {
                   const city = CITY_POINTS[id];
                   return (
-                    <g key={id} className="po0-landing__atlas-city is-active">
+                    <g key={id} className="po0-landing__atlas-city po0-landing__atlas-city--source is-active">
                       <circle cx={city.x} cy={city.y} r="24" fill="url(#po0CityGlow)" />
-                      <circle cx={city.x} cy={city.y} r="6" />
+                      <circle className="po0-landing__atlas-node-ring" cx={city.x} cy={city.y} r="10" />
+                      <circle className="po0-landing__atlas-node-core" cx={city.x} cy={city.y} r="5.8" />
                       <circle className="po0-landing__atlas-pulse" cx={city.x} cy={city.y} r="6" />
+                      <g className="po0-landing__atlas-reticle" transform={`translate(${city.x - 8} ${city.y - 8})`}>
+                        <path d="M8 0 9.8 3.6H6.2Z" />
+                        <path d="M8 16 6.2 12.4h3.6Z" />
+                        <path d="M0 8 3.6 6.2v3.6Z" />
+                        <path d="M16 8 12.4 9.8V6.2Z" />
+                      </g>
                       <text x={city.x - 14} y={city.y - 16} textAnchor="end">{city.label}</text>
                     </g>
                   );
                 })}
                 {Object.entries(TARGET_POINTS).map(([id, tgt]) => (
-                  <g key={id} className="po0-landing__atlas-target">
-                    <circle cx={tgt.x} cy={tgt.y} r="3.6" />
+                  <g key={id} className="po0-landing__atlas-target po0-landing__atlas-city--target">
+                    <circle className="po0-landing__atlas-target-halo" cx={tgt.x} cy={tgt.y} r="15" />
+                    <circle className="po0-landing__atlas-node-core" cx={tgt.x} cy={tgt.y} r="3.8" />
                     <circle className="po0-landing__atlas-target-pulse" cx={tgt.x} cy={tgt.y} r="3.6" />
+                    <g className="po0-landing__atlas-reticle po0-landing__atlas-reticle--target" transform={`translate(${tgt.x - 8} ${tgt.y - 8})`}>
+                      <path d="M8 0 9.8 3.6H6.2Z" />
+                      <path d="M8 16 6.2 12.4h3.6Z" />
+                      <path d="M0 8 3.6 6.2v3.6Z" />
+                      <path d="M16 8 12.4 9.8V6.2Z" />
+                    </g>
                     <text x={tgt.x + tgt.dx} y={tgt.y + tgt.dy} textAnchor={tgt.anchor}>{tgt.label}</text>
                   </g>
                 ))}

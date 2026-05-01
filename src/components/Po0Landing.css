@@ -350,7 +350,59 @@
   position: relative;
   width: 100%;
   aspect-ratio: 1000 / 738;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 52% 48%, rgba(58, 212, 255, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(5, 13, 26, 0.28), rgba(5, 13, 26, 0.08));
   filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.5));
+}
+
+.po0-landing__atlas-canvas::before,
+.po0-landing__atlas-canvas::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.po0-landing__atlas-canvas::before {
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(rgba(80, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(80, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(58, 212, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(58, 212, 255, 0.035) 1px, transparent 1px);
+  background-size: 72px 72px, 72px 72px, 18px 18px, 18px 18px;
+  mask-image: radial-gradient(circle at 54% 50%, black 8%, transparent 72%);
+  -webkit-mask-image: radial-gradient(circle at 54% 50%, black 8%, transparent 72%);
+  mix-blend-mode: screen;
+  animation: po0AtlasGridPan 30s linear infinite;
+}
+
+.po0-landing__atlas-canvas::after {
+  inset: 10px;
+  z-index: 4;
+  border: 1px solid rgba(80, 255, 255, 0.22);
+  clip-path: polygon(0 0, 16px 0, 16px 1px, 1px 1px, 1px 16px, 0 16px, 0 0, 100% 0, calc(100% - 16px) 0, calc(100% - 16px) 1px, calc(100% - 1px) 1px, calc(100% - 1px) 16px, 100% 16px, 100% 0, 100% 100%, calc(100% - 16px) 100%, calc(100% - 16px) calc(100% - 1px), calc(100% - 1px) calc(100% - 1px), calc(100% - 1px) calc(100% - 16px), 100% calc(100% - 16px), 100% 100%, 0 100%, 16px 100%, 16px calc(100% - 1px), 1px calc(100% - 1px), 1px calc(100% - 16px), 0 calc(100% - 16px));
+  filter: drop-shadow(0 0 8px rgba(80, 255, 255, 0.32));
+}
+
+.po0-landing__atlas-scan {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  top: 0;
+  z-index: 3;
+  height: 80px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(80, 255, 255, 0), rgba(80, 255, 255, 0.34) 48%, rgba(80, 255, 255, 0));
+  border-top: 1px solid rgba(143, 245, 255, 0.5);
+  border-bottom: 1px solid rgba(143, 245, 255, 0.24);
+  mix-blend-mode: screen;
+  filter: blur(0.2px) drop-shadow(0 0 16px rgba(80, 255, 255, 0.55));
+  animation: po0AtlasScan 5.2s linear infinite;
 }
 
 .po0-landing__atlas-map,
@@ -364,6 +416,7 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  z-index: 1;
 }
 
 .po0-landing__atlas-map svg {
@@ -399,6 +452,7 @@
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
+  text-shadow: 0 0 8px rgba(80, 255, 255, 0.4);
   paint-order: stroke;
   stroke: rgba(5, 12, 24, 0.92);
   stroke-width: 3.5;
@@ -407,30 +461,61 @@
 
 .po0-landing__atlas-line {
   fill: none;
-  stroke-width: 1.4;
-  stroke-dasharray: 4 6;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 8px rgba(58, 212, 255, 0.45));
-  animation: po0Dash 1.8s linear infinite;
+  vector-effect: non-scaling-stroke;
 }
 
-.po0-landing__atlas-line--cyan { stroke: var(--po0-accent-strong); }
-.po0-landing__atlas-line--violet {
-  stroke: var(--po0-violet);
-  filter: drop-shadow(0 0 8px rgba(140, 125, 255, 0.4));
+.po0-landing__atlas-line--base {
+  stroke-width: 1.25;
+  stroke-dasharray: 5 8;
+  opacity: 0.42;
 }
 
-.po0-landing__atlas-target circle:nth-child(1) {
-  fill: var(--po0-text-strong);
-  stroke: rgba(58, 212, 255, 0.6);
+.po0-landing__atlas-line--flow {
+  stroke-width: 2.15;
+  stroke-dasharray: 2 18 46 18;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(80, 255, 255, 0.8)) drop-shadow(0 0 14px rgba(58, 212, 255, 0.48));
+  animation: po0Dash 2.4s linear infinite;
+}
+
+.po0-landing__atlas-link--cyan .po0-landing__atlas-line { stroke: #5ff; }
+.po0-landing__atlas-link--violet .po0-landing__atlas-line--base { stroke: rgba(140, 125, 255, 0.78); }
+.po0-landing__atlas-link--violet .po0-landing__atlas-line--flow {
+  stroke: #8ff7ff;
+  filter: drop-shadow(0 0 6px rgba(80, 255, 255, 0.72)) drop-shadow(0 0 14px rgba(140, 125, 255, 0.42));
+}
+
+.po0-landing__atlas-link-label {
+  fill: rgba(143, 245, 255, 0.58);
+  font-size: 8px;
+  opacity: 0;
+  animation: po0AtlasLabel 2.4s ease-in-out infinite;
+}
+
+.po0-landing__atlas-target-halo,
+.po0-landing__atlas-node-ring {
+  fill: none;
+  stroke: rgba(95, 255, 255, 0.62);
   stroke-width: 1.4;
+  filter: drop-shadow(0 0 6px rgba(80, 255, 255, 0.64));
+}
+
+.po0-landing__atlas-node-core {
+  fill: var(--po0-text-strong);
+  stroke: #5ff;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 6px rgba(80, 255, 255, 0.8));
 }
 
 .po0-landing__atlas-target-pulse {
-  fill: rgba(58, 212, 255, 0.55);
+  fill: none;
+  stroke: rgba(80, 255, 255, 0.78);
+  stroke-width: 1.3;
   transform-origin: center;
   transform-box: fill-box;
   animation: po0CityPulse 2.4s ease-out infinite both;
+  filter: drop-shadow(0 0 6px rgba(80, 255, 255, 0.8));
 }
 
 .po0-landing__atlas-target text {
@@ -438,17 +523,42 @@
   font-size: 11px;
 }
 
-.po0-landing__atlas-city circle:nth-child(2) {
-  fill: var(--po0-accent-strong);
-  stroke: var(--po0-accent);
-  stroke-width: 1.6;
+.po0-landing__atlas-city--target .po0-landing__atlas-node-core {
+  fill: rgba(231, 238, 249, 0.92);
+  opacity: 0.86;
+}
+
+.po0-landing__atlas-city--target .po0-landing__atlas-target-halo {
+  stroke: rgba(95, 255, 255, 0.38);
 }
 
 .po0-landing__atlas-pulse {
-  fill: rgba(58, 212, 255, 0.45);
+  fill: none;
+  stroke: rgba(80, 255, 255, 0.72);
+  stroke-width: 1.4;
   transform-origin: center;
   transform-box: fill-box;
   animation: po0CityPulse 2.2s ease-out infinite both;
+  filter: drop-shadow(0 0 8px rgba(80, 255, 255, 0.82));
+}
+
+.po0-landing__atlas-reticle {
+  fill: rgba(143, 245, 255, 0.84);
+  opacity: 0.88;
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 0 5px rgba(80, 255, 255, 0.66));
+  animation: po0Spin 10s linear infinite;
+}
+
+.po0-landing__atlas-reticle--target {
+  opacity: 0.56;
+  animation-duration: 14s;
+}
+
+.po0-landing__atlas-city:hover .po0-landing__atlas-reticle,
+.po0-landing__atlas-target:hover .po0-landing__atlas-reticle {
+  animation-duration: 2.8s;
 }
 
 .po0-landing__atlas-city text {
@@ -529,21 +639,28 @@
 /* Scroll-reveal entrance */
 .po0-reveal {
   opacity: 0;
-  transform: translate3d(0, 32px, 0);
-  transition: opacity 0.8s cubic-bezier(0.22, 0.8, 0.18, 1), transform 0.8s cubic-bezier(0.22, 0.8, 0.18, 1);
+  transform: translateY(24px);
+  transition:
+    opacity 700ms ease var(--reveal-delay, 0ms),
+    transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
 }
 
-.po0-reveal.is-visible {
+.po0-reveal.is-revealed,
+.po0-reveal[data-revealed="true"] {
   opacity: 1;
-  transform: translate3d(0, 0, 0);
+  transform: none;
+  will-change: auto;
 }
 
 .po0-landing__pillars .po0-reveal {
-  transform: translate3d(0, 48px, 0);
+  transform: translateY(24px);
 }
 
-.po0-landing__pillars-grid .po0-reveal:nth-child(2) { transition-delay: 0.08s; }
-.po0-landing__pillars-grid .po0-reveal:nth-child(3) { transition-delay: 0.16s; }
+.po0-landing__pillars .po0-reveal.is-revealed,
+.po0-landing__pillars .po0-reveal[data-revealed="true"] {
+  transform: none;
+}
 
 /* Keyframes */
 @keyframes po0Pulse {
@@ -556,12 +673,12 @@
 }
 
 @keyframes po0Dash {
-  to { stroke-dashoffset: -50; }
+  to { stroke-dashoffset: -84; }
 }
 
 @keyframes po0CityPulse {
-  0% { r: 4; opacity: 0.6; }
-  90% { r: 24; opacity: 0; }
+  0% { r: 4; opacity: 0.75; }
+  90% { r: 26; opacity: 0; }
   100% { r: 4; opacity: 0; }
 }
 
@@ -584,6 +701,22 @@
   100% { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
+@keyframes po0AtlasGridPan {
+  to { background-position: 72px 72px, 72px 72px, 18px 18px, 18px 18px; }
+}
+
+@keyframes po0AtlasScan {
+  0% { transform: translateY(-110%); opacity: 0; }
+  10%, 82% { opacity: 1; }
+  100% { transform: translateY(760%); opacity: 0; }
+}
+
+@keyframes po0AtlasLabel {
+  0%, 30% { opacity: 0; transform: translateY(2px); }
+  45%, 70% { opacity: 0.62; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-2px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .po0-landing *,
   .po0-reveal {
@@ -591,6 +724,14 @@
     transition: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  .po0-reveal {
+    will-change: auto !important;
+  }
+
+  .po0-landing__atlas-scan {
+    display: none;
   }
 }
 
