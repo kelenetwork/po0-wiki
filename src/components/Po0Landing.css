@@ -31,9 +31,8 @@
   min-height: 100vh;
   color: var(--po0-text);
   background:
-    radial-gradient(circle at 12% 8%, rgba(58, 212, 255, 0.16), transparent 28rem),
-    radial-gradient(circle at 92% 58%, rgba(140, 125, 255, 0.12), transparent 26rem),
-    linear-gradient(180deg, var(--po0-bg) 0%, var(--po0-bg-2) 35%, var(--po0-bg-3) 100%);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(58, 212, 255, 0.08), transparent 70%),
+    linear-gradient(180deg, #050d1a 0%, #081224 30%, #0a1628 60%, #0c1a2f 100%);
   font-family: var(--po0-font-body);
   overflow-x: hidden;
 }
@@ -44,8 +43,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(rgba(120, 170, 220, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 170, 220, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(120, 170, 220, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 170, 220, 0.025) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(circle at 50% 30%, black 18%, transparent 78%);
   -webkit-mask-image: radial-gradient(circle at 50% 30%, black 18%, transparent 78%);
@@ -344,8 +343,8 @@
   isolation: isolate;
   border-radius: 28px;
   background:
-    radial-gradient(circle at 52% 48%, rgba(58, 212, 255, 0.12), transparent 34%),
-    linear-gradient(180deg, rgba(5, 13, 26, 0.18), rgba(5, 13, 26, 0));
+    radial-gradient(circle at 52% 48%, rgba(58, 212, 255, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(5, 13, 26, 0.12), rgba(5, 13, 26, 0));
   filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.5));
 }
 
@@ -449,13 +448,6 @@
 .po0-landing__atlas-link--violet .po0-landing__atlas-line--flow {
   stroke: #8ff7ff;
   filter: drop-shadow(0 0 6px rgba(80, 255, 255, 0.72)) drop-shadow(0 0 14px rgba(140, 125, 255, 0.42));
-}
-
-.po0-landing__atlas-link-label {
-  fill: rgba(143, 245, 255, 0.58);
-  font-size: 8px;
-  opacity: 0;
-  animation: po0AtlasLabel 2.4s ease-in-out infinite;
 }
 
 .po0-landing__atlas-target-halo,
@@ -665,12 +657,6 @@
   to { background-position: 72px 72px, 72px 72px, 18px 18px, 18px 18px; }
 }
 
-@keyframes po0AtlasLabel {
-  0%, 30% { opacity: 0; transform: translateY(2px); }
-  45%, 70% { opacity: 0.62; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-2px); }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .po0-landing *,
   .po0-reveal {
@@ -715,10 +701,10 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 18% 36%, rgba(58, 212, 255, 0.18), transparent 50%),
-    radial-gradient(circle at 82% 70%, rgba(140, 125, 255, 0.16), transparent 50%);
-  filter: blur(4px);
-  opacity: 0.85;
+    radial-gradient(circle at 18% 36%, rgba(58, 212, 255, 0.08), transparent 52%),
+    radial-gradient(circle at 82% 70%, rgba(58, 212, 255, 0.04), transparent 54%);
+  filter: blur(6px);
+  opacity: 0.55;
 }
 
 .po0-landing__why header {
@@ -918,10 +904,7 @@
   margin-top: clamp(80px, 12vw, 160px);
   padding: clamp(48px, 6vw, 100px) clamp(8px, 2vw, 24px);
   border-radius: 28px;
-  background:
-    radial-gradient(ellipse at 20% 0%, rgba(58, 212, 255, 0.18), transparent 60%),
-    radial-gradient(ellipse at 80% 100%, rgba(140, 125, 255, 0.18), transparent 60%),
-    linear-gradient(180deg, rgba(13, 27, 48, 0.55), rgba(7, 16, 32, 0.85));
+  background: rgba(8, 18, 36, 0.35);
   border: 1px solid var(--po0-line);
   overflow: hidden;
 }

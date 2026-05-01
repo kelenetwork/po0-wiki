@@ -170,8 +170,6 @@ export default function Po0Landing() {
                   const source = CITY_POINTS[link.from];
                   const target = TARGET_POINTS[link.to];
                   const path = buildPath(source, target);
-                  const midX = (source.x + target.x) / 2;
-                  const midY = (source.y + target.y) / 2;
                   return (
                     <g key={`link-${idx}`} className={`po0-landing__atlas-link po0-landing__atlas-link--${link.color}`}>
                       <path className="po0-landing__atlas-line po0-landing__atlas-line--base" d={path} />
@@ -180,7 +178,6 @@ export default function Po0Landing() {
                         d={path}
                         style={{ animationDelay: `${idx * 0.34}s` }}
                       />
-                      <text className="po0-landing__atlas-link-label" x={midX} y={midY - 10} textAnchor="middle">LINK</text>
                     </g>
                   );
                 })}
