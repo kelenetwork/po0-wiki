@@ -4,16 +4,16 @@ import chinaMapSvg from '../assets/china-map.svg?raw';
 import AgentDocCard from './AgentDocCard';
 import { mockProbeSnapshot, PublicProbeSnapshot, usePublicProbeSnapshot } from './probeSnapshot';
 
-const MAP_VIEWBOX = '0 0 774 569';
+const MAP_VIEWBOX = '0 0 1000 738';
 
 const CITY_POINTS = {
-  shanghai: { x: 605, y: 387, label: 'Po0·上海' },
-  guangzhou: { x: 495, y: 533, label: 'Po0·广州' },
+  shanghai: { x: 756, y: 489.5, label: 'Po0·上海' },
+  guangzhou: { x: 643.5, y: 614.2, label: 'Po0·广州' },
 };
 
 const TARGET_POINTS = {
-  hongkong: { x: 528, y: 540, label: '香港 HKG', anchor: 'start' as const, dx: 12, dy: 4 },
-  tokyo: { x: 736, y: 314, label: '东京 NRT', anchor: 'end' as const, dx: -10, dy: -8 },
+  hongkong: { x: 648.4, y: 637.9, label: '香港 HKG', anchor: 'start' as const, dx: 14, dy: 8 },
+  tokyo: { x: 925.3, y: 394.9, label: '东京 NRT', anchor: 'end' as const, dx: -10, dy: -8 },
 };
 
 const HERO_LINES = ['Po0', 'Routing', 'Atlas'];
@@ -186,13 +186,6 @@ export default function Po0Landing() {
                     style={{ animationDelay: `${idx * 0.4}s` }}
                   />
                 ))}
-                {Object.entries(TARGET_POINTS).map(([id, tgt]) => (
-                  <g key={id} className="po0-landing__atlas-target">
-                    <circle cx={tgt.x} cy={tgt.y} r="3.6" />
-                    <circle className="po0-landing__atlas-target-pulse" cx={tgt.x} cy={tgt.y} r="3.6" />
-                    <text x={tgt.x + tgt.dx} y={tgt.y + tgt.dy} textAnchor={tgt.anchor}>{tgt.label}</text>
-                  </g>
-                ))}
                 {(['shanghai', 'guangzhou'] as const).map((id) => {
                   const city = CITY_POINTS[id];
                   return (
@@ -204,6 +197,13 @@ export default function Po0Landing() {
                     </g>
                   );
                 })}
+                {Object.entries(TARGET_POINTS).map(([id, tgt]) => (
+                  <g key={id} className="po0-landing__atlas-target">
+                    <circle cx={tgt.x} cy={tgt.y} r="3.6" />
+                    <circle className="po0-landing__atlas-target-pulse" cx={tgt.x} cy={tgt.y} r="3.6" />
+                    <text x={tgt.x + tgt.dx} y={tgt.y + tgt.dy} textAnchor={tgt.anchor}>{tgt.label}</text>
+                  </g>
+                ))}
               </svg>
             </div>
           </aside>

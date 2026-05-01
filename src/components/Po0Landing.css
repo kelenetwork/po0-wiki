@@ -349,7 +349,7 @@
 .po0-landing__atlas-canvas {
   position: relative;
   width: 100%;
-  aspect-ratio: 774 / 569;
+  aspect-ratio: 1000 / 738;
   filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.5));
 }
 
@@ -379,8 +379,11 @@
   transition: fill 0.2s ease;
 }
 
-.po0-landing__atlas-map svg path[id="shanghai"],
-.po0-landing__atlas-map svg path[id="guangdong"] {
+.po0-landing__atlas-map svg path[id="CNSH"],
+.po0-landing__atlas-map svg path[id="CNGD"],
+.po0-landing__atlas-map svg path[id="CNHK"],
+.po0-landing__atlas-map svg path[id="CNMO"],
+.po0-landing__atlas-map svg path[id="CNTW"] {
   fill: rgba(58, 212, 255, 0.18);
   stroke: rgba(170, 230, 255, 0.7);
 }
