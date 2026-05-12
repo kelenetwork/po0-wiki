@@ -697,3 +697,454 @@
   font-size: 9.4px;
   letter-spacing: -0.03em;
 }
+
+
+/* ========================================================================
+   misaka redesign — stats strip, refined dots, target cards, chart panel
+   ======================================================================== */
+
+.status-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 22px;
+}
+
+.status-stats-strip .stat-card {
+  position: relative;
+  padding: 18px 20px;
+  background: var(--po0-bg-1);
+  border: 1px solid var(--po0-line);
+  border-radius: var(--po0-radius-lg);
+  overflow: hidden;
+}
+.status-stats-strip .stat-card::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 100px;
+  height: 100px;
+  border-radius: 999px;
+  background: radial-gradient(circle, var(--po0-accent-soft), transparent 60%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.status-stats-strip .stat-card__label {
+  font-family: var(--po0-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--po0-text-faint);
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+.status-stats-strip .stat-card__value {
+  font-family: var(--po0-font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--po0-text-strong);
+  letter-spacing: -0.005em;
+  position: relative;
+  z-index: 1;
+}
+.status-stats-strip .stat-card__unit {
+  font-family: var(--po0-font-mono);
+  font-size: 13px;
+  font-style: normal;
+  color: var(--po0-text-dim);
+  margin-left: 4px;
+}
+.status-stats-strip .stat-card__delta {
+  margin-top: 8px;
+  font-family: var(--po0-font-mono);
+  font-size: 10.5px;
+  color: var(--po0-accent);
+  letter-spacing: 0.04em;
+  position: relative;
+  z-index: 1;
+}
+
+/* Restrained status dots — small (6px) filled circle + 1.5px outer ring */
+.status-probe .dot,
+.source-node-card .dot,
+.source-filter .dot,
+.latency-card .dot {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 999px !important;
+  box-shadow: 0 0 0 1.5px rgba(7, 193, 96, 0.18) !important;
+  flex-shrink: 0;
+}
+.status-probe .dot.online,
+.source-node-card .dot.online,
+.source-filter .dot.online,
+.latency-card .dot.online {
+  background: var(--po0-accent) !important;
+}
+.status-probe .dot.warn,
+.source-node-card .dot.warn,
+.source-filter .dot.warn,
+.latency-card .dot.warn {
+  background: var(--po0-warn) !important;
+  box-shadow: 0 0 0 1.5px rgba(245, 165, 36, 0.2) !important;
+}
+.status-probe .dot.offline,
+.source-node-card .dot.offline,
+.source-filter .dot.offline,
+.latency-card .dot.offline {
+  background: var(--po0-danger) !important;
+  box-shadow: 0 0 0 1.5px rgba(224, 68, 78, 0.2) !important;
+}
+.status-probe .dot.pending,
+.source-node-card .dot.pending,
+.source-filter .dot.pending,
+.latency-card .dot.pending {
+  background: var(--po0-text-faint) !important;
+  box-shadow: 0 0 0 1.5px rgba(115, 115, 115, 0.18) !important;
+}
+
+/* Top bar slim down */
+.status-dashboard__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--po0-line);
+}
+.status-source-meta {
+  font-family: var(--po0-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--po0-text-faint);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.status-source-meta::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--po0-accent);
+  box-shadow: 0 0 0 1.5px rgba(7, 193, 96, 0.18);
+}
+
+/* Time-range tabs as misaka chips */
+.status-tabs {
+  background: transparent !important;
+  display: flex !important;
+  gap: 4px !important;
+  padding: 0 !important;
+}
+.status-tabs button {
+  background: transparent !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  padding: 6px 13px !important;
+  color: var(--po0-text-dim) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10.5px !important;
+  letter-spacing: 0.06em !important;
+  cursor: pointer;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+.status-tabs button.active {
+  background: var(--po0-bg-2) !important;
+  border-color: rgba(7, 193, 96, 0.4) !important;
+  color: var(--po0-accent) !important;
+}
+
+/* Source-node cards (sidebar) — flat misaka rows */
+.source-node-card {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--po0-radius) !important;
+  padding: 10px 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  transition: background 120ms, border-color 120ms;
+}
+.source-node-card:hover {
+  background: var(--po0-bg-2) !important;
+  border-color: var(--po0-line) !important;
+}
+.source-node-card__main {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+.source-node-card__main strong {
+  font-family: var(--po0-font-mono) !important;
+  font-weight: 500 !important;
+  font-size: 12.5px !important;
+  color: var(--po0-text) !important;
+  letter-spacing: 0 !important;
+}
+.source-node-card__main small {
+  display: block !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+  margin-top: 2px !important;
+}
+.source-node-card__meta {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--po0-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--po0-text-faint);
+  padding-left: 16px;
+}
+.node-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--po0-text-dim) !important;
+}
+.node-status--online { color: var(--po0-accent) !important; }
+.node-status--warn   { color: var(--po0-warn) !important; }
+.node-status--offline { color: var(--po0-danger) !important; }
+.node-status i { display: none !important; }
+
+/* Status panel title */
+.status-panel-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--po0-line);
+}
+.status-panel-title span {
+  font-family: var(--po0-font-display) !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+  font-size: 20px !important;
+  color: var(--po0-text-strong) !important;
+}
+.status-panel-title strong {
+  font-family: var(--po0-font-mono) !important;
+  font-weight: 500 !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+}
+
+/* Latency target cards — misaka style */
+.latency-card {
+  background: var(--po0-bg-1) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  padding: 14px 16px !important;
+  box-shadow: none !important;
+}
+.latency-card__route {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+}
+.latency-card__value {
+  font-family: var(--po0-font-display) !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+  font-size: 28px !important;
+  line-height: 1 !important;
+  color: var(--po0-text-strong) !important;
+}
+.latency-card__value .unit {
+  font-family: var(--po0-font-mono) !important;
+  font-style: normal !important;
+  font-size: 11px !important;
+  color: var(--po0-text-dim) !important;
+  margin-left: 3px !important;
+  font-weight: 400 !important;
+}
+.latency-card__target {
+  margin: 6px 0 0 !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10.5px !important;
+  color: var(--po0-text-faint) !important;
+  letter-spacing: 0.04em !important;
+}
+.latency-card__meta {
+  margin-top: 6px;
+  display: flex;
+  gap: 10px;
+  font-family: var(--po0-font-mono);
+  font-size: 10px;
+  color: var(--po0-text-faint);
+  letter-spacing: 0.04em;
+}
+.latency-card--green .latency-card__value { color: var(--po0-text-strong) !important; }
+.latency-card--amber .latency-card__value { color: var(--po0-warn) !important; }
+.latency-card--violet .latency-card__value,
+.latency-card--blue .latency-card__value { color: var(--po0-text-strong) !important; }
+.latency-card--pending .latency-card__value { color: var(--po0-text-faint) !important; }
+
+/* Chart card refinement */
+.status-chart-card {
+  background: var(--po0-bg-1) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius-lg) !important;
+  padding: 22px 24px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+.status-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.status-chart-head h3,
+.status-chart-head h2 {
+  font-family: var(--po0-font-display) !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+  font-size: 20px !important;
+  margin: 0 !important;
+  color: var(--po0-text-strong) !important;
+}
+.status-chart-head .status-kicker,
+.status-kicker {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+  font-weight: 500 !important;
+}
+
+/* Chart svg internals */
+.chart-grid {
+  stroke: var(--po0-line) !important;
+  stroke-width: 1 !important;
+  opacity: 0.6;
+}
+.chart-grid--vertical {
+  stroke-dasharray: 2 6 !important;
+  opacity: 0.4 !important;
+}
+.chart-axis,
+.chart-empty {
+  fill: var(--po0-text-faint) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 9.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.chart-axis-title {
+  font-size: 9.5px !important;
+}
+.chart-jitter {
+  opacity: 0.12 !important;
+  stroke-width: 6 !important;
+}
+.chart-smoke {
+  opacity: 0.08 !important;
+  mix-blend-mode: normal !important;
+}
+.chart-line-underlay {
+  stroke: var(--po0-bg) !important;
+  stroke-width: 4 !important;
+}
+.chart-line {
+  stroke-width: 1.6 !important;
+}
+.chart-last-point {
+  stroke: var(--po0-bg) !important;
+  stroke-width: 2 !important;
+  filter: none !important;
+}
+
+/* Source filter chip row */
+.source-filter {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 6px !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 0 16px !important;
+  backdrop-filter: none !important;
+}
+.source-filter button {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 7px 14px !important;
+  background: var(--po0-bg-1) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  color: var(--po0-text-dim) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.06em !important;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms;
+}
+.source-filter button:hover {
+  border-color: var(--po0-line-strong) !important;
+  color: var(--po0-text) !important;
+}
+.source-filter button.active {
+  border-color: rgba(7, 193, 96, 0.45) !important;
+  background: var(--po0-bg-2) !important;
+  color: var(--po0-accent) !important;
+}
+
+/* Status legend */
+.status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--po0-line);
+}
+.status-legend button {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 5px 10px !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 4px !important;
+  color: var(--po0-text-dim) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10.5px !important;
+  letter-spacing: 0.04em !important;
+  cursor: pointer;
+}
+.status-legend button.active {
+  color: var(--po0-text-strong) !important;
+}
+.status-legend button .swatch {
+  width: 12px !important;
+  height: 2px !important;
+  border-radius: 1px !important;
+}
+
+/* status-probe section root */
+.status-probe.status-dashboard {
+  padding: clamp(20px, 2vw, 28px) !important;
+}

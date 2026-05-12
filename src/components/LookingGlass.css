@@ -344,3 +344,363 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ========================================================================
+   misaka redesign — LG sidebar, workbench, action grid, terminal output
+   ======================================================================== */
+
+.looking-glass-console {
+  display: grid !important;
+  grid-template-columns: 320px minmax(0, 1fr) !important;
+  gap: 20px !important;
+}
+
+.lg-sidebar {
+  background: var(--po0-bg-1) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius-lg) !important;
+  padding: 18px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+.lg-sidebar__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--po0-line);
+}
+.lg-sidebar__head h2 {
+  font-family: var(--po0-font-display) !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+  font-size: 20px !important;
+  margin: 0 !important;
+  color: var(--po0-text-strong) !important;
+}
+
+/* Region group title — small mono caps + hairline */
+.lg-region {
+  margin-bottom: 14px;
+}
+.lg-region__title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+  margin-bottom: 8px !important;
+  padding-bottom: 0 !important;
+  border: 0 !important;
+}
+.lg-region__title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--po0-line);
+}
+
+/* Node rows — flat, hover bg only */
+.lg-node {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  padding: 9px 12px !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--po0-radius-sm) !important;
+  text-align: left !important;
+  cursor: pointer;
+  font: inherit !important;
+  transition: background 120ms, border-color 120ms;
+  margin-bottom: 4px !important;
+}
+.lg-node:hover {
+  background: var(--po0-bg-2) !important;
+}
+.lg-node.is-active {
+  background: var(--po0-bg-2) !important;
+  border-color: rgba(7, 193, 96, 0.4) !important;
+}
+.lg-node.is-offline {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Misaka-style 6px dot */
+.lg-node-dot {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 999px !important;
+  box-shadow: 0 0 0 1.5px rgba(7, 193, 96, 0.18) !important;
+  flex-shrink: 0;
+}
+.lg-node-dot.online { background: var(--po0-accent) !important; }
+.lg-node-dot.busy   { background: var(--po0-warn) !important; box-shadow: 0 0 0 1.5px rgba(245, 165, 36, 0.2) !important; }
+.lg-node-dot.standby,
+.lg-node-dot.offline { background: var(--po0-text-faint) !important; box-shadow: 0 0 0 1.5px rgba(115, 115, 115, 0.18) !important; }
+.lg-node-dot.degraded { background: var(--po0-warn) !important; box-shadow: 0 0 0 1.5px rgba(245, 165, 36, 0.2) !important; }
+.lg-node-dot.down,
+.lg-node-dot.error { background: var(--po0-danger) !important; box-shadow: 0 0 0 1.5px rgba(224, 68, 78, 0.2) !important; }
+
+.lg-node strong,
+.lg-node__name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  color: var(--po0-text) !important;
+  letter-spacing: 0 !important;
+  text-align: left !important;
+}
+.lg-node small,
+.lg-node__lat,
+.lg-node__loc {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+}
+
+/* Workbench panel */
+.lg-workbench {
+  background: var(--po0-bg-1) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius-lg) !important;
+  padding: 22px 24px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.lg-toolbar {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr auto !important;
+  gap: 12px !important;
+  align-items: end !important;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--po0-line);
+}
+
+.lg-action-grid,
+.lg-tools {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin: 0 0 18px !important;
+}
+.lg-tool-button,
+.lg-action {
+  padding: 14px 16px !important;
+  background: var(--po0-bg-2) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  cursor: pointer;
+  transition: border-color 120ms, background 120ms;
+  text-align: left !important;
+  font: inherit !important;
+  color: inherit !important;
+}
+.lg-tool-button:hover,
+.lg-action:hover {
+  border-color: rgba(7, 193, 96, 0.4) !important;
+}
+.lg-tool-button.is-active,
+.lg-tool-button[aria-pressed="true"],
+.lg-action.is-active {
+  border-color: var(--po0-accent) !important;
+  background: rgba(7, 193, 96, 0.06) !important;
+}
+.lg-tool-button strong,
+.lg-tool-button__name,
+.lg-action__name {
+  display: block;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: var(--po0-text) !important;
+  margin-bottom: 4px !important;
+}
+.lg-tool-button small,
+.lg-tool-button__desc,
+.lg-action__desc {
+  display: block;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10.5px !important;
+  color: var(--po0-text-faint) !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* Target input + Run button */
+.lg-target {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lg-target span,
+.lg-source-readonly span {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+}
+.lg-target input,
+.lg-source-readonly input,
+.lg-source-readonly output {
+  background: var(--po0-bg-2) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  padding: 10px 14px !important;
+  color: var(--po0-text) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 12.5px !important;
+  width: 100% !important;
+  display: block !important;
+}
+.lg-target input:focus,
+.lg-source-readonly input:focus {
+  outline: none !important;
+  border-color: var(--po0-accent) !important;
+  box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.12) !important;
+}
+
+.lg-run {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 0 22px !important;
+  height: 40px !important;
+  background: var(--po0-accent) !important;
+  color: #000 !important;
+  border: 0 !important;
+  border-radius: var(--po0-radius) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  cursor: pointer;
+  transition: background 120ms;
+}
+.lg-run:hover {
+  background: var(--po0-accent-strong) !important;
+}
+.lg-run:disabled {
+  background: var(--po0-bg-3) !important;
+  color: var(--po0-text-faint) !important;
+  cursor: not-allowed;
+}
+
+/* Summary grid */
+.lg-summary-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  gap: 10px !important;
+  margin-bottom: 18px;
+}
+.lg-summary-card,
+.lg-summary-tile {
+  background: var(--po0-bg-2) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  padding: 14px 16px !important;
+}
+.lg-summary-card__label,
+.lg-summary-tile__label {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+  margin-bottom: 8px !important;
+}
+.lg-summary-card__value,
+.lg-summary-tile__value {
+  font-family: var(--po0-font-display) !important;
+  font-style: italic !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+  color: var(--po0-text-strong) !important;
+}
+.lg-summary-card__value .unit,
+.lg-summary-tile__value .unit {
+  font-family: var(--po0-font-mono) !important;
+  font-style: normal !important;
+  font-size: 11px !important;
+  color: var(--po0-text-dim) !important;
+  margin-left: 3px !important;
+}
+
+/* Terminal output panel */
+.lg-terminal-card {
+  background: #000 !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  padding: 0 !important;
+  overflow: hidden;
+  font-family: var(--po0-font-mono) !important;
+}
+.lg-terminal-top {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 16px !important;
+  border-bottom: 1px solid var(--po0-line) !important;
+  background: var(--po0-bg) !important;
+}
+.lg-terminal-top::before {
+  content: "";
+  display: inline-flex;
+  width: 32px;
+  height: 8px;
+  background:
+    radial-gradient(circle, #ff5f56 4px, transparent 4px) 0 50% / 12px 8px no-repeat,
+    radial-gradient(circle, #f5a524 4px, transparent 4px) 50% 50% / 12px 8px no-repeat,
+    radial-gradient(circle, #07c160 4px, transparent 4px) 100% 50% / 12px 8px no-repeat;
+}
+.lg-terminal-top h3,
+.lg-terminal-top span,
+.lg-terminal-top strong,
+.lg-terminal-title {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10.5px !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+  font-weight: 400 !important;
+  margin: 0 !important;
+}
+.lg-terminal-body,
+.lg-terminal,
+.lg-terminal-card pre {
+  padding: 16px 18px !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 12px !important;
+  line-height: 1.65 !important;
+  color: var(--po0-text-dim) !important;
+  background: #000 !important;
+  white-space: pre-wrap !important;
+  margin: 0 !important;
+  max-height: 540px;
+  overflow-y: auto;
+}
+
+/* Empty state */
+.lg-empty {
+  font-family: var(--po0-font-mono);
+  font-size: 11.5px;
+  color: var(--po0-text-faint);
+  padding: 24px 12px;
+  text-align: center;
+}
+

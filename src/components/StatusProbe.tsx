@@ -384,6 +384,74 @@ function chartSeriesStats(points: ChartPoint[]): ChartSeriesStats {
   };
 }
 
+type DashboardStats = {
+  onlineNodes: number;
+  totalNodes: number;
+  avgLatency: number | null;
+  bestLatency: number | null;
+  worstLatency: number | null;
+  avgLoss: number;
+  lastUpdateMs: number | null;
+};
+
+function computeDashboardStats(
+  snapshot: PublicProbeSnapshot,
+  latencies: TargetLatency[],
+): DashboardStats {
+  const sources = snapshot.sources;
+  const onlineNodes = sources.filter(
+    (n) => safeStatus(n.status) === "online",
+  ).length;
+
+  const liveLatencies: number[] = [];
+  for (const item of latencies) {
+    if (item.pending) continue;
+    const value = parseFloat(item.latencyValue);
+    if (Number.isFinite(value)) liveLatencies.push(value);
+  }
+  const sumLatency = liveLatencies.reduce((acc, v) => acc + v, 0);
+  const avgLatency = liveLatencies.length
+    ? sumLatency / liveLatencies.length
+    : null;
+
+  const losses: number[] = [];
+  for (const series of snapshot.series) {
+    for (const point of series.points) {
+      if (Number.isFinite(point.loss_pct)) losses.push(point.loss_pct);
+    }
+  }
+  const avgLoss = losses.length
+    ? losses.reduce((a, b) => a + b, 0) / losses.length
+    : 0;
+
+  let lastUpdateMs: number | null = null;
+  for (const node of sources) {
+    const t = Date.parse(node.updated_at);
+    if (Number.isFinite(t)) {
+      lastUpdateMs = lastUpdateMs === null ? t : Math.max(lastUpdateMs, t);
+    }
+  }
+
+  return {
+    onlineNodes,
+    totalNodes: sources.length,
+    avgLatency,
+    bestLatency: liveLatencies.length ? minNumber(liveLatencies, 0) : null,
+    worstLatency: liveLatencies.length ? maxNumber(liveLatencies, 0) : null,
+    avgLoss,
+    lastUpdateMs,
+  };
+}
+
+function formatRelativeAge(ms: number | null): string {
+  if (ms === null) return "—";
+  const diff = Math.max(0, Date.now() - ms);
+  if (diff < 60_000) return `${Math.round(diff / 1000)}s ago`;
+  if (diff < 3_600_000) return `${Math.round(diff / 60_000)}m ago`;
+  return `${Math.round(diff / 3_600_000)}h ago`;
+}
+
+
 function formatMs(value: number | null, digits = 1) {
   return value == null ? "—" : `${value.toFixed(digits)}ms`;
 }
@@ -616,6 +684,11 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
     () => buildChartModel(safeSnapshot, selectedSeriesIds, selectedRange),
     [safeSnapshot, selectedSeriesIds, selectedRange],
   );
+
+  const dashboardStats = useMemo(
+    () => computeDashboardStats(safeSnapshot, targetLatencies),
+    [safeSnapshot, targetLatencies],
+  );
   const selectedSource = safeSnapshot.sources.find(
     (source) => source.id === selectedSourceId,
   );
@@ -711,6 +784,50 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
       className="status-probe status-dashboard kele-status"
       aria-label="链路状态"
     >
+      <div className="status-stats-strip" aria-label="链路概览">
+        <div className="stat-card">
+          <div className="stat-card__label">Online Nodes</div>
+          <div className="stat-card__value">
+            {dashboardStats.onlineNodes}
+            <span className="stat-card__unit">/ {dashboardStats.totalNodes}</span>
+          </div>
+          <div className="stat-card__delta">
+            {dashboardStats.onlineNodes === dashboardStats.totalNodes
+              ? "全部健康"
+              : `${dashboardStats.totalNodes - dashboardStats.onlineNodes} 个异常`}
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-card__label">Avg Latency</div>
+          <div className="stat-card__value">
+            {dashboardStats.avgLatency === null ? "—" : dashboardStats.avgLatency.toFixed(1)}
+            <span className="stat-card__unit">ms</span>
+          </div>
+          <div className="stat-card__delta">
+            {dashboardStats.bestLatency !== null && dashboardStats.worstLatency !== null
+              ? `min ${dashboardStats.bestLatency.toFixed(0)} · max ${dashboardStats.worstLatency.toFixed(0)}`
+              : "等待样本"}
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-card__label">Avg Loss</div>
+          <div className="stat-card__value">
+            {dashboardStats.avgLoss.toFixed(2)}
+            <span className="stat-card__unit">%</span>
+          </div>
+          <div className="stat-card__delta">
+            {dashboardStats.avgLoss < 0.5 ? "稳定" : "波动"}
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-card__label">Last Sample</div>
+          <div className="stat-card__value">
+            {formatRelativeAge(dashboardStats.lastUpdateMs)}
+          </div>
+          <div className="stat-card__delta">实时同步</div>
+        </div>
+      </div>
+
       <div className="status-dashboard__topbar">
         <div>
           <span className="status-source-meta">
