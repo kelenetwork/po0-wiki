@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import './LookingGlass.css';
 import { PublicProbeItem, usePublicProbeSnapshot } from './probeSnapshot';
 
@@ -47,14 +47,45 @@ type LGResult = {
   completed_at?: string;
 };
 
-function renderTerminalOutput(value: string) {
-  const [firstLine, ...restLines] = value.split('\n');
-  const className = firstLine.startsWith('✓') ? 'lg-terminal-success' : firstLine.startsWith('⚠') ? 'lg-terminal-warning' : '';
-  if (!className) return value;
+function renderTerminalLines(value: string) {
+  const lines = value.split('\n');
   return (
     <>
-      <span className={className}>{firstLine}</span>
-      {restLines.length > 0 && `\n${restLines.join('\n')}`}
+      {lines.map((line, i) => {
+        let cls = 'tl';
+        if (line.startsWith('✓')) cls = 'tl tl--ok';
+        else if (line.startsWith('⚠') || /error|failed|timeout/i.test(line)) cls = 'tl tl--err';
+        else if (line.startsWith('#') || line.startsWith('---')) cls = 'tl tl--dim';
+        else if (line.startsWith('$') || /^\$\s/.test(line)) cls = 'tl tl--cmd';
+
+        const parts: React.ReactNode[] = [];
+        const re = /(time=\s*([\d.]+)\s*ms|([\d.]+)\s*ms\b|(\d+(?:\.\d+)?)%\s*(?:loss|packet loss))/g;
+        let lastIdx = 0;
+        let match: RegExpExecArray | null;
+        let key = 0;
+        while ((match = re.exec(line)) !== null) {
+          if (match.index > lastIdx) parts.push(line.slice(lastIdx, match.index));
+          const token = match[0];
+          let tone = 'tk tk--good';
+          const num = parseFloat(match[2] ?? match[3] ?? match[4] ?? '0');
+          if (match[4] !== undefined) {
+            tone = num >= 5 ? 'tk tk--bad' : num >= 1 ? 'tk tk--mid' : 'tk tk--good';
+          } else {
+            tone = num >= 200 ? 'tk tk--bad' : num >= 80 ? 'tk tk--mid' : 'tk tk--good';
+          }
+          parts.push(<span key={`k${i}-${key++}`} className={tone}>{token}</span>);
+          lastIdx = match.index + token.length;
+        }
+        if (lastIdx < line.length) parts.push(line.slice(lastIdx));
+        if (parts.length === 0) parts.push(line || '\u00a0');
+
+        return (
+          <span key={i} className={cls}>
+            {parts}
+            {i < lines.length - 1 ? '\n' : ''}
+          </span>
+        );
+      })}
     </>
   );
 }
@@ -68,6 +99,7 @@ export default function LookingGlass() {
   const { snapshot, origin } = usePublicProbeSnapshot();
   const lgTargets = useMemo(() => snapshot.targets.filter((target) => target.show_in_lg !== false), [snapshot.targets]);
   const regionGroups = groupSources(snapshot.sources);
+  const onlineCount = snapshot.sources.filter((n) => isOnline(n.status)).length;
   const [selectedSourceId, setSelectedSourceId] = useState(defaultOnlineSourceId(snapshot.sources));
   const [selectedTargetId, setSelectedTargetId] = useState(lgTargets[0]?.id ?? '');
   const [selectedTool, setSelectedTool] = useState<LGTool>('mtr');
@@ -138,40 +170,36 @@ export default function LookingGlass() {
       : '';
 
   return (
-    <section className="looking-glass-console" aria-label="Looking Glass 工具台">
+    <section className="lg-console" aria-label="Looking Glass 工具台">
       <aside className="lg-sidebar">
         <div className="lg-sidebar__head">
-          <p className="status-kicker">Nodes</p>
-          <h2>发起点</h2>
-          <span>{origin === 'api' ? '选择一个可用发起点开始检测。' : '正在同步可用发起点。'}</span>
+          <h2 className="lg-sidebar__title">源节点</h2>
+          <span className="lg-sidebar__meta">{onlineCount} ONLINE</span>
         </div>
         <div className="lg-region-list">
           {regionGroups.map((group) => (
-            <article className="lg-region" key={group.region}>
-              <div className="lg-region__title">
-                <strong>{group.region}</strong>
-                <small>{group.summary}</small>
+            <div className="lg-region" key={group.region}>
+              <div className="lg-region__title">{group.region}</div>
+              <div className="lg-region__nodes">
+                {group.nodes.map((node) => {
+                  const online = isOnline(node.status);
+                  return (
+                    <button
+                      className={`lg-node${selectedSourceId === node.id ? ' is-active' : ''}${online ? '' : ' is-offline'}`}
+                      type="button"
+                      key={node.id}
+                      onClick={() => online && setSelectedSourceId(node.id)}
+                      disabled={!online}
+                      title={online ? '' : `${node.display_name} 暂不可用（${node.status}）`}
+                    >
+                      <span className={`lg-node-dot ${nodeTone(node.status)}`} />
+                      <span className="lg-node__name">{node.display_name}</span>
+                      <span className="lg-node__lat">{node.tags[0] ?? '—'}</span>
+                    </button>
+                  );
+                })}
               </div>
-              {group.nodes.map((node) => {
-                const online = isOnline(node.status);
-                return (
-                  <button
-                    className={`lg-node${selectedSourceId === node.id ? ' is-active' : ''}${online ? '' : ' is-offline'}`}
-                    type="button"
-                    key={node.id}
-                    onClick={() => online && setSelectedSourceId(node.id)}
-                    disabled={!online}
-                    title={online ? '' : `${node.display_name} 暂不可用（${node.status}）`}
-                  >
-                    <span className={`lg-node-dot ${nodeTone(node.status)}`} />
-                    <span>
-                      <strong>{node.display_name}</strong>
-                      <small>{node.tags.join(' / ') || 'public'} · {node.status}</small>
-                    </span>
-                  </button>
-                );
-              })}
-            </article>
+            </div>
           ))}
           {snapshot.sources.length === 0 && (
             <p className="lg-empty">暂时没有可用发起点，请稍后再试。</p>
@@ -180,28 +208,79 @@ export default function LookingGlass() {
       </aside>
 
       <div className="lg-workbench">
-        <div className="lg-toolbar">
-          <label>
-            <span>工具</span>
-            <select value={selectedTool} aria-label="选择工具" onChange={(event) => setSelectedTool(event.target.value as LGTool)}>
-              <option value="ping">Ping</option>
-              <option value="tcping">TCPing</option>
-              <option value="mtr">MTR</option>
-              <option value="nexttrace">Nexttrace</option>
-              <option value="traceroute">Traceroute</option>
-            </select>
-          </label>
-          <label className="lg-target">
-            <span>目标</span>
-            <select value={selectedTargetId} aria-label="选择目标" onChange={(event) => setSelectedTargetId(event.target.value)}>
+        <div className="lg-workbench__head">
+          <h2 className="lg-workbench__title">探测工具台</h2>
+          <span className="lg-workbench__meta">
+            {(selectedSource?.region?.toUpperCase()) ?? '—'} → {selectedTarget?.display_name ?? '?'}
+          </span>
+        </div>
+
+        <ol className="lg-stepper" aria-label="操作步骤">
+          <li className={`lg-step${selectedSourceId ? ' is-done' : ''}`}>
+            <span className="lg-step__num">1</span>
+            <span className="lg-step__label">源节点</span>
+          </li>
+          <li className={`lg-step${selectedTool ? ' is-done' : ''}`}>
+            <span className="lg-step__num">2</span>
+            <span className="lg-step__label">探测工具</span>
+          </li>
+          <li className={`lg-step${selectedTargetId ? ' is-done' : ''}`}>
+            <span className="lg-step__num">3</span>
+            <span className="lg-step__label">选择目标</span>
+          </li>
+          <li className={`lg-step${running ? ' is-current' : ''}`}>
+            <span className="lg-step__num">4</span>
+            <span className="lg-step__label">执行</span>
+          </li>
+        </ol>
+
+        <div className="lg-actions" role="radiogroup" aria-label="选择探测工具">
+          {([
+            { id: 'ping', name: 'Ping', desc: 'ICMP echo · 平均延迟' },
+            { id: 'traceroute', name: 'Traceroute', desc: '逐跳路径' },
+            { id: 'mtr', name: 'MTR', desc: '丢包采样' },
+            { id: 'nexttrace', name: 'Nexttrace', desc: '路由可视化' },
+          ] as { id: LGTool; name: string; desc: string }[]).map((tool) => (
+            <button
+              key={tool.id}
+              type="button"
+              role="radio"
+              aria-checked={selectedTool === tool.id}
+              className={`lg-action${selectedTool === tool.id ? ' is-active' : ''}`}
+              onClick={() => setSelectedTool(tool.id)}
+            >
+              <span className="lg-action__icon" aria-hidden="true">
+                {tool.id === 'ping' && (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h3l3-9 6 18 3-9h3" /></svg>
+                )}
+                {tool.id === 'traceroute' && (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M3 6h18M3 12h18M3 18h18" /><circle cx="6" cy="6" r="1.6" fill="currentColor" /><circle cx="11" cy="12" r="1.6" fill="currentColor" /><circle cx="16" cy="18" r="1.6" fill="currentColor" /></svg>
+                )}
+                {tool.id === 'mtr' && (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3v18" strokeLinecap="round" /></svg>
+                )}
+                {tool.id === 'nexttrace' && (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 17V7l8-3 8 3v10l-8 3-8-3Z" /><path d="M4 7l8 3 8-3M12 10v10" /></svg>
+                )}
+              </span>
+              <span className="lg-action__name">{tool.name}</span>
+              <span className="lg-action__desc">{tool.desc}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="lg-target-row">
+          <label className="lg-target-input">
+            <span className="lg-target-input__label">目标</span>
+            <select
+              value={selectedTargetId}
+              aria-label="选择目标"
+              onChange={(event) => setSelectedTargetId(event.target.value)}
+            >
               {lgTargets.map((target) => (
                 <option value={target.id} key={target.id}>{target.display_name}</option>
               ))}
             </select>
-          </label>
-          <label className="lg-source-readonly">
-            <span>发起点</span>
-            <strong>{selectedSource?.display_name ?? '未选择'}</strong>
           </label>
           <button
             className="lg-run"
@@ -210,36 +289,27 @@ export default function LookingGlass() {
             disabled={!canRun}
             title={runDisabledHint}
           >
-            {running ? '检测中…' : '开始检测'}
+            <span className="lg-run__icon" aria-hidden="true">
+              {running ? (
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1" /></svg>
+              ) : (
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+              )}
+            </span>
+            {running ? '检测中' : '运行'}
           </button>
         </div>
 
-        <div className="lg-summary-grid">
-          <article>
-            <span>发起点</span>
-            <strong>{selectedSource?.display_name ?? '未选择'}</strong>
-            <small>{selectedSource ? `${selectedSource.region} · ${selectedSource.tags.join(' / ') || 'public'}` : '暂无节点'}</small>
-          </article>
-          <article>
-            <span>目标</span>
-            <strong>{selectedTarget?.display_name ?? '未选择'}</strong>
-            <small>{selectedTarget ? `${selectedTarget.region} · ${selectedTarget.tags.join(' / ') || 'public'}` : '暂无目标'}</small>
-          </article>
-          <article>
-            <span>执行方式</span>
-            <strong>{running ? '运行中' : '即时检测'}</strong>
-            <small>结果会在下方窗口更新</small>
-          </article>
-        </div>
-
-        <div className="lg-terminal-card">
-          <div className="lg-terminal-top">
-            <span />
-            <span />
-            <span />
-            <strong>检测结果</strong>
+        <div className="lg-terminal">
+          <div className="lg-terminal__top">
+            <span className="lg-terminal__dot lg-terminal__dot--r" />
+            <span className="lg-terminal__dot lg-terminal__dot--y" />
+            <span className="lg-terminal__dot lg-terminal__dot--g" />
+            <span className="lg-terminal__title">
+              {selectedSource?.display_name ?? 'NODE'} <span className="lg-terminal__sep">→</span> {selectedTarget?.display_name ?? 'TARGET'} · {selectedTool.toUpperCase()}
+            </span>
           </div>
-          <pre>{renderTerminalOutput(terminalOutput)}</pre>
+          <pre className="lg-terminal__body">{renderTerminalLines(terminalOutput)}</pre>
         </div>
       </div>
     </section>
