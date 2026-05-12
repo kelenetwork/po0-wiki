@@ -30,9 +30,19 @@
   margin-top: -1.5rem;
   min-height: 100vh;
   color: var(--po0-text);
-  background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(58, 212, 255, 0.08), transparent 70%),
-    linear-gradient(180deg, #050d1a 0%, #081224 30%, #0a1628 60%, #0c1a2f 100%);
+  /* Force dark color-scheme in the landing subtree even when the system
+     prefers-color-scheme is light and rspress hasn't toggled .dark on <html>.
+     Prevents form controls / scrollbars rendering in light variants. */
+  color-scheme: dark;
+  /* Solid color fallback first: if any gradient layer fails to parse on older
+     mobile browsers, the whole `background` shorthand would be ignored,
+     leaving the page transparent over rspress's light theme and producing a
+     white-on-white screen. background-color is a separate property so it
+     always survives even if background-image fails. */
+  background-color: #050d1a;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(58, 212, 255, 0.08), transparent 70%),
+    linear-gradient(180deg, #050d1a, #081224 30%, #0a1628 60%, #0c1a2f);
   font-family: var(--po0-font-body);
   overflow-x: hidden;
 }
