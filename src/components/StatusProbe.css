@@ -171,7 +171,7 @@
 .dot.online { background: #009c8d; box-shadow: 0 0 0 6px rgba(0, 156, 141, 0.16); }
 .dot.warn { background: #c17400; box-shadow: 0 0 0 6px rgba(193, 116, 0, 0.15); }
 .dot.pending { background: #8a9694; }
-.dot.offline { background: #b5432d; box-shadow: 0 0 0 6px rgba(181, 67, 45, 0.15); }
+.dot.offline { background: #e0444e; box-shadow: 0 0 0 6px rgba(181, 67, 45, 0.15); }
 
 .status-dashboard {
   isolation: isolate;
@@ -317,7 +317,7 @@
 .node-status--online { color: #007f74; background: rgba(0, 156, 141, 0.12); }
 .node-status--warn { color: #c17400; background: rgba(193, 116, 0, 0.13); }
 .node-status--pending { color: #7b8583; background: rgba(138, 150, 148, 0.14); }
-.node-status--offline { color: #b5432d; background: rgba(181, 67, 45, 0.13); }
+.node-status--offline { color: #e0444e; background: rgba(181, 67, 45, 0.13); }
 
 .source-filter {
   flex-wrap: wrap;
@@ -466,9 +466,9 @@
 }
 
 .latency-card--green { color: #007f74; }
-.latency-card--blue { color: #1d6e8a; }
+.latency-card--blue { color: #1d1d1d; }
 .latency-card--amber { color: #c17400; }
-.latency-card--violet { color: #7b4fbd; }
+.latency-card--violet { color: #232323; }
 
 .status-chart-head {
   align-items: flex-start;

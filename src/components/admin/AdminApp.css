@@ -37,7 +37,7 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
   padding: 24px 16px;
   color: #f5fffb;
   background:
-    radial-gradient(circle at 30% 0, rgba(32, 218, 197, 0.22), transparent 18rem),
+    radial-gradient(circle at 30% 0, rgba(7, 193, 96, 0.22), transparent 18rem),
     #071214;
   border-right: 1px solid rgba(237, 247, 244, 0.12);
 }
@@ -74,9 +74,9 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
 .admin-sidebar a.active,
 .admin-sidebar a:hover,
 .admin-sidebar button:hover {
-  border-color: rgba(32, 218, 197, 0.24);
+  border-color: rgba(7, 193, 96, 0.24);
   color: #f5fffb;
-  background: rgba(32, 218, 197, 0.12);
+  background: rgba(7, 193, 96, 0.12);
 }
 
 .admin-shell {
@@ -272,11 +272,11 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
 
 .admin-error {
   border: 1px solid rgba(181, 67, 45, 0.28);
-  color: var(--kele-danger, #b5432d);
+  color: var(--kele-danger, #e0444e);
   background: rgba(181, 67, 45, 0.1);
 }
 
-.admin-error button { color: var(--kele-danger, #b5432d); }
+.admin-error button { color: var(--kele-danger, #e0444e); }
 
 .admin-shell button {
   border: 1px solid var(--kele-line, rgba(20, 32, 31, 0.14));
@@ -306,12 +306,12 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
 
 .admin-shell button.danger {
   border-color: rgba(181, 67, 45, .28);
-  color: var(--kele-danger, #b5432d);
+  color: var(--kele-danger, #e0444e);
 }
 
 .admin-shell button.danger:hover {
   color: #fffaf0;
-  background: var(--kele-danger, #b5432d);
+  background: var(--kele-danger, #e0444e);
 }
 
 .admin-table-wrap,
@@ -500,7 +500,7 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
   .admin-layout { color: var(--kele-ink, #edf7f4); }
   .admin-card, .admin-table-wrap, .admin-matrix, .admin-stat { background: var(--kele-card, rgba(12,25,28,.88)); }
   .admin-shell td, .admin-shell th, .admin-actions, .admin-drawer { background: rgba(12, 25, 28, 0.9) !important; }
-  .admin-shell tr:hover td { background: rgba(32, 218, 197, 0.08) !important; }
+  .admin-shell tr:hover td { background: rgba(7, 193, 96, 0.08) !important; }
   .admin-form input, .admin-form select, .admin-shell button { background: rgba(7, 18, 20, 0.66); color: var(--kele-ink, #edf7f4); border-color: var(--kele-line, rgba(221,246,238,.15)); }
   .install-view code, .status-pending { background: rgba(221,246,238,.09) !important; color: var(--kele-ink, #edf7f4); }
 }
@@ -515,144 +515,6 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
   .admin-drawer { width: 100%; height: min(86vh, 720px); border-radius: 24px 24px 0 0; }
 }
 
-/* Light admin console overrides aligned with /looking-glass. */
-[data-admin="1"] body,
-[data-admin="1"] .po0-shell {
-  color: #132f3a;
-  background: #f6fbff !important;
-}
-
-.admin-layout {
-  color: #132f3a;
-  background:
-    radial-gradient(circle at 16% 0, rgba(44, 171, 226, 0.18), transparent 28rem),
-    radial-gradient(circle at 92% 12%, rgba(14, 165, 233, 0.14), transparent 26rem),
-    linear-gradient(90deg, rgba(14, 116, 144, 0.08) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(14, 116, 144, 0.07) 1px, transparent 1px),
-    linear-gradient(135deg, #f7fcff, #edf7ff 48%, #f8fbff);
-  background-size: auto, auto, 44px 44px, 44px 44px, auto;
-}
-
-.admin-sidebar {
-  color: #113445;
-  background: rgba(255, 255, 255, 0.78);
-  border-right-color: rgba(14, 116, 144, 0.16);
-  box-shadow: 24px 0 80px rgba(14, 116, 144, 0.08);
-  backdrop-filter: blur(18px);
-}
-
-.admin-brand,
-.admin-sidebar a,
-.admin-sidebar button {
-  color: #174258;
-}
-
-.admin-sidebar a.active,
-.admin-sidebar a:hover,
-.admin-sidebar button:hover {
-  border-color: rgba(14, 165, 233, 0.32);
-  color: #075985;
-  background: rgba(224, 242, 254, 0.86);
-}
-
-.admin-card,
-.admin-table-wrap,
-.admin-matrix,
-.admin-form.admin-card,
-.admin-stat,
-.admin-drawer {
-  border-color: rgba(14, 116, 144, 0.15);
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 24px 70px rgba(14, 116, 144, 0.12);
-}
-
-.admin-form input,
-.admin-form select,
-.admin-shell button {
-  color: #133344;
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(14, 116, 144, 0.18);
-}
-
-.admin-form input:focus,
-.admin-form select:focus {
-  outline: 3px solid rgba(14, 165, 233, 0.18);
-  border-color: rgba(14, 165, 233, 0.52);
-}
-
-.admin-shell button:hover,
-.admin-shell button.active {
-  border-color: rgba(8, 145, 178, 0.48);
-  color: #ffffff;
-  background: linear-gradient(135deg, #0891b2, #0ea5e9);
-}
-
-.admin-shell th,
-.admin-shell td,
-.admin-actions {
-  color: #133344;
-  background: rgba(255, 255, 255, 0.72) !important;
-}
-
-.admin-shell th {
-  color: #4b6b7a;
-  background: rgba(240, 249, 255, 0.94) !important;
-}
-
-.admin-shell tr:hover td {
-  background: rgba(224, 242, 254, 0.7) !important;
-}
-
-.admin-drawer-backdrop {
-  background: rgba(15, 23, 42, 0.24);
-}
-
-.admin-drawer {
-  background:
-    linear-gradient(90deg, rgba(14, 116, 144, 0.07) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(14, 116, 144, 0.06) 1px, transparent 1px),
-    #f8fcff;
-  background-size: 40px 40px, 40px 40px, auto;
-}
-
-.admin-drag-handle {
-  min-width: 36px;
-  cursor: grab !important;
-  color: #075985 !important;
-  background: rgba(224, 242, 254, 0.9) !important;
-}
-
-.admin-drag-handle:active { cursor: grabbing !important; }
-
-.admin-lg-pill {
-  display: inline-flex;
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.admin-lg-pill.on {
-  color: #0369a1;
-  background: rgba(186, 230, 253, 0.78);
-}
-
-.admin-lg-pill.off {
-  color: #9a3412;
-  background: rgba(255, 237, 213, 0.9);
-}
-
-@media (prefers-color-scheme: dark) {
-  [data-admin="1"] .admin-layout,
-  [data-admin="1"] .admin-card,
-  [data-admin="1"] .admin-table-wrap,
-  [data-admin="1"] .admin-matrix,
-  [data-admin="1"] .admin-stat,
-  [data-admin="1"] .admin-drawer,
-  [data-admin="1"] .admin-shell td,
-  [data-admin="1"] .admin-shell th,
-  [data-admin="1"] .admin-actions {
-    color: #133344;
-    background-color: rgba(255, 255, 255, 0.88) !important;
-  }
-}
+/* The "Light admin console overrides" block used to live here and forced
+   a near-white admin surface. Removed for the misaka dark theme — admin now
+   inherits the dark tokens from src/styles/global.css like /status and /lg. */

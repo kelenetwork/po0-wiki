@@ -86,14 +86,14 @@ type StatusProbeProps = {
 
 const toneCycle: TargetLatency["tone"][] = ["green", "blue", "amber", "violet"];
 const chartColors = [
-  "#0ea5e9",
-  "#10b981",
-  "#f59e0b",
-  "#8b5cf6",
-  "#ef4444",
-  "#06b6d4",
-  "#f97316",
-  "#64748b",
+  "#07c160", // misaka green (primary)
+  "#2ee08a", // green tint
+  "#a78bfa", // violet
+  "#f5a524", // amber
+  "#6abdf3", // info blue
+  "#e0444e", // danger
+  "#d4d4d4", // bright neutral
+  "#737373", // mid neutral
 ];
 const chartBounds = {
   left: 72,

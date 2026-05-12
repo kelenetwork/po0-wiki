@@ -4,31 +4,11 @@
    - Forces dark Po0 palette and shared typography
    ============================================================ */
 
-:root {
-  --po0-bg: #0a1628;
-  --po0-bg-2: #122441;
-  --po0-bg-3: #16294b;
-  --po0-text: #f0f5fc;
-  --po0-text-strong: #ffffff;
-  --po0-muted: #a3b3c8;
-  --po0-muted-strong: #d2dfef;
-  --po0-faint: rgba(231, 238, 249, 0.5);
-  --po0-line: rgba(140, 195, 240, 0.22);
-  --po0-line-strong: rgba(140, 195, 240, 0.5);
-  --po0-accent: #3ad4ff;
-  --po0-accent-soft: rgba(58, 212, 255, 0.18);
-  --po0-accent-strong: #6fe6ff;
-  --po0-amber: #ffc06a;
-  --po0-violet: #aea5ff;
-  --po0-good: #6effc4;
-  --po0-warn: #ffb966;
-  --po0-pending: #97a4b6;
-  --po0-surface: rgba(22, 41, 75, 0.72);
-  --po0-surface-strong: rgba(28, 50, 88, 0.86);
-  --po0-font-display: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
-  --po0-font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Inter", system-ui, sans-serif;
-  --po0-font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
-}
+/* NOTE: design tokens live in src/styles/global.css (misaka palette). 
+   This file used to redefine its own :root token block here, which then
+   shadowed the global ones and produced the old cyber-blue look. The
+   tokens have been removed so this stylesheet now consumes the same
+   :root variables as the rest of the site. */
 
 /* Hide Rspress nav on Po0 themed pages — we ship our own header */
 html body:has(.po0-shell) header.rp-nav,
@@ -54,7 +34,7 @@ html body:has(.po0-shell) main {
 html:has(.po0-shell),
 html:has(.po0-shell) body,
 html:has(.po0-shell) #root {
-  background: #050d1a !important;
+  background: #0a0a0a !important;
 }
 
 /* Shared shell wrapper */
@@ -66,8 +46,8 @@ html:has(.po0-shell) #root {
   min-height: 100vh;
   color: var(--po0-text);
   background:
-    radial-gradient(circle at 12% 8%, rgba(58, 212, 255, 0.16), transparent 28rem),
-    radial-gradient(circle at 92% 60%, rgba(140, 125, 255, 0.12), transparent 26rem),
+    radial-gradient(circle at 12% 8%, rgba(7, 193, 96, 0.16), transparent 28rem),
+    radial-gradient(circle at 92% 60%, rgba(35, 35, 35, 0.12), transparent 26rem),
     linear-gradient(180deg, var(--po0-bg) 0%, var(--po0-bg-2) 60%, var(--po0-bg-3) 100%);
   font-family: var(--po0-font-body);
   overflow-x: hidden;
@@ -79,8 +59,8 @@ html:has(.po0-shell) #root {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(rgba(120, 170, 220, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 170, 220, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(circle at 50% 22%, black 18%, transparent 78%);
   -webkit-mask-image: radial-gradient(circle at 50% 22%, black 18%, transparent 78%);
@@ -121,7 +101,7 @@ html:has(.po0-shell) #root {
 }
 
 .po0-shell__brand svg {
-  filter: drop-shadow(0 0 18px rgba(58, 212, 255, 0.45));
+  filter: drop-shadow(0 0 18px rgba(7, 193, 96, 0.45));
   animation: po0Spin 22s linear infinite;
 }
 
@@ -187,7 +167,7 @@ html:has(.po0-shell) #root {
   height: 8px;
   border-radius: 50%;
   background: var(--po0-good);
-  box-shadow: 0 0 0 3px rgba(77, 255, 184, 0.18);
+  box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.18);
   animation: po0Pulse 1.6s ease-in-out infinite;
 }
 
@@ -317,8 +297,8 @@ html:has(.po0-shell) #root {
   margin: 0 0 clamp(20px, 3vw, 32px) !important;
   border: 1px solid var(--po0-line-strong) !important;
   border-radius: 22px !important;
-  background: linear-gradient(160deg, rgba(47, 78, 126, 0.86), rgba(28, 52, 92, 0.74)) !important;
-  box-shadow: 0 24px 60px rgba(8, 18, 36, 0.38) !important;
+  background: linear-gradient(160deg, rgba(29, 29, 29, 0.86), rgba(22, 22, 22, 0.74)) !important;
+  box-shadow: 0 24px 60px rgba(17, 17, 17, 0.38) !important;
   backdrop-filter: blur(14px) !important;
   color: var(--po0-text) !important;
 }
@@ -367,7 +347,7 @@ html:has(.po0-shell) #root {
 .status-pill {
   border-color: var(--po0-line-strong) !important;
   color: var(--po0-accent-strong) !important;
-  background: rgba(58, 212, 255, 0.12) !important;
+  background: rgba(7, 193, 96, 0.12) !important;
 }
 
 .status-tabs {
@@ -383,7 +363,7 @@ html:has(.po0-shell) #root {
 .status-tabs button.active {
   color: var(--po0-bg) !important;
   background: var(--po0-accent-strong) !important;
-  box-shadow: 0 0 22px rgba(58, 212, 255, 0.32) !important;
+  box-shadow: 0 0 22px rgba(7, 193, 96, 0.32) !important;
 }
 
 .status-source-panel,
@@ -393,7 +373,7 @@ html:has(.po0-shell) #root {
 .status-chart-card .status-chart-head,
 .source-node-card,
 .probe-row {
-  background: rgba(48, 81, 131, 0.72) !important;
+  background: rgba(29, 29, 29, 0.72) !important;
   border-color: var(--po0-line-strong) !important;
   color: var(--po0-text) !important;
   backdrop-filter: blur(10px);
@@ -422,7 +402,7 @@ html:has(.po0-shell) #root {
 .dot.online,
 .node-status--online {
   color: var(--po0-good) !important;
-  background: rgba(77, 255, 184, 0.12) !important;
+  background: rgba(7, 193, 96, 0.12) !important;
 }
 
 .dot.warn,
@@ -434,20 +414,20 @@ html:has(.po0-shell) #root {
 .dot.pending,
 .node-status--pending {
   color: var(--po0-pending) !important;
-  background: rgba(111, 124, 142, 0.14) !important;
+  background: rgba(35, 35, 35, 0.14) !important;
 }
 
 .source-filter button,
 .status-legend button {
   color: var(--po0-text-strong) !important;
-  background: rgba(54, 88, 139, 0.72) !important;
+  background: rgba(29, 29, 29, 0.72) !important;
   border-color: var(--po0-line-strong) !important;
 }
 
 .source-filter button.active,
 .status-legend button.active {
   color: var(--po0-accent-strong) !important;
-  background: rgba(58, 212, 255, 0.12) !important;
+  background: rgba(7, 193, 96, 0.12) !important;
   border-color: var(--po0-line-strong) !important;
 }
 
@@ -470,14 +450,14 @@ html:has(.po0-shell) #root {
 /* ------------------------------------------------------------ */
 .lg-sidebar,
 .lg-workbench {
-  background: rgba(48, 81, 131, 0.76) !important;
+  background: rgba(29, 29, 29, 0.76) !important;
   border-color: var(--po0-line-strong) !important;
   color: var(--po0-text) !important;
-  box-shadow: 0 18px 48px rgba(8, 18, 36, 0.35) !important;
+  box-shadow: 0 18px 48px rgba(17, 17, 17, 0.35) !important;
 }
 
 .lg-workbench::before {
-  background: radial-gradient(circle, rgba(58, 212, 255, 0.18), transparent 65%) !important;
+  background: radial-gradient(circle, rgba(7, 193, 96, 0.18), transparent 65%) !important;
 }
 
 .lg-sidebar__head h2 { color: var(--po0-text-strong) !important; font-family: var(--po0-font-display) !important; font-weight: 400 !important; letter-spacing: -0.02em !important; }
@@ -492,13 +472,13 @@ html:has(.po0-shell) #root {
 }
 
 .lg-region {
-  background: rgba(42, 72, 119, 0.72) !important;
+  background: rgba(29, 29, 29, 0.72) !important;
   border-color: var(--po0-line-strong) !important;
 }
 
 .lg-node {
   color: var(--po0-text-strong) !important;
-  background: rgba(16, 35, 66, 0.3) !important;
+  background: rgba(22, 22, 22, 0.3) !important;
 }
 
 .lg-node strong {
@@ -519,51 +499,51 @@ html:has(.po0-shell) #root {
 
 .lg-node:hover {
   border-color: var(--po0-line-strong) !important;
-  background: rgba(58, 212, 255, 0.14) !important;
+  background: rgba(7, 193, 96, 0.14) !important;
   box-shadow: 0 12px 30px rgba(0,0,0,0.45) !important;
 }
 
 .lg-node.is-active {
   border-color: var(--po0-accent-strong) !important;
-  background: rgba(58, 212, 255, 0.24) !important;
-  box-shadow: 0 0 32px rgba(58, 212, 255, 0.22) !important;
+  background: rgba(7, 193, 96, 0.24) !important;
+  box-shadow: 0 0 32px rgba(7, 193, 96, 0.22) !important;
 }
 
 .lg-toolbar select,
 .lg-toolbar input,
 .lg-source-readonly strong {
-  background: rgba(59, 94, 146, 0.9) !important;
+  background: rgba(29, 29, 29, 0.9) !important;
   color: var(--po0-text-strong) !important;
   border-color: var(--po0-line-strong) !important;
 }
 
 .lg-source-readonly strong {
-  background: rgba(58, 212, 255, 0.12) !important;
+  background: rgba(7, 193, 96, 0.12) !important;
   color: var(--po0-text-strong) !important;
 }
 
 .lg-run {
   background: linear-gradient(135deg, var(--po0-accent-strong) 0%, var(--po0-accent) 100%) !important;
   color: var(--po0-bg) !important;
-  box-shadow: 0 16px 38px rgba(58, 212, 255, 0.28) !important;
+  box-shadow: 0 16px 38px rgba(7, 193, 96, 0.28) !important;
 }
 
 .lg-summary-grid article {
-  background: rgba(43, 75, 125, 0.72) !important;
+  background: rgba(29, 29, 29, 0.72) !important;
   border-color: var(--po0-line) !important;
 }
 
 .lg-summary-grid strong { color: var(--po0-text-strong) !important; }
 
 .lg-terminal-card {
-  border-color: rgba(58, 212, 255, 0.22) !important;
+  border-color: rgba(7, 193, 96, 0.22) !important;
   background:
-    radial-gradient(circle at 100% 0, rgba(58, 212, 255, 0.12), transparent 30%),
-    #0b1c33 !important;
+    radial-gradient(circle at 100% 0, rgba(7, 193, 96, 0.12), transparent 30%),
+    #161616 !important;
 }
 
 .lg-terminal-card pre {
-  color: #c5f4ff !important;
+  color: #232323 !important;
 }
 
 .lg-mode-banner {
@@ -573,7 +553,7 @@ html:has(.po0-shell) #root {
 }
 
 .lg-mode-banner--dispatch {
-  background: rgba(58, 212, 255, 0.12) !important;
+  background: rgba(7, 193, 96, 0.12) !important;
   color: var(--po0-accent-strong) !important;
   border-color: var(--po0-line-strong) !important;
 }
@@ -589,8 +569,8 @@ html:has(.po0-shell) #root {
 
 .admin-sidebar {
   background:
-    radial-gradient(circle at 30% 0, rgba(58, 212, 255, 0.22), transparent 18rem),
-    rgba(28, 50, 88, 0.92) !important;
+    radial-gradient(circle at 30% 0, rgba(7, 193, 96, 0.22), transparent 18rem),
+    rgba(22, 22, 22, 0.92) !important;
   border-right: 1px solid var(--po0-line-strong) !important;
   color: var(--po0-text) !important;
 }
@@ -604,7 +584,7 @@ html:has(.po0-shell) #root {
 
 .admin-sidebar a,
 .admin-sidebar button {
-  color: rgba(231, 238, 249, 0.7) !important;
+  color: rgba(35, 35, 35, 0.7) !important;
   background: transparent !important;
   border-color: transparent !important;
   font-family: var(--po0-font-display) !important;
@@ -615,7 +595,7 @@ html:has(.po0-shell) #root {
 .admin-sidebar a:hover,
 .admin-sidebar button:hover {
   color: var(--po0-text-strong) !important;
-  background: rgba(58, 212, 255, 0.12) !important;
+  background: rgba(7, 193, 96, 0.12) !important;
   border-color: var(--po0-line-strong) !important;
 }
 
@@ -625,10 +605,10 @@ html:has(.po0-shell) #root {
 .admin-form.admin-card,
 .admin-stat,
 .admin-shell .admin-form {
-  background: rgba(48, 81, 131, 0.72) !important;
+  background: rgba(29, 29, 29, 0.72) !important;
   border-color: var(--po0-line-strong) !important;
   color: var(--po0-text) !important;
-  box-shadow: 0 24px 60px rgba(8, 18, 36, 0.42) !important;
+  box-shadow: 0 24px 60px rgba(17, 17, 17, 0.42) !important;
   backdrop-filter: blur(14px);
 }
 
@@ -651,7 +631,7 @@ html:has(.po0-shell) #root {
 }
 
 .admin-form input:disabled {
-  background: rgba(31, 47, 70, 0.6) !important;
+  background: rgba(22, 22, 22, 0.6) !important;
   color: var(--po0-faint) !important;
 }
 
@@ -699,7 +679,7 @@ html:has(.po0-shell) #root {
 }
 
 .admin-shell tr:hover td {
-  background: rgba(58, 212, 255, 0.14) !important;
+  background: rgba(7, 193, 96, 0.14) !important;
 }
 
 .admin-actions {
@@ -712,12 +692,12 @@ html:has(.po0-shell) #root {
 .admin-token-row code,
 .install-view code {
   color: var(--po0-accent-strong) !important;
-  background: rgba(58, 212, 255, 0.1) !important;
+  background: rgba(7, 193, 96, 0.1) !important;
 }
 
 .admin-chips span {
   color: var(--po0-accent-strong) !important;
-  background: rgba(58, 212, 255, 0.1) !important;
+  background: rgba(7, 193, 96, 0.1) !important;
 }
 
 .admin-drawer {
@@ -732,7 +712,7 @@ html:has(.po0-shell) #root {
 
 .install-primary,
 .install-hero {
-  background: rgba(58, 212, 255, 0.14) !important;
+  background: rgba(7, 193, 96, 0.14) !important;
   border-color: var(--po0-line-strong) !important;
 }
 
@@ -743,13 +723,13 @@ html:has(.po0-shell) #root {
 
 .matrix-cell { color: var(--po0-text-strong) !important; }
 .matrix-empty { color: var(--po0-muted) !important; }
-.status-ok { background: rgba(77, 255, 184, 0.12) !important; }
+.status-ok { background: rgba(7, 193, 96, 0.12) !important; }
 .status-warn { background: rgba(255, 176, 74, 0.16) !important; }
 .status-fail { background: rgba(255, 80, 90, 0.18) !important; }
-.status-pending { background: rgba(111, 124, 142, 0.16) !important; }
+.status-pending { background: rgba(35, 35, 35, 0.16) !important; }
 
 .admin-notice {
-  background: rgba(58, 212, 255, 0.12) !important;
+  background: rgba(7, 193, 96, 0.12) !important;
   color: var(--po0-accent-strong) !important;
   border-color: var(--po0-line-strong) !important;
 }
@@ -789,11 +769,11 @@ html:has(.po0-shell) #root {
 /* chart axis tick labels */
 .latency-chart text { fill: var(--po0-text) !important; }
 .chart-axis-title { fill: var(--po0-accent-strong) !important; }
-.chart-grid--vertical { stroke: rgba(120,170,220,0.18) !important; }
+.chart-grid--vertical { stroke: rgba(255, 255, 255,0.18) !important; }
 
 /* source-node-card status pill alignment */
 .source-node-card__meta { color: var(--po0-muted) !important; }
-.source-node-card__meta .node-status i { background: currentColor; box-shadow: 0 0 0 4px rgba(77,255,184,0.18); }
+.source-node-card__meta .node-status i { background: currentColor; box-shadow: 0 0 0 4px rgba(7, 193, 96, 0.18); }
 
 /* Looking Glass dedupe with Po0Shell hero */
 .lg-sidebar__head { display: none !important; }
@@ -826,7 +806,7 @@ html:has(.po0-shell) #root {
 }
 
 .status-dashboard {
-  background: linear-gradient(155deg, rgba(55, 88, 138, 0.9), rgba(31, 58, 100, 0.82)) !important;
+  background: linear-gradient(155deg, rgba(29, 29, 29, 0.9), rgba(29, 29, 29, 0.82)) !important;
 }
 
 .status-dashboard-grid {
@@ -854,13 +834,13 @@ html:has(.po0-shell) #root {
 }
 
 .source-node-card {
-  background: rgba(27, 55, 98, 0.72) !important;
+  background: rgba(29, 29, 29, 0.72) !important;
 }
 
 .latency-card,
 .status-chart-card,
 .status-source-panel {
-  background: rgba(58, 91, 142, 0.72) !important;
+  background: rgba(29, 29, 29, 0.72) !important;
 }
 
 .kele-lg-page .looking-glass-console {
@@ -869,19 +849,19 @@ html:has(.po0-shell) #root {
 
 .lg-sidebar,
 .lg-workbench {
-  background: linear-gradient(155deg, rgba(55, 88, 138, 0.9), rgba(31, 58, 100, 0.82)) !important;
+  background: linear-gradient(155deg, rgba(29, 29, 29, 0.9), rgba(29, 29, 29, 0.82)) !important;
 }
 
 .lg-region,
 .lg-node,
 .lg-summary-grid article {
-  background: rgba(32, 62, 109, 0.76) !important;
+  background: rgba(29, 29, 29, 0.76) !important;
 }
 
 .lg-node:not(:disabled) strong,
 .lg-region__title strong {
   color: #ffffff !important;
-  text-shadow: 0 1px 14px rgba(111, 230, 255, 0.18);
+  text-shadow: 0 1px 14px rgba(35, 35, 35, 0.18);
 }
 
 .lg-node:disabled {
@@ -897,13 +877,13 @@ html:has(.po0-shell) #root {
 .lg-summary-grid span,
 .lg-toolbar label span,
 .lg-empty {
-  color: #dbe8f7 !important;
+  color: #232323 !important;
 }
 
 .lg-terminal-card {
   background:
-    radial-gradient(circle at 100% 0, rgba(58, 212, 255, 0.16), transparent 30%),
-    #0e223c !important;
+    radial-gradient(circle at 100% 0, rgba(7, 193, 96, 0.16), transparent 30%),
+    #161616 !important;
 }
 
 @media (max-width: 980px) {
@@ -944,1166 +924,7 @@ html body:has(.po0-shell) main.po0-shell__main {
   max-width: 220px !important;
 }
 
-/* ------------------------------------------------------------ */
-/* v12 light functional pages: /status and /looking-glass only    */
-/* ------------------------------------------------------------ */
-html:has(.po0-shell--status),
-html:has(.po0-shell--status) body,
-html:has(.po0-shell--status) #root,
-html:has(.po0-shell--looking-glass),
-html:has(.po0-shell--looking-glass) body,
-html:has(.po0-shell--looking-glass) #root {
-  background: #f4f8ff !important;
-}
-
-.po0-shell--status,
-.po0-shell--looking-glass {
-  --po0-page-bg: #f4f8ff;
-  --po0-page-bg-2: #edf5ff;
-  --po0-page-ink: #132033;
-  --po0-page-strong: #07172b;
-  --po0-page-muted: #536276;
-  --po0-page-muted-strong: #33465f;
-  --po0-page-line: rgba(60, 111, 166, 0.18);
-  --po0-page-line-strong: rgba(37, 99, 168, 0.28);
-  --po0-page-card: rgba(255, 255, 255, 0.78);
-  --po0-page-card-strong: rgba(255, 255, 255, 0.92);
-  color: var(--po0-page-ink) !important;
-  background:
-    radial-gradient(circle at 13% 8%, rgba(58, 212, 255, 0.22), transparent 30rem),
-    radial-gradient(circle at 86% 12%, rgba(174, 165, 255, 0.2), transparent 28rem),
-    radial-gradient(circle at 78% 80%, rgba(67, 184, 255, 0.13), transparent 30rem),
-    linear-gradient(180deg, #fbfdff 0%, var(--po0-page-bg) 45%, #eef6ff 100%) !important;
-}
-
-.po0-shell--status::before,
-.po0-shell--looking-glass::before {
-  display: block !important;
-  background:
-    linear-gradient(rgba(40, 100, 170, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(40, 100, 170, 0.055) 1px, transparent 1px),
-    radial-gradient(circle at 50% 0, rgba(58, 212, 255, 0.12), transparent 34rem) !important;
-  background-size: 34px 34px, 34px 34px, auto !important;
-  mask-image: linear-gradient(180deg, black 0%, black 72%, transparent 100%) !important;
-  -webkit-mask-image: linear-gradient(180deg, black 0%, black 72%, transparent 100%) !important;
-}
-
-.po0-shell--status .po0-shell__brand,
-.po0-shell--looking-glass .po0-shell__brand,
-.po0-shell--status .po0-shell__nav nav a,
-.po0-shell--looking-glass .po0-shell__nav nav a {
-  color: var(--po0-page-strong) !important;
-}
-
-.po0-shell--status .po0-shell__brand i,
-.po0-shell--looking-glass .po0-shell__brand i {
-  background: rgba(31, 71, 120, 0.28) !important;
-}
-
-.po0-shell--status .po0-shell__cta,
-.po0-shell--looking-glass .po0-shell__cta {
-  background: rgba(255, 255, 255, 0.76) !important;
-  border-color: var(--po0-page-line-strong) !important;
-  opacity: 0.95 !important;
-}
-
-.po0-shell--status .po0-shell__title,
-.po0-shell--looking-glass .po0-shell__title,
-.kele-status-hero h1 {
-  color: var(--po0-page-strong) !important;
-}
-
-.po0-shell--status .po0-shell__lead,
-.po0-shell--looking-glass .po0-shell__lead,
-.kele-status-hero p:not(.kele-section-kicker) {
-  color: var(--po0-page-muted) !important;
-}
-
-.po0-shell--status .po0-shell__eyebrow,
-.po0-shell--looking-glass .po0-shell__eyebrow,
-.kele-status-hero p.kele-section-kicker,
-.kele-section-kicker,
-.status-kicker {
-  color: #087fae !important;
-}
-
-.kele-status-page,
-.kele-lg-page,
-.status-probe.kele-status,
-.status-probe.compact,
-.status-probe {
-  color: var(--po0-page-ink) !important;
-}
-
-.kele-status-page > .status-probe,
-.kele-status-page .status-probe,
-.kele-lg-page .looking-glass-console,
-.kele-status-roadmap {
-  border-color: var(--po0-page-line-strong) !important;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(239, 247, 255, 0.74)),
-    radial-gradient(circle at 0 0, rgba(58, 212, 255, 0.13), transparent 22rem) !important;
-  box-shadow: 0 24px 70px rgba(31, 73, 125, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-  color: var(--po0-page-ink) !important;
-}
-
-.status-dashboard,
-.lg-sidebar,
-.lg-workbench {
-  background:
-    linear-gradient(160deg, rgba(255, 255, 255, 0.88), rgba(237, 246, 255, 0.78)),
-    radial-gradient(circle at 12% 0, rgba(58, 212, 255, 0.13), transparent 22rem) !important;
-  border-color: var(--po0-page-line-strong) !important;
-  color: var(--po0-page-ink) !important;
-  box-shadow: 0 20px 58px rgba(35, 73, 118, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-}
-
-.status-dashboard__topbar h2,
-.status-head h3,
-.status-chart-head h3,
-.status-panel-title,
-.status-panel-title span,
-.source-node-card strong,
-.latency-card__value,
-.latency-card__target,
-.probe-row strong,
-.lg-sidebar__head h2,
-.lg-region__title strong,
-.lg-node strong,
-.lg-node:not(:disabled) strong,
-.lg-summary-grid strong {
-  color: var(--po0-page-strong) !important;
-  text-shadow: none !important;
-}
-
-.status-source-meta,
-.status-dashboard__topbar span,
-.status-chart-head small,
-.status-legend,
-.source-node-card small,
-.source-node-card__meta,
-.latency-card__route,
-.latency-card__meta small,
-.probe-row small,
-.lg-sidebar__head span,
-.lg-region__title small,
-.lg-node small,
-.lg-summary-grid small,
-.lg-summary-grid span,
-.lg-toolbar label span,
-.lg-empty {
-  color: var(--po0-page-muted-strong) !important;
-}
-
-.status-source-panel,
-.status-chart-card,
-.latency-card,
-.source-filter,
-.status-chart-card .status-chart-head,
-.source-node-card,
-.probe-row,
-.lg-region,
-.lg-node,
-.lg-summary-grid article {
-  background: var(--po0-page-card) !important;
-  border-color: var(--po0-page-line) !important;
-  color: var(--po0-page-ink) !important;
-  box-shadow: 0 12px 32px rgba(37, 82, 130, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.82) !important;
-}
-
-.source-node-card,
-.lg-region,
-.lg-summary-grid article {
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(242, 248, 255, 0.78)) !important;
-}
-
-.latency-card,
-.status-chart-card,
-.status-source-panel,
-.lg-sidebar,
-.lg-workbench {
-  backdrop-filter: blur(16px) !important;
-}
-
-.status-tabs {
-  background: rgba(226, 239, 255, 0.72) !important;
-  border-color: var(--po0-page-line) !important;
-}
-
-.status-tabs button,
-.source-filter button,
-.status-legend button {
-  color: var(--po0-page-muted-strong) !important;
-  background: rgba(255, 255, 255, 0.8) !important;
-  border-color: var(--po0-page-line) !important;
-  box-shadow: 0 8px 22px rgba(37, 82, 130, 0.06) !important;
-}
-
-.status-tabs button.active,
-.source-filter button.active,
-.status-legend button.active {
-  color: #05293a !important;
-  background: linear-gradient(135deg, rgba(111, 230, 255, 0.85), rgba(174, 165, 255, 0.65)) !important;
-  border-color: rgba(8, 127, 174, 0.34) !important;
-  box-shadow: 0 12px 30px rgba(34, 163, 212, 0.18) !important;
-}
-
-.status-pill,
-.status-source-meta,
-.status-panel-title strong {
-  color: #087fae !important;
-  background: rgba(58, 212, 255, 0.13) !important;
-  border-color: rgba(8, 127, 174, 0.24) !important;
-}
-
-.dot.online,
-.node-status--online,
-.lg-node-dot.online {
-  color: #008c80 !important;
-  background: #00a99a !important;
-  box-shadow: 0 0 0 5px rgba(0, 169, 154, 0.14), 0 0 18px rgba(0, 169, 154, 0.26) !important;
-}
-
-.node-status--online {
-  color: #00796f !important;
-  background: rgba(0, 169, 154, 0.12) !important;
-}
-
-.dot.warn,
-.node-status--warn,
-.lg-node-dot.busy {
-  color: #b86f00 !important;
-  background: #d9911a !important;
-  box-shadow: 0 0 0 5px rgba(217, 145, 26, 0.14) !important;
-}
-
-.node-status--warn { background: rgba(217, 145, 26, 0.13) !important; }
-.dot.pending,
-.node-status--pending,
-.lg-node-dot.standby { color: #738096 !important; background: #8b98aa !important; }
-.node-status--pending { background: rgba(139, 152, 170, 0.14) !important; }
-
-.latency-card--green { color: #008c80 !important; }
-.latency-card--blue { color: #1677c8 !important; }
-.latency-card--amber { color: #b86f00 !important; }
-.latency-card--violet { color: #7357cf !important; }
-
-.latency-card::after {
-  opacity: 0.12 !important;
-}
-
-.latency-card__meta small {
-  color: var(--po0-page-muted-strong) !important;
-  background: rgba(226, 239, 255, 0.74) !important;
-}
-
-.latency-chart {
-  background:
-    linear-gradient(rgba(70, 120, 180, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(70, 120, 180, 0.035) 1px, transparent 1px),
-    rgba(255, 255, 255, 0.42) !important;
-  background-size: 28px 28px !important;
-  border-radius: 18px !important;
-}
-
-.latency-chart text,
-.chart-axis,
-.chart-empty {
-  fill: #455b74 !important;
-}
-
-.chart-axis-title {
-  fill: #087fae !important;
-}
-
-.latency-chart line.chart-grid,
-.chart-grid {
-  stroke: rgba(58, 107, 160, 0.18) !important;
-}
-
-.chart-grid--vertical {
-  stroke: rgba(58, 107, 160, 0.14) !important;
-}
-
-.chart-line {
-  filter: drop-shadow(0 6px 10px rgba(37, 82, 130, 0.18)) !important;
-}
-
-.chart-tooltip rect {
-  fill: rgba(7, 23, 43, 0.94) !important;
-  stroke: rgba(111, 230, 255, 0.24) !important;
-}
-
-.chart-tooltip text {
-  fill: #eef9ff !important;
-}
-
-.lg-node:hover {
-  border-color: rgba(8, 127, 174, 0.32) !important;
-  background: rgba(232, 247, 255, 0.92) !important;
-  box-shadow: 0 14px 34px rgba(34, 109, 175, 0.13) !important;
-}
-
-.lg-node.is-active {
-  border-color: rgba(8, 127, 174, 0.46) !important;
-  background: linear-gradient(135deg, rgba(222, 248, 255, 0.94), rgba(237, 233, 255, 0.84)) !important;
-  box-shadow: inset 0 0 0 1px rgba(58, 212, 255, 0.18), 0 16px 36px rgba(34, 109, 175, 0.14) !important;
-}
-
-.lg-node:disabled {
-  opacity: 0.68 !important;
-}
-
-.lg-node:disabled strong {
-  color: #68788e !important;
-}
-
-.lg-toolbar select,
-.lg-toolbar input,
-.lg-source-readonly strong {
-  background: rgba(255, 255, 255, 0.92) !important;
-  color: var(--po0-page-strong) !important;
-  border-color: var(--po0-page-line-strong) !important;
-  box-shadow: 0 10px 28px rgba(37, 82, 130, 0.08) !important;
-}
-
-.lg-source-readonly strong {
-  background: linear-gradient(135deg, rgba(234, 249, 255, 0.96), rgba(241, 238, 255, 0.9)) !important;
-}
-
-.lg-run {
-  color: #041827 !important;
-  background: linear-gradient(135deg, #6fe6ff 0%, #3ad4ff 48%, #aea5ff 100%) !important;
-  box-shadow: 0 18px 36px rgba(34, 163, 212, 0.24) !important;
-}
-
-.lg-run:not(:disabled):hover {
-  transform: translateY(-1px);
-  box-shadow: 0 22px 44px rgba(34, 163, 212, 0.3) !important;
-}
-
-.lg-terminal-card {
-  border-color: rgba(58, 212, 255, 0.3) !important;
-  background:
-    radial-gradient(circle at 100% 0, rgba(58, 212, 255, 0.16), transparent 30%),
-    linear-gradient(180deg, #0b1c33 0%, #06111f 100%) !important;
-  box-shadow: 0 24px 58px rgba(16, 35, 66, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
-}
-
-.lg-terminal-card pre,
-.install-view pre,
-.lg-terminal-card pre {
-  background: transparent !important;
-  color: #c5f4ff !important;
-}
-
-.lg-terminal-top {
-  color: #9fc3d3 !important;
-  border-bottom-color: rgba(237, 247, 244, 0.14) !important;
-}
-
-.lg-mode-banner {
-  color: #a73a2a !important;
-  background: rgba(181, 67, 45, 0.09) !important;
-  border-color: rgba(181, 67, 45, 0.22) !important;
-}
-
-.lg-mode-banner--dispatch {
-  color: #087fae !important;
-  background: rgba(58, 212, 255, 0.11) !important;
-  border-color: rgba(8, 127, 174, 0.24) !important;
-}
-
-.kele-status-roadmap h2,
-.kele-status-roadmap li,
-.kele-status-roadmap ul {
-  color: var(--po0-page-ink) !important;
-}
-
-/* ------------------------------------------------------------ */
-/* v13 light readability: keep functional cards white and legible */
-/* ------------------------------------------------------------ */
-.po0-shell--status .status-probe,
-.po0-shell--status .status-probe *,
-.po0-shell--looking-glass .looking-glass-console,
-.po0-shell--looking-glass .looking-glass-console * {
-  text-shadow: none !important;
-}
-
-.po0-shell--status .status-source-panel,
-.po0-shell--status .status-chart-card,
-.po0-shell--status .latency-card,
-.po0-shell--status .source-filter,
-.po0-shell--status .source-node-card,
-.po0-shell--status .probe-row,
-.po0-shell--looking-glass .lg-sidebar,
-.po0-shell--looking-glass .lg-workbench,
-.po0-shell--looking-glass .lg-region,
-.po0-shell--looking-glass .lg-node,
-.po0-shell--looking-glass .lg-summary-grid article {
-  color: #132033 !important;
-}
-
-.po0-shell--status .status-panel-title,
-.po0-shell--status .status-panel-title span,
-.po0-shell--status .source-node-card strong,
-.po0-shell--status .source-node-card__main strong,
-.po0-shell--status .latency-card__target,
-.po0-shell--status .latency-card__value,
-.po0-shell--status .probe-row strong,
-.po0-shell--status .status-chart-head h3,
-.po0-shell--looking-glass .lg-region__title strong,
-.po0-shell--looking-glass .lg-node strong,
-.po0-shell--looking-glass .lg-node:not(:disabled) strong,
-.po0-shell--looking-glass .lg-toolbar label,
-.po0-shell--looking-glass .lg-source-readonly strong,
-.po0-shell--looking-glass .lg-summary-grid strong {
-  color: #07172b !important;
-}
-
-.po0-shell--status .status-source-meta,
-.po0-shell--status .status-dashboard__topbar span,
-.po0-shell--status .status-panel-title strong,
-.po0-shell--status .source-node-card small,
-.po0-shell--status .source-node-card__meta,
-.po0-shell--status .source-node-card__meta span,
-.po0-shell--status .latency-card__route,
-.po0-shell--status .latency-card__meta small,
-.po0-shell--status .probe-row small,
-.po0-shell--status .status-kicker,
-.po0-shell--status .status-chart-head small,
-.po0-shell--status .status-legend,
-.po0-shell--looking-glass .lg-region__title small,
-.po0-shell--looking-glass .lg-node small,
-.po0-shell--looking-glass .lg-summary-grid span,
-.po0-shell--looking-glass .lg-summary-grid small,
-.po0-shell--looking-glass .lg-toolbar label span,
-.po0-shell--looking-glass .lg-empty {
-  color: #33465f !important;
-}
-
-.po0-shell--status .source-filter button,
-.po0-shell--status .status-legend button,
-.po0-shell--status .status-tabs button {
-  color: #132033 !important;
-  background: rgba(255, 255, 255, 0.88) !important;
-  border-color: rgba(37, 99, 168, 0.24) !important;
-}
-
-.po0-shell--status .source-filter button.active,
-.po0-shell--status .status-legend button.active,
-.po0-shell--status .status-tabs button.active {
-  color: #07172b !important;
-  background: linear-gradient(135deg, rgba(205, 242, 255, 0.98), rgba(231, 228, 255, 0.92)) !important;
-}
-
-.po0-shell--status .node-status,
-.po0-shell--status .status-pill,
-.po0-shell--status .status-source-meta {
-  color: #132033 !important;
-}
-
-.po0-shell--status .node-status--online {
-  color: #006b63 !important;
-  background: rgba(0, 169, 154, 0.16) !important;
-}
-
-.po0-shell--status .node-status--warn {
-  color: #8d5400 !important;
-  background: rgba(217, 145, 26, 0.17) !important;
-}
-
-.po0-shell--status .node-status--pending {
-  color: #33465f !important;
-  background: rgba(139, 152, 170, 0.18) !important;
-}
-
-.po0-shell--status .node-status--offline {
-  color: #8f321f !important;
-  background: rgba(181, 67, 45, 0.16) !important;
-}
-
-.po0-shell--status .status-legend button:not(.active),
-.po0-shell--looking-glass .lg-node:disabled,
-.po0-shell--looking-glass .lg-node.is-offline {
-  opacity: 1 !important;
-}
-
-.po0-shell--looking-glass .lg-node:disabled strong,
-.po0-shell--looking-glass .lg-node.is-offline strong {
-  color: #33465f !important;
-}
-
-.po0-shell--looking-glass .lg-node:disabled small,
-.po0-shell--looking-glass .lg-node.is-offline small {
-  color: #3f526a !important;
-}
-
-.po0-shell--looking-glass .lg-toolbar select,
-.po0-shell--looking-glass .lg-toolbar input,
-.po0-shell--looking-glass .lg-source-readonly strong {
-  color: #07172b !important;
-  background: #ffffff !important;
-  caret-color: #07172b !important;
-}
-
-.po0-shell--looking-glass .lg-toolbar select::placeholder,
-.po0-shell--looking-glass .lg-toolbar input::placeholder {
-  color: #33465f !important;
-}
-
-/* v14 emergency legibility: cut the frosted wash on light functional cards */
-.po0-shell--status .status-dashboard,
-.po0-shell--status .status-source-panel,
-.po0-shell--status .status-chart-card,
-.po0-shell--status .latency-card,
-.po0-shell--status .source-filter,
-.po0-shell--status .source-node-card,
-.po0-shell--status .probe-row,
-.po0-shell--looking-glass .lg-sidebar,
-.po0-shell--looking-glass .lg-workbench,
-.po0-shell--looking-glass .lg-region,
-.po0-shell--looking-glass .lg-node,
-.po0-shell--looking-glass .lg-summary-grid article,
-.po0-shell--looking-glass .lg-toolbar select,
-.po0-shell--looking-glass .lg-toolbar input,
-.po0-shell--looking-glass .lg-source-readonly strong {
-  opacity: 1 !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.po0-shell--status .status-source-panel,
-.po0-shell--status .status-chart-card,
-.po0-shell--status .source-filter,
-.po0-shell--status .source-node-card,
-.po0-shell--looking-glass .lg-sidebar,
-.po0-shell--looking-glass .lg-workbench,
-.po0-shell--looking-glass .lg-region,
-.po0-shell--looking-glass .lg-node,
-.po0-shell--looking-glass .lg-summary-grid article {
-  background: #ffffff !important;
-}
-
-.po0-shell--status .latency-card,
-.po0-shell--looking-glass .lg-toolbar select,
-.po0-shell--looking-glass .lg-toolbar input,
-.po0-shell--looking-glass .lg-source-readonly strong {
-  background: #f9fcff !important;
-}
-
-.po0-shell--status .source-node-card *,
-.po0-shell--status .source-filter button *,
-.po0-shell--status .status-legend button *,
-.po0-shell--status .status-panel-title *,
-.po0-shell--status .status-chart-head *,
-.po0-shell--looking-glass .lg-node *,
-.po0-shell--looking-glass .lg-region__title *,
-.po0-shell--looking-glass .lg-toolbar *,
-.po0-shell--looking-glass .lg-summary-grid * {
-  opacity: 1 !important;
-  filter: none !important;
-}
-
-.po0-shell--status .source-node-card strong,
-.po0-shell--status .source-filter button,
-.po0-shell--status .status-legend button,
-.po0-shell--looking-glass .lg-node strong,
-.po0-shell--looking-glass .lg-region__title strong,
-.po0-shell--looking-glass .lg-toolbar label,
-.po0-shell--looking-glass .lg-summary-grid strong {
-  color: #07172b !important;
-}
-
-.po0-shell--status .source-node-card small,
-.po0-shell--status .source-node-card__meta,
-.po0-shell--status .status-chart-head small,
-.po0-shell--looking-glass .lg-node small,
-.po0-shell--looking-glass .lg-region__title small,
-.po0-shell--looking-glass .lg-toolbar label span,
-.po0-shell--looking-glass .lg-summary-grid span,
-.po0-shell--looking-glass .lg-summary-grid small {
-  color: #33465f !important;
-}
-
-/* v15 final light-scope fix: scope from document, not shell :has() */
-html:has(.po0-shell--status) .po0-shell,
-html:has(.po0-shell--looking-glass) .po0-shell {
-  color: #132033 !important;
-  background:
-    radial-gradient(circle at 13% 8%, rgba(58, 212, 255, 0.20), transparent 30rem),
-    radial-gradient(circle at 86% 12%, rgba(174, 165, 255, 0.18), transparent 28rem),
-    linear-gradient(180deg, #fbfdff 0%, #f4f8ff 48%, #eef6ff 100%) !important;
-}
-
-html:has(.po0-shell--status) .po0-shell__brand,
-html:has(.po0-shell--status) .po0-shell__nav nav a,
-html:has(.po0-shell--looking-glass) .po0-shell__brand,
-html:has(.po0-shell--looking-glass) .po0-shell__nav nav a,
-html:has(.po0-shell--status) .po0-shell__title,
-html:has(.po0-shell--looking-glass) .po0-shell__title {
-  color: #07172b !important;
-}
-
-html:has(.po0-shell--status) .po0-shell__lead,
-html:has(.po0-shell--looking-glass) .po0-shell__lead {
-  color: #33465f !important;
-}
-
-html:has(.po0-shell--status) .status-source-panel,
-html:has(.po0-shell--status) .status-chart-card,
-html:has(.po0-shell--status) .source-filter,
-html:has(.po0-shell--status) .source-node-card,
-html:has(.po0-shell--status) .latency-card,
-html:has(.po0-shell--looking-glass) .lg-sidebar,
-html:has(.po0-shell--looking-glass) .lg-workbench,
-html:has(.po0-shell--looking-glass) .lg-region,
-html:has(.po0-shell--looking-glass) .lg-node,
-html:has(.po0-shell--looking-glass) .lg-summary-grid article,
-html:has(.po0-shell--looking-glass) .lg-toolbar select,
-html:has(.po0-shell--looking-glass) .lg-toolbar input,
-html:has(.po0-shell--looking-glass) .lg-source-readonly strong {
-  opacity: 1 !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  background-color: #fff !important;
-  color: #132033 !important;
-}
-
-html:has(.po0-shell--status) .source-node-card strong,
-html:has(.po0-shell--status) .source-filter button,
-html:has(.po0-shell--status) .status-legend button,
-html:has(.po0-shell--status) .status-panel-title,
-html:has(.po0-shell--status) .status-panel-title span,
-html:has(.po0-shell--status) .latency-card__target,
-html:has(.po0-shell--status) .probe-row strong,
-html:has(.po0-shell--looking-glass) .lg-region__title strong,
-html:has(.po0-shell--looking-glass) .lg-node strong,
-html:has(.po0-shell--looking-glass) .lg-toolbar label,
-html:has(.po0-shell--looking-glass) .lg-summary-grid strong {
-  color: #07172b !important;
-  -webkit-text-fill-color: #07172b !important;
-  opacity: 1 !important;
-}
-
-html:has(.po0-shell--status) .source-node-card small,
-html:has(.po0-shell--status) .source-node-card__meta,
-html:has(.po0-shell--status) .source-node-card__meta span,
-html:has(.po0-shell--status) .status-chart-head small,
-html:has(.po0-shell--status) .latency-card__route,
-html:has(.po0-shell--status) .latency-card__meta small,
-html:has(.po0-shell--looking-glass) .lg-region__title small,
-html:has(.po0-shell--looking-glass) .lg-node small,
-html:has(.po0-shell--looking-glass) .lg-toolbar label span,
-html:has(.po0-shell--looking-glass) .lg-summary-grid span,
-html:has(.po0-shell--looking-glass) .lg-summary-grid small {
-  color: #33465f !important;
-  -webkit-text-fill-color: #33465f !important;
-  opacity: 1 !important;
-}
-
-html:has(.po0-shell--status) .source-filter button.active,
-html:has(.po0-shell--status) .status-legend button.active,
-html:has(.po0-shell--status) .status-tabs button.active,
-html:has(.po0-shell--looking-glass) .lg-node.is-active {
-  background: linear-gradient(135deg, #d7f7ff 0%, #ece9ff 100%) !important;
-  color: #07172b !important;
-  -webkit-text-fill-color: #07172b !important;
-}
-
-html:has(.po0-shell--status) .status-dashboard,
-html:has(.po0-shell--looking-glass) .looking-glass-console {
-  background: rgba(255,255,255,0.72) !important;
-}
-
-/* v16 robust light pages: class-based, no :has dependency */
-.po0-shell--status,
-.po0-shell--looking-glass {
-  color: #132033 !important;
-  background:
-    radial-gradient(circle at 12% 7%, rgba(58, 212, 255, 0.22), transparent 30rem),
-    radial-gradient(circle at 88% 10%, rgba(174, 165, 255, 0.18), transparent 28rem),
-    linear-gradient(180deg, #fbfdff 0%, #f4f8ff 48%, #eef6ff 100%) !important;
-}
-
-.po0-shell--status::before,
-.po0-shell--looking-glass::before {
-  display: block !important;
-  background:
-    linear-gradient(rgba(40, 100, 170, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(40, 100, 170, 0.055) 1px, transparent 1px) !important;
-  background-size: 34px 34px !important;
-  mask-image: linear-gradient(180deg, black 0%, black 72%, transparent 100%) !important;
-  -webkit-mask-image: linear-gradient(180deg, black 0%, black 72%, transparent 100%) !important;
-}
-
-.po0-shell--status .po0-shell__brand,
-.po0-shell--status .po0-shell__nav nav a,
-.po0-shell--status .po0-shell__title,
-.po0-shell--looking-glass .po0-shell__brand,
-.po0-shell--looking-glass .po0-shell__nav nav a,
-.po0-shell--looking-glass .po0-shell__title {
-  color: #07172b !important;
-}
-
-.po0-shell--status .po0-shell__lead,
-.po0-shell--looking-glass .po0-shell__lead {
-  color: #33465f !important;
-}
-
-.po0-shell--status .po0-shell__eyebrow,
-.po0-shell--looking-glass .po0-shell__eyebrow {
-  color: #087fae !important;
-}
-
-.po0-shell--status .status-probe,
-.po0-shell--status .status-dashboard,
-.po0-shell--status .status-source-panel,
-.po0-shell--status .status-chart-card,
-.po0-shell--status .source-filter,
-.po0-shell--status .source-node-card,
-.po0-shell--status .latency-card,
-.po0-shell--status .probe-row,
-.po0-shell--looking-glass .looking-glass-console,
-.po0-shell--looking-glass .lg-sidebar,
-.po0-shell--looking-glass .lg-workbench,
-.po0-shell--looking-glass .lg-region,
-.po0-shell--looking-glass .lg-node,
-.po0-shell--looking-glass .lg-summary-grid article,
-.po0-shell--looking-glass .lg-toolbar select,
-.po0-shell--looking-glass .lg-toolbar input,
-.po0-shell--looking-glass .lg-source-readonly strong {
-  opacity: 1 !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  color: #132033 !important;
-}
-
-.po0-shell--status .status-dashboard,
-.po0-shell--status .status-source-panel,
-.po0-shell--status .status-chart-card,
-.po0-shell--status .source-filter,
-.po0-shell--status .source-node-card,
-.po0-shell--status .latency-card,
-.po0-shell--looking-glass .looking-glass-console,
-.po0-shell--looking-glass .lg-sidebar,
-.po0-shell--looking-glass .lg-workbench,
-.po0-shell--looking-glass .lg-region,
-.po0-shell--looking-glass .lg-node,
-.po0-shell--looking-glass .lg-summary-grid article {
-  background: rgba(255,255,255,0.94) !important;
-  border-color: rgba(37, 99, 168, 0.22) !important;
-  box-shadow: 0 18px 45px rgba(31, 73, 125, 0.10), inset 0 1px 0 rgba(255,255,255,0.95) !important;
-}
-
-.po0-shell--status .source-node-card *,
-.po0-shell--status .source-filter *,
-.po0-shell--status .status-legend *,
-.po0-shell--status .status-chart-head *,
-.po0-shell--status .latency-card *,
-.po0-shell--looking-glass .lg-node *,
-.po0-shell--looking-glass .lg-region__title *,
-.po0-shell--looking-glass .lg-toolbar *,
-.po0-shell--looking-glass .lg-summary-grid * {
-  opacity: 1 !important;
-  filter: none !important;
-  text-shadow: none !important;
-}
-
-.po0-shell--status .source-node-card strong,
-.po0-shell--status .source-filter button,
-.po0-shell--status .status-legend button,
-.po0-shell--status .status-chart-head h3,
-.po0-shell--status .latency-card__target,
-.po0-shell--looking-glass .lg-node strong,
-.po0-shell--looking-glass .lg-region__title strong,
-.po0-shell--looking-glass .lg-toolbar label,
-.po0-shell--looking-glass .lg-source-readonly strong,
-.po0-shell--looking-glass .lg-summary-grid strong {
-  color: #07172b !important;
-  -webkit-text-fill-color: #07172b !important;
-}
-
-.po0-shell--status .source-node-card small,
-.po0-shell--status .source-node-card__meta,
-.po0-shell--status .source-node-card__meta span,
-.po0-shell--status .status-chart-head small,
-.po0-shell--status .latency-card__route,
-.po0-shell--status .latency-card__meta small,
-.po0-shell--looking-glass .lg-node small,
-.po0-shell--looking-glass .lg-region__title small,
-.po0-shell--looking-glass .lg-toolbar label span,
-.po0-shell--looking-glass .lg-summary-grid span,
-.po0-shell--looking-glass .lg-summary-grid small {
-  color: #33465f !important;
-  -webkit-text-fill-color: #33465f !important;
-}
-
-.po0-shell--status .status-legend button:not(.active),
-.po0-shell--looking-glass .lg-node:disabled,
-.po0-shell--looking-glass .lg-node.is-offline {
-  opacity: 1 !important;
-}
-
-.po0-shell--status .source-filter button.active,
-.po0-shell--status .status-legend button.active,
-.po0-shell--status .status-tabs button.active,
-.po0-shell--looking-glass .lg-node.is-active {
-  background: linear-gradient(135deg, #d7f7ff 0%, #ece9ff 100%) !important;
-  color: #07172b !important;
-  -webkit-text-fill-color: #07172b !important;
-}
-
-.po0-shell--looking-glass .lg-terminal-card,
-.po0-shell--looking-glass .lg-terminal-card pre {
-  color: #c5f4ff !important;
-  -webkit-text-fill-color: #c5f4ff !important;
-}
-
-/* v17 Admin light console readability — keep aligned with light LG pages */
-html[data-admin="1"],
-html[data-admin="1"] body,
-html[data-admin="1"] #root {
-  background: #f4f8ff !important;
-}
-
-html[data-admin="1"] .po0-shell,
-html[data-admin="1"] .admin-layout {
-  color: #132033 !important;
-  background:
-    radial-gradient(circle at 12% 7%, rgba(58, 212, 255, 0.18), transparent 30rem),
-    radial-gradient(circle at 88% 10%, rgba(174, 165, 255, 0.16), transparent 28rem),
-    linear-gradient(rgba(40, 100, 170, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(40, 100, 170, 0.045) 1px, transparent 1px),
-    linear-gradient(180deg, #fbfdff 0%, #f4f8ff 48%, #eef6ff 100%) !important;
-  background-size: auto, auto, 34px 34px, 34px 34px, auto !important;
-}
-
-html[data-admin="1"] .po0-shell__brand,
-html[data-admin="1"] .po0-shell__nav nav a,
-html[data-admin="1"] .admin-brand,
-html[data-admin="1"] .admin-sidebar a,
-html[data-admin="1"] .admin-sidebar button,
-html[data-admin="1"] .admin-shell h1,
-html[data-admin="1"] .admin-shell h2,
-html[data-admin="1"] .admin-shell h3,
-html[data-admin="1"] .admin-card h2,
-html[data-admin="1"] .admin-card h3,
-html[data-admin="1"] .admin-table-wrap h2,
-html[data-admin="1"] .admin-drawer h2,
-html[data-admin="1"] .admin-drawer h3,
-html[data-admin="1"] .admin-stat strong,
-html[data-admin="1"] .admin-shell label,
-html[data-admin="1"] .admin-shell td strong {
-  color: #07172b !important;
-  -webkit-text-fill-color: #07172b !important;
-  text-shadow: none !important;
-}
-
-html[data-admin="1"] .admin-layout,
-html[data-admin="1"] .admin-layout *,
-html[data-admin="1"] .admin-shell,
-html[data-admin="1"] .admin-shell * {
-  text-shadow: none !important;
-}
-
-html[data-admin="1"] .admin-shell p,
-html[data-admin="1"] .admin-shell small,
-html[data-admin="1"] .admin-kicker,
-html[data-admin="1"] .admin-auth,
-html[data-admin="1"] .admin-auth span,
-html[data-admin="1"] .admin-card p,
-html[data-admin="1"] .admin-stat span,
-html[data-admin="1"] .admin-shell td,
-html[data-admin="1"] .admin-shell th,
-html[data-admin="1"] .admin-actions,
-html[data-admin="1"] .admin-form label,
-html[data-admin="1"] .install-view p,
-html[data-admin="1"] .install-details summary {
-  color: #33465f !important;
-  -webkit-text-fill-color: #33465f !important;
-}
-
-html[data-admin="1"] .admin-kicker,
-html[data-admin="1"] .po0-shell__eyebrow {
-  color: #087fae !important;
-  -webkit-text-fill-color: #087fae !important;
-}
-
-html[data-admin="1"] .admin-sidebar,
-html[data-admin="1"] .admin-card,
-html[data-admin="1"] .admin-table-wrap,
-html[data-admin="1"] .admin-matrix,
-html[data-admin="1"] .admin-form.admin-card,
-html[data-admin="1"] .admin-stat,
-html[data-admin="1"] .admin-shell .admin-form,
-html[data-admin="1"] .admin-drawer,
-html[data-admin="1"] .install-primary,
-html[data-admin="1"] .install-hero,
-html[data-admin="1"] .install-block {
-  background: rgba(255, 255, 255, 0.94) !important;
-  border-color: rgba(37, 99, 168, 0.22) !important;
-  color: #132033 !important;
-  box-shadow: 0 18px 45px rgba(31, 73, 125, 0.10), inset 0 1px 0 rgba(255,255,255,0.95) !important;
-  opacity: 1 !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-html[data-admin="1"] .admin-sidebar a.active,
-html[data-admin="1"] .admin-sidebar a:hover,
-html[data-admin="1"] .admin-sidebar button:hover,
-html[data-admin="1"] .admin-shell button.active {
-  color: #07172b !important;
-  -webkit-text-fill-color: #07172b !important;
-  background: linear-gradient(135deg, #d7f7ff 0%, #ece9ff 100%) !important;
-  border-color: rgba(8, 127, 174, 0.32) !important;
-}
-
-html[data-admin="1"] .admin-form input,
-html[data-admin="1"] .admin-form select,
-html[data-admin="1"] .admin-form textarea,
-html[data-admin="1"] .admin-shell input,
-html[data-admin="1"] .admin-shell select {
-  color: #07172b !important;
-  -webkit-text-fill-color: #07172b !important;
-  background: #ffffff !important;
-  border-color: rgba(37, 99, 168, 0.28) !important;
-  box-shadow: 0 10px 28px rgba(37, 82, 130, 0.08) !important;
-  caret-color: #07172b !important;
-}
-
-html[data-admin="1"] .admin-form input:disabled,
-html[data-admin="1"] .admin-form select:disabled,
-html[data-admin="1"] .admin-shell input:disabled,
-html[data-admin="1"] .admin-shell select:disabled {
-  color: #64748b !important;
-  -webkit-text-fill-color: #64748b !important;
-  background: #eef5fc !important;
-}
-
-html[data-admin="1"] .admin-shell button,
-html[data-admin="1"] .install-primary button,
-html[data-admin="1"] .install-block button {
-  color: #07172b !important;
-  -webkit-text-fill-color: #07172b !important;
-  background: #ffffff !important;
-  border-color: rgba(37, 99, 168, 0.24) !important;
-  box-shadow: 0 8px 22px rgba(37, 82, 130, 0.06) !important;
-}
-
-html[data-admin="1"] .admin-shell button:hover,
-html[data-admin="1"] .install-primary button:hover,
-html[data-admin="1"] .install-block button:hover {
-  color: #041827 !important;
-  -webkit-text-fill-color: #041827 !important;
-  background: linear-gradient(135deg, #6fe6ff 0%, #3ad4ff 48%, #aea5ff 100%) !important;
-  border-color: rgba(8, 127, 174, 0.34) !important;
-}
-
-html[data-admin="1"] .admin-shell button.danger {
-  color: #9a3412 !important;
-  -webkit-text-fill-color: #9a3412 !important;
-  background: #fff7ed !important;
-  border-color: rgba(234, 88, 12, 0.24) !important;
-}
-
-html[data-admin="1"] .admin-shell button.danger:hover {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  background: linear-gradient(135deg, #ea580c, #dc2626) !important;
-}
-
-html[data-admin="1"] .admin-shell table,
-html[data-admin="1"] .admin-shell thead,
-html[data-admin="1"] .admin-shell tbody,
-html[data-admin="1"] .admin-shell tr,
-html[data-admin="1"] .admin-shell th,
-html[data-admin="1"] .admin-shell td,
-html[data-admin="1"] .admin-actions {
-  background: transparent !important;
-}
-
-html[data-admin="1"] .admin-shell th {
-  color: #33465f !important;
-  -webkit-text-fill-color: #33465f !important;
-  background: rgba(240, 249, 255, 0.94) !important;
-}
-
-html[data-admin="1"] .admin-shell td {
-  color: #132033 !important;
-  -webkit-text-fill-color: #132033 !important;
-  border-color: rgba(37, 99, 168, 0.14) !important;
-}
-
-html[data-admin="1"] .admin-shell tr:hover td {
-  background: rgba(224, 242, 254, 0.55) !important;
-}
-
-html[data-admin="1"] .admin-lg-pill.on {
-  color: #0369a1 !important;
-  -webkit-text-fill-color: #0369a1 !important;
-  background: rgba(186, 230, 253, 0.78) !important;
-}
-
-html[data-admin="1"] .admin-lg-pill.off {
-  color: #9a3412 !important;
-  -webkit-text-fill-color: #9a3412 !important;
-  background: rgba(255, 237, 213, 0.9) !important;
-}
-
-html[data-admin="1"] .admin-drawer-backdrop {
-  background: rgba(15, 23, 42, 0.24) !important;
-}
-
-html[data-admin="1"] .install-view code,
-html[data-admin="1"] .install-view pre,
-html[data-admin="1"] .install-block pre {
-  color: #c5f4ff !important;
-  -webkit-text-fill-color: #c5f4ff !important;
-  background: #07172b !important;
-  border-color: rgba(58, 212, 255, 0.24) !important;
-}
-
-html[data-admin="1"] .admin-login .admin-form input {
-  color: #07172b !important;
-  -webkit-text-fill-color: #07172b !important;
-  background: #ffffff !important;
-}
-
-/* Status latency trace clarity pass */
-.po0-shell--status .status-legend,
-html:has(.po0-shell--status) .status-legend {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(210px, 1fr)) !important;
-  flex: 1 1 620px !important;
-  width: auto !important;
-}
-
-.po0-shell--status .status-legend button,
-html:has(.po0-shell--status) .status-legend button {
-  display: grid !important;
-  grid-template-columns: 10px minmax(0, 1fr) auto !important;
-  gap: 4px 8px !important;
-  align-items: center !important;
-  min-height: 54px !important;
-  padding: 9px 11px !important;
-  text-align: left !important;
-}
-
-.po0-shell--status .status-legend .legend-label,
-html:has(.po0-shell--status) .status-legend .legend-label {
-  min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
-
-.po0-shell--status .status-legend button > strong,
-html:has(.po0-shell--status) .status-legend button > strong {
-  color: #062033 !important;
-  font-family: var(--po0-mono, ui-monospace, monospace) !important;
-  font-size: 0.82rem !important;
-}
-
-.po0-shell--status .status-legend button > small,
-html:has(.po0-shell--status) .status-legend button > small {
-  grid-column: 2 / 4 !important;
-  color: #627790 !important;
-  font-family: var(--po0-mono, ui-monospace, monospace) !important;
-  font-size: 0.68rem !important;
-  font-weight: 800 !important;
-}
-
-.po0-shell--status .chart-plot-bg,
-html:has(.po0-shell--status) .chart-plot-bg {
-  fill: rgba(255, 255, 255, 0.46) !important;
-  stroke: rgba(58, 107, 160, 0.18) !important;
-}
-
-.po0-shell--status .chart-smoke,
-html:has(.po0-shell--status) .chart-smoke {
-  opacity: 0.16 !important;
-  mix-blend-mode: multiply !important;
-}
-
-.po0-shell--status .chart-line-underlay,
-html:has(.po0-shell--status) .chart-line-underlay {
-  fill: none !important;
-  stroke: rgba(255, 255, 255, 0.9) !important;
-  stroke-width: 6.4 !important;
-  stroke-linecap: round !important;
-  stroke-linejoin: round !important;
-}
-
-.po0-shell--status .chart-line,
-html:has(.po0-shell--status) .chart-line {
-  stroke-width: 2.65 !important;
-  filter: drop-shadow(0 6px 10px rgba(37, 82, 130, 0.16)) !important;
-}
-
-.po0-shell--status .chart-last-point,
-html:has(.po0-shell--status) .chart-last-point {
-  stroke: rgba(255, 255, 255, 0.94) !important;
-  stroke-width: 2.2 !important;
-  filter: drop-shadow(0 3px 8px rgba(37, 82, 130, 0.25)) !important;
-}
-
-.po0-shell--status .chart-loss-label,
-html:has(.po0-shell--status) .chart-loss-label {
-  fill: #637a92 !important;
-  font-size: 10px !important;
-  opacity: 0.78 !important;
-}
-
-@media (max-width: 900px) {
-  .po0-shell--status .status-legend,
-  html:has(.po0-shell--status) .status-legend {
-    grid-template-columns: 1fr !important;
-    width: 100% !important;
-    flex-basis: 100% !important;
-  }
-}
-
-/* Status latency trace v3 compact chips */
-.po0-shell--status .status-legend,
-html:has(.po0-shell--status) .status-legend {
-  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)) !important;
-  flex: 0 1 760px !important;
-}
-
-.po0-shell--status .status-legend button,
-html:has(.po0-shell--status) .status-legend button {
-  min-height: 42px !important;
-  padding: 7px 9px !important;
-  grid-template-columns: 8px minmax(0, 1fr) auto !important;
-  border-radius: 18px !important;
-}
-
-.po0-shell--status .status-legend i,
-html:has(.po0-shell--status) .status-legend i {
-  width: 8px !important;
-  height: 8px !important;
-}
-
-.po0-shell--status .status-legend button > strong,
-html:has(.po0-shell--status) .status-legend button > strong {
-  font-size: 0.76rem !important;
-}
-
-.po0-shell--status .status-legend button > small,
-html:has(.po0-shell--status) .status-legend button > small {
-  font-size: 0.59rem !important;
-  opacity: 0.76 !important;
-}
-
-.po0-shell--status .chart-tooltip text,
-html:has(.po0-shell--status) .chart-tooltip text {
-  font-size: 9.4px !important;
-  letter-spacing: -0.03em !important;
-}
+/* Light functional theme for /status, /looking-glass, /admin has been
+   removed for the misaka-flavored dark theme. The pages now inherit the
+   dark palette from src/styles/global.css and the shared shell rules
+   above. */

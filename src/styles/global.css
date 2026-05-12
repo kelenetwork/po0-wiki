@@ -1,54 +1,209 @@
-:root {
-  --rp-c-brand: #0b8f87;
-  --rp-c-brand-dark: #05706b;
-  --rp-c-brand-light: #31d0bd;
-  --kele-bg: #f1eee6;
-  --kele-bg-2: #e8e4d8;
-  --kele-ink: #14201f;
-  --kele-muted: #66716f;
-  --kele-soft: rgba(255, 252, 243, 0.78);
-  --kele-card: rgba(255, 252, 243, 0.9);
-  --kele-line: rgba(20, 32, 31, 0.14);
-  --kele-accent: #009c8d;
-  --kele-accent-strong: #006f68;
-  --kele-warn: #c17400;
-  --kele-danger: #b5432d;
-  --kele-shadow: 0 30px 80px rgba(37, 45, 41, 0.13);
-  --kele-radius-lg: 34px;
-  --kele-radius-md: 22px;
-  --kele-font: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "PingFang SC", "Microsoft YaHei", serif;
-  --kele-ui: "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
-  --kele-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+/* ============================================================================
+ * Po0 Wiki — misaka-flavored theme tokens
+ *
+ * Borrowed from misaka-web (vps.misaka.si):
+ *   - Pure-black canvas (#0a0a0a) with discrete elevation tiers
+ *   - JetBrains Mono for body text, Instrument Serif italic for display
+ *   - Single accent color (#07c160), used for "live / online / good"
+ *   - Hair-thin borders, 8–10px radius, generous letter-spacing on labels
+ *
+ * Implementation notes:
+ *   - We keep the original `--kele-*` and `--po0-*` variable names as
+ *     ALIASES so the ~6k lines of downstream component CSS keep working
+ *     without surgery. The actual values now point at the misaka token set.
+ *   - rspress's own light/dark switch toggles `.dark` on <html>. Our theme
+ *     is intentionally dark-only across all surfaces; the `:root` and
+ *     `.dark` variable blocks resolve to the same misaka palette so the
+ *     theme never visually flips with the user's system preference.
+ * ========================================================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Noto+Sans+SC:wght@400;500;700&display=swap");
+
+/* ---------------------------------------------------------------------------
+ * Design tokens — single source of truth
+ * ------------------------------------------------------------------------- */
+:root,
+.dark {
+  /* Surface tiers */
+  --po0-bg: #0a0a0a;
+  --po0-bg-1: #111111;
+  --po0-bg-2: #161616;
+  --po0-bg-3: #1d1d1d;
+  --po0-bg-4: #232323;
+  --po0-surface: rgba(17, 17, 17, 0.78);
+  --po0-surface-strong: rgba(22, 22, 22, 0.94);
+
+  /* Borders */
+  --po0-line: #232323;
+  --po0-line-strong: #2e2e2e;
+  --po0-line-hairline: rgba(255, 255, 255, 0.06);
+
+  /* Text */
+  --po0-text: #ededed;
+  --po0-text-strong: #ffffff;
+  --po0-text-dim: #a3a3a3;
+  --po0-text-faint: #737373;
+  --po0-text-mute: #525252;
+
+  /* Accent palette */
+  --po0-accent: #07c160;
+  --po0-accent-dim: #0a5d33;
+  --po0-accent-soft: rgba(7, 193, 96, 0.15);
+  --po0-accent-glow: rgba(7, 193, 96, 0.22);
+  --po0-accent-strong: #2ee08a;
+
+  /* Semantic tones */
+  --po0-good: #07c160;
+  --po0-info: #6abdf3;
+  --po0-warn: #f5a524;
+  --po0-danger: #e0444e;
+  --po0-violet: #a78bfa;
+
+  /* Radii / shadows */
+  --po0-radius-sm: 4px;
+  --po0-radius: 8px;
+  --po0-radius-lg: 12px;
+  --po0-radius-xl: 18px;
+  --po0-shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --po0-shadow-glow: 0 0 0 1px rgba(7, 193, 96, 0.2), 0 8px 28px rgba(7, 193, 96, 0.08);
+
+  /* Typography */
+  --po0-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --po0-font-display: "Instrument Serif", "Noto Serif SC", "Songti SC", Georgia, serif;
+  --po0-font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
+  --po0-font-body: var(--po0-font-mono);
+
+  /* Letter-spacing presets */
+  --po0-tracking-label: 0.18em;
+  --po0-tracking-kicker: 0.32em;
+
+  /* --- Backward-compat aliases for existing component CSS ---
+     All `--kele-*` and pre-existing `--po0-*` names map onto the misaka
+     palette below. Most descendant rules `var(--kele-card, …)` style
+     fallbacks already exist, so the aliasing here covers the rest. */
+  --kele-bg: var(--po0-bg);
+  --kele-bg-2: var(--po0-bg-1);
+  --kele-bg-3: var(--po0-bg-2);
+  --kele-ink: var(--po0-text);
+  --kele-muted: var(--po0-text-dim);
+  --kele-faint: var(--po0-text-faint);
+  --kele-soft: var(--po0-surface);
+  --kele-card: var(--po0-bg-1);
+  --kele-card-strong: var(--po0-bg-2);
+  --kele-line: var(--po0-line);
+  --kele-line-strong: var(--po0-line-strong);
+  --kele-accent: var(--po0-accent);
+  --kele-accent-strong: var(--po0-accent-strong);
+  --kele-accent-soft: var(--po0-accent-soft);
+  --kele-warn: var(--po0-warn);
+  --kele-danger: var(--po0-danger);
+  --kele-good: var(--po0-good);
+  --kele-shadow: var(--po0-shadow-soft);
+  --kele-radius-lg: var(--po0-radius-xl);
+  --kele-radius-md: var(--po0-radius-lg);
+  --kele-radius: var(--po0-radius);
+  --kele-font: var(--po0-font-body);
+  --kele-ui: var(--po0-font-body);
+  --kele-mono: var(--po0-font-mono);
+
+  /* po0-page-* aliases used by the old "light theme for status/lg" rules */
+  --po0-page-bg: var(--po0-bg);
+  --po0-page-bg-2: var(--po0-bg-1);
+  --po0-page-bg-3: var(--po0-bg-2);
+  --po0-page-ink: var(--po0-text);
+  --po0-page-strong: var(--po0-text-strong);
+  --po0-page-muted: var(--po0-text-dim);
+  --po0-page-muted-strong: var(--po0-text-faint);
+  --po0-page-line: var(--po0-line);
+  --po0-page-line-strong: var(--po0-line-strong);
+  --po0-page-card: var(--po0-bg-1);
+  --po0-page-card-strong: var(--po0-bg-2);
+
+  /* rspress brand → misaka green (links, anchors, sidebar highlight) */
+  --rp-c-brand: var(--po0-accent);
+  --rp-c-brand-dark: var(--po0-accent-dim);
+  --rp-c-brand-light: var(--po0-accent-strong);
+  --rp-c-brand-tint: var(--po0-accent-soft);
+  --rp-c-bg: var(--po0-bg);
+  --rp-c-bg-soft: var(--po0-bg-1);
+  --rp-c-bg-mute: var(--po0-bg-2);
+  --rp-c-divider: var(--po0-line);
+  --rp-c-divider-light: var(--po0-line-hairline);
+  --rp-c-text-1: var(--po0-text);
+  --rp-c-text-2: var(--po0-text-dim);
+  --rp-c-text-3: var(--po0-text-faint);
+  --rp-c-text-code: var(--po0-accent-strong);
 }
 
-.dark {
-  --kele-bg: #071214;
-  --kele-bg-2: #0d1c1f;
-  --kele-ink: #edf7f4;
-  --kele-muted: #9baaa7;
-  --kele-soft: rgba(14, 29, 31, 0.76);
-  --kele-card: rgba(12, 25, 28, 0.88);
-  --kele-line: rgba(221, 246, 238, 0.15);
-  --kele-accent: #20dac5;
-  --kele-accent-strong: #7cf8e8;
-  --kele-warn: #f4bd4f;
-  --kele-danger: #ff826d;
-  --kele-shadow: 0 30px 90px rgba(0, 0, 0, 0.42);
+/* ---------------------------------------------------------------------------
+ * Global reset & html/body baseline
+ * ------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--po0-bg);
+  color: var(--po0-text);
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "calt" 1, "liga" 1, "ss01" 1;
+  font-family: var(--po0-font-body);
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 html,
 body {
   overflow-x: hidden;
+  margin: 0;
+  min-height: 100%;
 }
 
 body {
-  font-family: var(--kele-ui);
+  background: var(--po0-bg);
+  background-image:
+    radial-gradient(900px circle at 0% 0%, rgba(7, 193, 96, 0.04), transparent 60%),
+    radial-gradient(700px circle at 100% 100%, rgba(7, 193, 96, 0.025), transparent 60%);
+  background-attachment: fixed;
+  color: var(--po0-text);
+  font-family: var(--po0-font-body);
+  min-height: 100vh;
 }
 
-.rspress-home-hero-image {
-  filter: drop-shadow(0 24px 60px rgba(0, 156, 141, 0.22));
+::selection {
+  background: var(--po0-accent);
+  color: #000;
 }
 
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--po0-bg-3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--po0-line-strong);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Shared shell containers — these used to define their own warm/light
+ * backgrounds. In the misaka theme we collapse them to the pure-black
+ * canvas plus the body-level radial glow.
+ * ------------------------------------------------------------------------- */
 .kele-home,
 .kele-home *,
 .kele-status-page,
@@ -65,33 +220,11 @@ body {
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
   margin-top: -1.5rem;
-  color: var(--kele-ink);
-  background:
-    radial-gradient(circle at 10% 8%, rgba(0, 156, 141, 0.24), transparent 25rem),
-    radial-gradient(circle at 84% 16%, rgba(193, 116, 0, 0.16), transparent 22rem),
-    linear-gradient(90deg, rgba(20, 32, 31, 0.045) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(20, 32, 31, 0.035) 1px, transparent 1px),
-    linear-gradient(135deg, var(--kele-bg), var(--kele-bg-2));
-  background-size: auto, auto, 46px 46px, 46px 46px, auto;
-  border-top: 1px solid var(--kele-line);
+  color: var(--po0-text);
+  background: transparent;
+  border-top: 1px solid var(--po0-line-hairline);
   overflow: hidden;
-}
-
-.dark .kele-home,
-.dark .kele-status-page,
-.dark .kele-lg-page {
-  background:
-    radial-gradient(circle at 12% 10%, rgba(32, 218, 197, 0.18), transparent 25rem),
-    radial-gradient(circle at 82% 10%, rgba(244, 189, 79, 0.1), transparent 21rem),
-    linear-gradient(90deg, rgba(221, 246, 238, 0.045) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(221, 246, 238, 0.035) 1px, transparent 1px),
-    linear-gradient(135deg, var(--kele-bg), var(--kele-bg-2));
-  background-size: auto, auto, 46px 46px, 46px 46px, auto;
-}
-
-.kele-home {
-  padding: clamp(30px, 5vw, 82px);
-  font-family: var(--kele-ui);
+  position: relative;
 }
 
 .kele-home::before,
@@ -101,1322 +234,250 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.2;
-  background-image: linear-gradient(rgba(20, 32, 31, 0.12) 1px, transparent 1px);
-  background-size: 100% 9px;
-  mix-blend-mode: multiply;
+  background:
+    radial-gradient(800px circle at 12% 8%, rgba(7, 193, 96, 0.05), transparent 60%),
+    radial-gradient(700px circle at 88% 16%, rgba(7, 193, 96, 0.03), transparent 65%);
+  z-index: 0;
 }
 
-.dark .kele-home::before,
-.dark .kele-status-page::before,
-.dark .kele-lg-page::before {
-  opacity: 0.09;
-  mix-blend-mode: screen;
-}
-
-.kele-hero,
-.kele-rail,
-.kele-grid-section,
-.kele-status-hero,
-.kele-status-page > .status-probe,
-.kele-status-roadmap,
-.kele-lg-page > .looking-glass-console {
+.kele-home > *,
+.kele-status-page > *,
+.kele-lg-page > * {
   position: relative;
   z-index: 1;
 }
 
-.kele-hero,
-.kele-rail,
-.kele-grid-section {
-  width: min(1500px, 100%);
-  margin-inline: auto;
+/* ---------------------------------------------------------------------------
+ * Typography helpers (mirrors misaka-web's font-serif-italic etc.)
+ * ------------------------------------------------------------------------- */
+.po0-font-display,
+.font-serif-italic {
+  font-family: var(--po0-font-display);
+  font-style: italic;
+  font-weight: 400;
+}
+.po0-font-mono,
+.font-mono {
+  font-family: var(--po0-font-mono);
+}
+.po0-font-sans,
+.font-sans {
+  font-family: var(--po0-font-sans);
 }
 
-.kele-hero {
-  min-height: clamp(620px, 76vh, 820px);
-  display: grid;
-  grid-template-columns: minmax(0, 1.06fr) minmax(390px, 0.94fr);
-  align-items: center;
-  gap: clamp(30px, 6vw, 88px);
-}
-
-.kele-hero__copy {
-  position: relative;
-}
-
-.kele-hero__copy::after {
-  content: "PO0";
-  position: absolute;
-  left: -0.08em;
-  bottom: -0.45em;
-  z-index: -1;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(0, 156, 141, 0.18);
-  font-family: var(--kele-mono);
-  font-size: clamp(6rem, 18vw, 18rem);
-  font-weight: 900;
-  letter-spacing: -0.16em;
-  opacity: 0.6;
-}
-
-.kele-eyebrow,
-.kele-section-kicker,
-.kele-card-index,
-.kele-link-board span {
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-}
-
-.kele-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid var(--kele-line);
-  border-radius: 999px;
-  padding: 9px 13px;
-  color: var(--kele-accent-strong);
-  background: var(--kele-soft);
-  box-shadow: 0 12px 30px rgba(20, 32, 31, 0.07);
-  backdrop-filter: blur(18px);
-  font-size: 0.78rem;
-  font-weight: 900;
-}
-
-.kele-live-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--kele-accent);
-  box-shadow: 0 0 0 6px rgba(0, 156, 141, 0.16), 0 0 24px var(--kele-accent);
-}
-
-.kele-hero h1,
-.kele-status-hero h1 {
-  margin: 24px 0 20px;
-  color: var(--kele-ink);
-  font-family: var(--kele-font);
-  font-size: clamp(3.8rem, 8.5vw, 8.4rem);
-  font-weight: 900;
-  letter-spacing: -0.1em;
-  line-height: 0.88;
-}
-
-.kele-lead,
-.kele-status-hero p:not(.kele-section-kicker) {
-  max-width: 760px;
-  margin: 0;
-  color: var(--kele-muted);
-  font-size: clamp(1.08rem, 1.65vw, 1.34rem);
-  line-height: 1.95;
-}
-
-.kele-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 34px;
-}
-
-.kele-button {
-  min-height: 50px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--kele-line);
-  border-radius: 999px;
-  padding: 0 20px;
-  color: var(--kele-ink) !important;
-  background: var(--kele-soft);
-  box-shadow: 0 14px 36px rgba(20, 32, 31, 0.08);
-  text-decoration: none !important;
-  font-weight: 900;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.kele-button:hover,
-.kele-link-board a:hover,
-.kele-rail article:hover {
-  transform: translateY(-3px);
-  border-color: rgba(0, 156, 141, 0.48);
-  box-shadow: 0 24px 60px rgba(0, 80, 74, 0.16);
-}
-
-.kele-button--primary {
-  border-color: transparent;
-  color: #fffaf0 !important;
-  background: linear-gradient(135deg, #006f68, #009c8d 54%, #c17400);
-}
-
-.kele-hero > .status-probe.compact,
-.kele-rail article,
-.kele-grid-section,
-.kele-link-board a,
-.kele-status-page > .status-probe,
-.kele-status-roadmap {
-  border: 1px solid var(--kele-line);
-  background: var(--kele-card);
-  box-shadow: var(--kele-shadow);
-  backdrop-filter: blur(20px);
-}
-
-.kele-hero > .status-probe.compact {
-  min-width: 0;
-  border-radius: var(--kele-radius-lg);
-  padding: 24px;
-}
-
-.kele-rail {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  margin-top: -18px;
-}
-
-.kele-rail article {
-  min-height: 210px;
-  display: flex;
-  flex-direction: column;
-  border-radius: 28px;
-  padding: 26px;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.kele-card-index {
-  width: 46px;
-  height: 46px;
-  display: grid;
-  place-items: center;
-  margin-bottom: auto;
-  border: 1px solid rgba(193, 116, 0, 0.28);
-  border-radius: 50%;
-  color: var(--kele-warn);
-  font-family: var(--kele-mono);
-  font-size: 0.75rem;
-  font-weight: 900;
-}
-
-.kele-rail h2,
-.kele-grid-section h2 {
-  margin: 24px 0 10px;
-  color: var(--kele-ink);
-  font-family: var(--kele-font);
-  letter-spacing: -0.05em;
-  line-height: 1.12;
-}
-
-.kele-rail h2 {
-  font-size: clamp(1.35rem, 2vw, 1.8rem);
-}
-
-.kele-rail p,
-.kele-grid-section p,
-.kele-status-roadmap li {
-  margin: 0;
-  color: var(--kele-muted);
-  line-height: 1.85;
-}
-
-.kele-grid-section {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
-  gap: 32px;
-  align-items: center;
-  margin-top: 20px;
-  border-radius: var(--kele-radius-lg);
-  padding: clamp(28px, 4vw, 52px);
-}
-
-.kele-section-kicker {
-  margin: 0 0 10px !important;
-  color: var(--kele-accent-strong) !important;
-  font-family: var(--kele-mono);
-  font-size: 0.74rem;
-  font-weight: 900;
-}
-
-.kele-grid-section h2 {
-  margin-top: 0;
-  font-size: clamp(2.1rem, 4.5vw, 4.7rem);
-}
-
-.kele-link-board {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.kele-link-board a {
-  min-height: 160px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border-radius: 24px;
-  padding: 20px;
-  text-decoration: none !important;
-  box-shadow: none;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.kele-link-board span {
-  color: var(--kele-muted);
-  font-family: var(--kele-mono);
-  font-size: 0.7rem;
-  font-weight: 900;
-}
-
-.kele-link-board strong {
-  color: var(--kele-ink);
-  font-size: 1.12rem;
-}
-
-.kele-status-page,
-.kele-lg-page {
-  min-height: calc(100vh - 64px);
-  padding: clamp(30px, 5vw, 78px);
-}
-
-.kele-status-hero,
-.kele-status-page > .status-probe,
-.kele-status-roadmap {
-  width: min(1220px, 100%);
-  margin-inline: auto;
-}
-
-.kele-lg-page > .looking-glass-console {
-  width: min(1500px, 100%);
-  margin-inline: auto;
-}
-
-.kele-status-hero {
-  margin-bottom: 28px;
-}
-
-.kele-status-hero h1 {
-  font-size: clamp(3.3rem, 7.5vw, 7rem);
-}
-
-.kele-status-page > .status-probe {
-  border-radius: var(--kele-radius-lg);
-  padding: clamp(22px, 3.6vw, 36px);
-}
-
-.kele-status-roadmap {
-  margin-top: 22px;
-  border-radius: 30px;
-  padding: clamp(24px, 4vw, 38px);
-}
-
-.kele-status-roadmap h2 {
-  margin: 0 0 14px;
-  color: var(--kele-ink);
-  font-family: var(--kele-font);
-  font-size: 1.9rem;
-  letter-spacing: -0.04em;
-}
-
-.kele-status-roadmap ul {
-  margin: 0;
-  padding-left: 1.2rem;
-}
-
-@media (max-width: 1060px) {
-  .kele-hero,
-  .kele-grid-section {
-    grid-template-columns: 1fr;
-  }
-
-  .kele-hero {
-    min-height: auto;
-    padding: 44px 0 26px;
-  }
-
-  .kele-rail,
-  .kele-link-board {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .kele-home,
-  .kele-status-page,
-  .kele-lg-page {
-    padding: 26px 16px 44px;
-  }
-
-  .kele-hero h1,
-  .kele-status-hero h1 {
-    letter-spacing: -0.08em;
-  }
-}
-
-/* Po0 Atlas cockpit homepage v2 */
-.kele-home--cockpit {
-  --atlas-bg: #030814;
-  --atlas-panel: rgba(8, 22, 39, 0.72);
-  --atlas-panel-strong: rgba(11, 31, 54, 0.86);
-  --atlas-line: rgba(78, 222, 255, 0.24);
-  --atlas-line-strong: rgba(88, 241, 255, 0.62);
-  --atlas-text: #eefaff;
-  --atlas-muted: #7f9ab0;
-  --atlas-cyan: #38f7ff;
-  --atlas-green: #4dffd0;
-  --atlas-blue: #4d80ff;
-  --atlas-amber: #ffd166;
-  min-height: calc(100vh - 64px);
-  padding: clamp(18px, 2.4vw, 34px);
-  color: var(--atlas-text);
-  background:
-    radial-gradient(circle at 12% 16%, rgba(30, 247, 255, 0.16), transparent 23rem),
-    radial-gradient(circle at 68% 8%, rgba(77, 128, 255, 0.14), transparent 24rem),
-    radial-gradient(circle at 88% 68%, rgba(77, 255, 208, 0.09), transparent 22rem),
-    linear-gradient(90deg, rgba(73, 226, 255, 0.055) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(73, 226, 255, 0.04) 1px, transparent 1px),
-    #030814;
-  background-size: auto, auto, auto, 56px 56px, 56px 56px, auto;
-}
-
-.kele-home--cockpit::before {
-  opacity: 0.18;
-  background:
-    linear-gradient(rgba(61, 239, 255, 0.18) 1px, transparent 1px),
-    radial-gradient(circle, rgba(112, 232, 255, 0.85) 0 1px, transparent 1.5px);
-  background-size: 100% 10px, 110px 96px;
-  mix-blend-mode: screen;
-  animation: atlasScanlines 7s linear infinite;
-}
-
-.kele-home--cockpit::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(115deg, transparent 0 42%, rgba(80, 241, 255, 0.13) 48%, transparent 54% 100%);
-  transform: translateX(-70%);
-  animation: atlasSweep 6.8s ease-in-out infinite;
-}
-
-.atlas-shell {
-  position: relative;
-  z-index: 1;
-  width: min(1500px, 100%);
-  margin: 0 auto;
-}
-
-.atlas-topbar,
-.atlas-hero,
-.atlas-route-panel,
-.atlas-button,
-.atlas-live,
-.atlas-search,
-.atlas-console {
-  border: 1px solid var(--atlas-line);
-  background: linear-gradient(135deg, rgba(8, 20, 36, 0.78), rgba(5, 13, 25, 0.52));
-  box-shadow: inset 0 0 0 1px rgba(114, 235, 255, 0.05), 0 0 38px rgba(34, 197, 255, 0.08);
-  backdrop-filter: blur(18px);
-}
-
-.atlas-topbar {
-  min-height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  border-radius: 20px;
-  padding: 10px 14px;
-  animation: atlasRise 0.7s ease both;
-}
-
-.atlas-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--atlas-text) !important;
-  text-decoration: none !important;
-}
-
-.atlas-logo {
-  width: 38px;
-  height: 38px;
-  position: relative;
-  display: inline-block;
-  filter: drop-shadow(0 0 18px rgba(56, 247, 255, 0.52));
-}
-
-.atlas-logo::before,
-.atlas-logo::after {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  clip-path: polygon(50% 0, 100% 86%, 78% 86%, 50% 33%, 22% 86%, 0 86%);
-  border: 2px solid var(--atlas-cyan);
-  background: linear-gradient(135deg, rgba(56, 247, 255, 0.08), rgba(77, 128, 255, 0.22));
-}
-
-.atlas-logo::after {
-  inset: 13px 15px 8px;
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  border-color: rgba(77, 255, 208, 0.7);
-}
-
-.atlas-brand small,
-.atlas-brand strong {
-  display: block;
-}
-
-.atlas-brand small {
-  color: #6fa4bd;
-  font-family: var(--kele-mono);
+/* Section-head kicker style used across status/lg/admin */
+.po0-kicker {
+  font-family: var(--po0-font-mono);
   font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.14em;
+  letter-spacing: var(--po0-tracking-label);
   text-transform: uppercase;
+  color: var(--po0-text-faint);
 }
 
-.atlas-brand strong {
-  color: var(--atlas-text);
-  font-size: 23px;
-  font-weight: 950;
-  letter-spacing: -0.03em;
+/* ---------------------------------------------------------------------------
+ * Shared animations (mirror misaka-web)
+ * ------------------------------------------------------------------------- */
+@keyframes po0-pulse-dot {
+  0% {
+    box-shadow: 0 0 0 0 rgba(7, 193, 96, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 9px rgba(7, 193, 96, 0);
+  }
+}
+.po0-pulse-dot,
+.pulse-dot {
+  animation: po0-pulse-dot 2s ease-out infinite;
 }
 
-.atlas-topbar__right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  min-width: 0;
+@keyframes po0-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.po0-fade-up,
+.fade-up {
+  animation: po0-fade-up 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.atlas-live,
-.atlas-search,
-.atlas-console {
-  min-height: 40px;
-  display: inline-flex;
-  align-items: center;
-  border-radius: 12px;
-  color: #a9c9d8 !important;
-  text-decoration: none !important;
-  font-size: 13px;
-  font-weight: 850;
+/* ---------------------------------------------------------------------------
+ * rspress default surfaces — explicit overrides to keep the theme consistent
+ * inside markdown-rendered docs (the /guide/* pages). These pages use the
+ * stock rspress chrome (sidebar / TOC / prose), so the var bindings above
+ * already do most of the work; the rules below patch the leftover light
+ * surfaces and link hover treatments.
+ * ------------------------------------------------------------------------- */
+.rspress-doc {
+  font-family: var(--po0-font-body);
+  color: var(--po0-text);
 }
 
-.atlas-live {
-  gap: 8px;
-  padding: 0 14px;
-  color: var(--atlas-green) !important;
-  text-transform: uppercase;
+.rspress-doc h1,
+.rspress-doc h2,
+.rspress-doc h3,
+.rspress-doc h4 {
+  font-family: var(--po0-font-display);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--po0-text-strong);
+  letter-spacing: 0;
 }
 
-.atlas-live i,
-.atlas-panel-head strong i {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--atlas-green);
-  box-shadow: 0 0 0 5px rgba(77, 255, 208, 0.12), 0 0 18px var(--atlas-green);
-  animation: atlasPulse 1.8s ease-in-out infinite;
+.rspress-doc h1 {
+  font-size: clamp(34px, 4vw, 44px);
+  line-height: 1.15;
+}
+.rspress-doc h2 {
+  font-size: clamp(24px, 2.6vw, 30px);
+  border-top: 1px solid var(--po0-line);
+  padding-top: 1.4em;
+  margin-top: 2em;
+}
+.rspress-doc h3 {
+  font-size: clamp(18px, 2vw, 22px);
 }
 
-.atlas-live b {
-  color: #7ba5ad;
-  font-weight: 800;
-  text-transform: none;
+.rspress-doc p,
+.rspress-doc li {
+  font-family: var(--po0-font-mono);
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--po0-text);
 }
 
-.atlas-search {
-  width: min(320px, 28vw);
-  justify-content: space-between;
-  padding: 0 12px;
-  color: #6f8da2 !important;
+.rspress-doc a {
+  color: var(--po0-accent);
+  border-bottom: 1px solid rgba(7, 193, 96, 0.35);
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.rspress-doc a:hover {
+  color: var(--po0-accent-strong);
+  border-bottom-color: var(--po0-accent-strong);
 }
 
-.atlas-search kbd {
-  border: 1px solid rgba(95, 221, 255, 0.22);
-  border-radius: 6px;
+.rspress-doc code:not(pre code) {
+  background: var(--po0-bg-2);
+  border: 1px solid var(--po0-line);
+  color: var(--po0-accent-strong);
   padding: 1px 6px;
-  color: #82a9bb;
-  background: rgba(255,255,255,0.03);
-  font-family: var(--kele-mono);
-}
-
-.atlas-console {
-  padding: 0 16px;
-}
-
-.atlas-hero {
-  min-height: min(760px, calc(100vh - 150px));
-  display: grid;
-  grid-template-columns: minmax(0, 0.76fr) minmax(520px, 1.08fr);
-  align-items: center;
-  gap: clamp(24px, 4vw, 58px);
-  margin-top: 22px;
-  border-radius: 28px;
-  padding: clamp(28px, 4.6vw, 64px);
-  overflow: hidden;
-  clip-path: polygon(0 22px, 22px 0, calc(100% - 22px) 0, 100% 22px, 100% calc(100% - 22px), calc(100% - 22px) 100%, 22px 100%, 0 calc(100% - 22px));
-}
-
-.atlas-hero::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  pointer-events: none;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle at 26% 34%, rgba(56, 247, 255, 0.13), transparent 22rem),
-    linear-gradient(90deg, transparent, rgba(56, 247, 255, 0.08), transparent);
-}
-
-.atlas-copy,
-.atlas-route-panel {
-  position: relative;
-  z-index: 1;
-}
-
-.atlas-copy {
-  animation: atlasRise 0.8s 0.08s ease both;
-}
-
-.atlas-kicker {
-  margin: 0 0 18px;
-  color: #77cce1;
-  font-family: var(--kele-mono);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
-
-.atlas-copy h1 {
-  margin: 0;
-  color: #effbff;
-  font-family: var(--kele-ui);
-  font-size: clamp(4.8rem, 10vw, 9.8rem);
-  font-weight: 950;
-  line-height: 0.9;
-  letter-spacing: -0.075em;
-  text-shadow: 0 0 26px rgba(147, 235, 255, 0.36), 0 0 60px rgba(56, 247, 255, 0.16);
-}
-
-.atlas-copy h2 {
-  margin: 18px 0 10px;
-  color: #d3edf8;
-  font-size: clamp(1.05rem, 1.8vw, 1.45rem);
-  letter-spacing: 0.02em;
-}
-
-.atlas-copy p:not(.atlas-kicker) {
-  max-width: 660px;
-  margin: 0;
-  color: #7c98a8;
-  font-size: clamp(0.98rem, 1.24vw, 1.08rem);
-  line-height: 1.9;
-}
-
-.atlas-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 34px;
-}
-
-.atlas-button {
-  min-width: 150px;
-  min-height: 52px;
-  position: relative;
-  justify-content: center;
-  gap: 9px;
-  border-radius: 0;
-  padding: 0 20px;
-  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
-  color: #cbeef9 !important;
-  text-decoration: none !important;
-  font-weight: 950;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.atlas-button span {
-  width: 16px;
-  height: 16px;
-  border: 1px solid currentColor;
   border-radius: 4px;
-  box-shadow: 0 0 13px currentColor;
+  font-size: 0.9em;
 }
 
-.atlas-button:hover {
-  transform: translateY(-3px);
-  border-color: var(--atlas-line-strong);
-  box-shadow: 0 0 32px rgba(56, 247, 255, 0.22);
+.rspress-doc pre {
+  background: var(--po0-bg-1) !important;
+  border: 1px solid var(--po0-line);
+  border-radius: var(--po0-radius);
+  font-size: 12.5px;
 }
 
-.atlas-button--primary {
-  color: #eaffff !important;
-  background: linear-gradient(135deg, rgba(44, 246, 255, 0.75), rgba(77, 255, 208, 0.28));
-  border-color: rgba(133, 255, 243, 0.72);
-  box-shadow: 0 0 36px rgba(56, 247, 255, 0.28), inset 0 0 24px rgba(77, 255, 208, 0.14);
-}
-
-.atlas-scan {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 28px;
-  color: #5d8194;
-  font-family: var(--kele-mono);
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.atlas-scan i {
-  width: 150px;
-  height: 8px;
-  overflow: hidden;
-  background: repeating-linear-gradient(90deg, rgba(56,247,255,0.9) 0 4px, transparent 4px 8px);
-  filter: drop-shadow(0 0 8px rgba(56,247,255,0.65));
-  animation: atlasBars 1.8s steps(10) infinite;
-}
-
-.atlas-route-panel {
-  min-height: 430px;
-  border-radius: 22px;
-  padding: 24px;
-  clip-path: polygon(32px 0, 100% 0, 100% calc(100% - 28px), calc(100% - 28px) 100%, 0 100%, 0 32px);
-  animation: atlasPanelFloat 5.2s ease-in-out infinite, atlasRise 0.8s 0.18s ease both;
-}
-
-.atlas-panel-corners::before,
-.atlas-panel-corners::after {
-  content: "";
-  position: absolute;
-  width: 90px;
-  height: 90px;
-  pointer-events: none;
-  border-color: var(--atlas-cyan);
-  filter: drop-shadow(0 0 16px rgba(56,247,255,.55));
-}
-
-.atlas-panel-corners::before {
-  left: 9px;
-  top: 9px;
-  border-left: 2px solid;
-  border-top: 2px solid;
-}
-
-.atlas-panel-corners::after {
-  right: 9px;
-  bottom: 9px;
-  border-right: 2px solid;
-  border-bottom: 2px solid;
-}
-
-.atlas-panel-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 22px;
-}
-
-.atlas-panel-head h2 {
-  margin: 0;
-  color: #effbff;
-  font-size: clamp(1.35rem, 2vw, 1.85rem);
-  letter-spacing: -0.02em;
-}
-
-.atlas-panel-head span {
-  margin-left: 8px;
-  color: #6997a8;
-  font-family: var(--kele-mono);
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.atlas-panel-head strong {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #a5f7e8;
-  font-family: var(--kele-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.atlas-route-body {
-  display: grid;
-  grid-template-columns: minmax(230px, 0.82fr) minmax(290px, 1fr);
-  gap: 18px;
-  align-items: center;
-}
-
-.atlas-map {
-  position: relative;
-  min-height: 260px;
-  border-radius: 18px;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 42% 48%, rgba(56, 247, 255, 0.14), transparent 7rem),
-    radial-gradient(circle at 66% 28%, rgba(77, 255, 208, 0.1), transparent 6rem),
-    linear-gradient(90deg, rgba(56,247,255,.04) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(56,247,255,.04) 1px, transparent 1px);
-  background-size: auto, auto, 28px 28px, 28px 28px;
-}
-
-.atlas-map::before {
-  content: "";
-  position: absolute;
-  inset: 30px;
-  opacity: 0.34;
-  background:
-    linear-gradient(35deg, transparent 20%, rgba(99, 224, 255, 0.2) 21% 22%, transparent 23%),
-    linear-gradient(-28deg, transparent 28%, rgba(77, 255, 208, 0.17) 29% 30%, transparent 31%);
-}
-
-.atlas-map svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.atlas-route-line {
-  fill: none;
-  stroke: url(#atlas-route-glow);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-dasharray: 8 12;
-  filter: drop-shadow(0 0 10px rgba(56, 247, 255, 0.8));
-  animation: atlasDash 1.7s linear infinite;
-}
-
-.atlas-route-line--two { animation-duration: 2.2s; opacity: 0.85; }
-.atlas-route-line--three { animation-duration: 2.8s; opacity: 0.55; }
-
-.atlas-map-dot {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  z-index: 2;
-  border: 2px solid rgba(173, 255, 244, 0.9);
-  border-radius: 50%;
-  background: var(--atlas-green);
-  box-shadow: 0 0 0 7px rgba(77,255,208,.12), 0 0 25px rgba(56,247,255,.85);
-  animation: atlasNode 2.4s ease-in-out infinite;
-}
-
-.atlas-map-dot--a { left: 20%; top: 66%; }
-.atlas-map-dot--b { left: 43%; top: 31%; animation-delay: .25s; }
-.atlas-map-dot--c { left: 55%; top: 55%; animation-delay: .5s; }
-.atlas-map-dot--d { left: 83%; top: 22%; animation-delay: .75s; }
-
-.atlas-route-list {
-  display: grid;
-  gap: 12px;
-}
-
-.atlas-route-card {
-  position: relative;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-  min-height: 78px;
-  border: 1px solid rgba(77, 128, 255, 0.24);
-  border-radius: 15px;
-  padding: 14px;
-  background: linear-gradient(135deg, rgba(8, 24, 43, 0.92), rgba(4, 11, 23, 0.82));
-  box-shadow: inset 0 0 0 1px rgba(147, 235, 255, 0.04);
-  animation: atlasCardGlow 4s ease-in-out infinite;
-}
-
-.atlas-route-card--best { border-color: rgba(77, 255, 208, 0.34); }
-.atlas-route-card--warn { border-color: rgba(255, 209, 102, 0.42); animation-delay: .4s; }
-
-.atlas-route-dot {
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: var(--atlas-green);
-  box-shadow: 0 0 0 8px rgba(77, 255, 208, 0.1), 0 0 18px var(--atlas-green);
-}
-
-.atlas-route-card--warn .atlas-route-dot {
-  background: var(--atlas-amber);
-  box-shadow: 0 0 0 8px rgba(255, 209, 102, 0.12), 0 0 18px var(--atlas-amber);
-}
-
-.atlas-route-card strong,
-.atlas-route-card small,
-.atlas-route-card em,
-.atlas-route-card b {
-  display: block;
-}
-
-.atlas-route-card strong {
-  color: #e8fbff;
-  font-size: 0.98rem;
-}
-
-.atlas-route-card small {
-  margin-top: 4px;
-  color: #7898a8;
-}
-
-.atlas-route-card em {
-  color: #8fffe9;
-  font-family: var(--kele-mono);
+.rspress-doc blockquote {
+  border-left: 2px solid var(--po0-accent);
+  background: var(--po0-bg-1);
+  color: var(--po0-text-dim);
+  padding: 12px 16px;
   font-style: normal;
-  font-weight: 900;
-  text-align: right;
 }
 
-.atlas-route-card--warn em { color: #ffd166; }
-
-.atlas-route-card b {
-  margin-top: 5px;
-  color: currentColor;
-  font-family: var(--kele-ui);
-  font-size: 0.76rem;
+.rspress-doc hr {
+  border: 0;
+  border-top: 1px solid var(--po0-line);
+  margin: 2.4em 0;
 }
 
-.atlas-route-stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1px;
-  margin-top: 18px;
-  border: 1px solid rgba(78, 222, 255, 0.18);
-  border-radius: 16px;
-  overflow: hidden;
-  background: rgba(78, 222, 255, 0.12);
+.rspress-doc table {
+  font-family: var(--po0-font-mono);
+  font-size: 12.5px;
+  border-color: var(--po0-line);
 }
 
-.atlas-route-stats span {
-  display: grid;
-  gap: 4px;
-  min-height: 62px;
-  place-items: center;
-  padding: 10px 8px;
-  color: #668a9a;
-  background: rgba(4, 12, 24, 0.74);
-  font-size: 12px;
-  font-weight: 850;
-}
-
-.atlas-route-stats b {
-  color: #c7fbff;
-  font-family: var(--kele-mono);
-  font-size: 14px;
-}
-
-@keyframes atlasRise {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes atlasSweep {
-  0%, 58% { transform: translateX(-78%); opacity: 0; }
-  68% { opacity: 1; }
-  100% { transform: translateX(78%); opacity: 0; }
-}
-
-@keyframes atlasScanlines {
-  from { background-position: 0 0, 0 0; }
-  to { background-position: 0 80px, 120px 96px; }
-}
-
-@keyframes atlasPulse {
-  0%, 100% { transform: scale(1); opacity: 0.88; }
-  50% { transform: scale(1.28); opacity: 1; }
-}
-
-@keyframes atlasBars {
-  0% { clip-path: inset(0 100% 0 0); }
-  65%, 100% { clip-path: inset(0 0 0 0); }
-}
-
-@keyframes atlasPanelFloat {
-  0%, 100% { transform: translateY(0); box-shadow: inset 0 0 0 1px rgba(114,235,255,.05), 0 0 38px rgba(34,197,255,.08); }
-  50% { transform: translateY(-5px); box-shadow: inset 0 0 0 1px rgba(114,235,255,.08), 0 0 56px rgba(34,197,255,.16); }
-}
-
-@keyframes atlasDash {
-  to { stroke-dashoffset: -40; }
-}
-
-@keyframes atlasNode {
-  0%, 100% { transform: scale(1); filter: brightness(1); }
-  50% { transform: scale(1.24); filter: brightness(1.35); }
-}
-
-@keyframes atlasCardGlow {
-  0%, 100% { box-shadow: inset 0 0 0 1px rgba(147,235,255,.04), 0 0 0 rgba(56,247,255,0); }
-  50% { box-shadow: inset 0 0 0 1px rgba(147,235,255,.1), 0 0 24px rgba(56,247,255,.08); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .kele-home--cockpit *,
-  .kele-home--cockpit::before,
-  .kele-home--cockpit::after {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-@media (max-width: 1180px) {
-  .atlas-hero {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-
-  .atlas-route-panel {
-    min-height: auto;
-  }
-}
-
-@media (max-width: 760px) {
-  .atlas-topbar,
-  .atlas-topbar__right,
-  .atlas-route-body,
-  .atlas-route-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .atlas-topbar,
-  .atlas-topbar__right {
-    display: grid;
-    align-items: stretch;
-  }
-
-  .atlas-search {
-    width: 100%;
-  }
-
-  .atlas-copy h1 {
-    font-size: clamp(4rem, 18vw, 6.2rem);
-  }
-
-  .atlas-route-body,
-  .atlas-route-card,
-  .atlas-route-stats {
-    display: grid;
-  }
-
-  .atlas-route-card {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .atlas-route-card em {
-    grid-column: 2;
-    text-align: left;
-  }
-}
-
-body:has(.kele-home--cockpit) :where(.rp-nav, .rspress-nav, header[class*="nav"], nav[class*="nav"]) {
-  display: none !important;
-}
-
-body:has(.kele-home--cockpit) :where(.rp-doc, .rp-content, .rp-container, .rp-doc-container, .rspress-doc, .rspress-doc-container, main) {
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100% !important;
-}
-
-.kele-home--cockpit {
-  margin-top: 0 !important;
-}
-
-@keyframes atlasRise {
-  from { opacity: 1; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Compact top-half homepage tuning */
-.kele-home--cockpit {
-  min-height: 100vh !important;
-  padding: clamp(14px, 1.8vw, 28px) !important;
-}
-
-.atlas-topbar {
-  min-height: 56px;
-  padding: 8px 12px;
-}
-
-.atlas-brand strong {
-  font-size: 21px;
-}
-
-.atlas-hero {
-  min-height: 500px;
-  align-items: center;
-  margin-top: 18px;
-  padding: clamp(26px, 3.2vw, 44px);
-  grid-template-columns: minmax(0, 0.73fr) minmax(560px, 1.08fr);
-}
-
-.atlas-copy h1 {
-  font-size: clamp(4.2rem, 7.2vw, 6.8rem);
-  letter-spacing: -0.07em;
-}
-
-.atlas-copy h2 {
-  margin-top: 14px;
-  font-size: clamp(1rem, 1.35vw, 1.25rem);
-}
-
-.atlas-copy p:not(.atlas-kicker) {
-  max-width: 560px;
-  font-size: 0.98rem;
-  line-height: 1.7;
-}
-
-.atlas-actions {
-  margin-top: 26px;
-}
-
-.atlas-button {
-  min-width: 132px;
-  min-height: 46px;
-}
-
-.atlas-scan {
-  margin-top: 22px;
-}
-
-.atlas-route-panel {
-  min-height: 342px;
-  padding: 20px;
-}
-
-.atlas-panel-head {
-  margin-bottom: 12px;
-}
-
-.atlas-panel-head h2 {
-  font-size: 1.45rem;
-}
-
-.atlas-route-body {
-  grid-template-columns: minmax(210px, 0.78fr) minmax(280px, 1fr);
-  gap: 14px;
-}
-
-.atlas-map {
-  min-height: 214px;
-}
-
-.atlas-route-list {
-  gap: 10px;
-}
-
-.atlas-route-card {
-  min-height: 62px;
-  padding: 11px 12px;
-}
-
-.atlas-route-card strong {
-  font-size: 0.9rem;
-}
-
-.atlas-route-card small,
-.atlas-route-card b {
-  font-size: 0.72rem;
-}
-
-.atlas-route-card em {
-  font-size: 0.86rem;
-}
-
-.atlas-route-stats {
-  margin-top: 12px;
-}
-
-.atlas-route-stats span {
-  min-height: 48px;
-  padding: 7px 6px;
-  font-size: 10px;
-}
-
-.atlas-route-stats b {
-  font-size: 12px;
-}
-
-@media (max-width: 1180px) {
-  .atlas-hero {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-}
-
-body:has(.kele-home--cockpit),
-body:has(.kele-home--cockpit) #root {
-  background: #030814 !important;
-}
-
-/* Bottom telemetry dock: fills lower homepage without bringing back entry cards */
-.atlas-telemetry {
-  position: relative;
-  z-index: 1;
-  margin-top: 18px;
-  border: 1px solid rgba(78, 222, 255, 0.22);
-  border-radius: 24px;
-  padding: 14px;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 18% 0, rgba(56, 247, 255, 0.12), transparent 18rem),
-    radial-gradient(circle at 82% 100%, rgba(77, 128, 255, 0.12), transparent 18rem),
-    linear-gradient(135deg, rgba(8, 20, 36, 0.76), rgba(5, 13, 25, 0.55));
-  box-shadow: inset 0 0 0 1px rgba(114, 235, 255, 0.05), 0 0 40px rgba(34, 197, 255, 0.08);
-  backdrop-filter: blur(18px);
-  animation: atlasRise 0.7s 0.28s ease both;
-}
-
-.atlas-telemetry::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.42;
-  background:
-    linear-gradient(90deg, transparent, rgba(56, 247, 255, 0.14), transparent),
-    repeating-linear-gradient(90deg, transparent 0 38px, rgba(56, 247, 255, 0.06) 38px 39px, transparent 39px 78px);
-  transform: translateX(-60%);
-  animation: atlasDockSweep 5.8s linear infinite;
-}
-
-.atlas-telemetry__grid {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 1px;
-  border: 1px solid rgba(78, 222, 255, 0.14);
-  border-radius: 18px;
-  overflow: hidden;
-  background: rgba(78, 222, 255, 0.13);
-}
-
-.atlas-telemetry article {
-  min-height: 92px;
-  display: grid;
-  align-content: center;
-  gap: 5px;
-  padding: 16px 18px;
-  background: rgba(3, 8, 20, 0.62);
-}
-
-.atlas-telemetry article span {
-  color: #6e97aa;
-  font-family: var(--kele-mono);
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.14em;
+.rspress-doc th {
+  background: var(--po0-bg-1);
+  color: var(--po0-text-dim);
+  letter-spacing: var(--po0-tracking-label);
   text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 500;
 }
 
-.atlas-telemetry article strong {
-  color: #effbff;
-  font-family: var(--kele-mono);
-  font-size: clamp(1.2rem, 2vw, 1.8rem);
-  line-height: 1;
-  text-shadow: 0 0 18px rgba(56, 247, 255, 0.32);
+.rspress-doc td,
+.rspress-doc th {
+  border-color: var(--po0-line);
 }
 
-.atlas-telemetry article small {
-  color: #63869a;
-  font-size: 12px;
-  font-weight: 800;
+.rspress-nav {
+  background: rgba(10, 10, 10, 0.72) !important;
+  border-bottom: 1px solid var(--po0-line);
+  backdrop-filter: blur(10px);
 }
 
-.atlas-event-stream {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 14px;
-  margin-top: 12px;
-  border: 1px solid rgba(78, 222, 255, 0.14);
-  border-radius: 16px;
+.rspress-nav,
+.rspress-nav a,
+.rspress-sidebar a {
+  color: var(--po0-text-dim);
+  font-family: var(--po0-font-mono);
+  font-size: 12.5px;
+}
+
+.rspress-sidebar {
+  background: rgba(10, 10, 10, 0.6);
+  border-right: 1px solid var(--po0-line);
+}
+
+.rspress-sidebar a:hover,
+.rspress-nav a:hover {
+  color: var(--po0-accent);
+}
+
+.rspress-sidebar .menu-item.active,
+.rspress-sidebar [data-active="true"] {
+  color: var(--po0-accent);
+}
+
+/* ---------------------------------------------------------------------------
+ * Inputs / buttons baseline (mirrors misaka-web's input style)
+ * ------------------------------------------------------------------------- */
+input,
+textarea,
+select,
+button {
+  font: inherit;
+  color: inherit;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  background: var(--po0-bg-2);
+  border: 1px solid var(--po0-line);
+  border-radius: var(--po0-radius);
   padding: 9px 12px;
-  overflow: hidden;
-  background: rgba(3, 8, 20, 0.48);
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--po0-accent);
+  box-shadow: 0 0 0 3px var(--po0-accent-soft);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--po0-text-faint);
 }
 
-.atlas-event-stream > span {
-  color: var(--atlas-green);
-  font-family: var(--kele-mono);
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.atlas-event-track {
-  display: flex;
-  width: max-content;
-  gap: 32px;
-  color: #8db5c7;
-  font-family: var(--kele-mono);
-  font-size: 12px;
-  font-weight: 800;
-  white-space: nowrap;
-  animation: atlasTicker 24s linear infinite;
-}
-
-.atlas-event-track p {
-  margin: 0;
-}
-
-@keyframes atlasDockSweep {
-  to { transform: translateX(60%); }
-}
-
-@keyframes atlasTicker {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-@media (max-width: 920px) {
-  .atlas-telemetry__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+/* Reduce-motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
   }
-
-  .atlas-event-stream {
-    grid-template-columns: 1fr;
-  }
-}
-
-
-html body:has(.po0-landing) header.rp-nav,
-html body:has(.po0-landing) header.rspress-nav,
-html body:has(.po0-landing) .rp-nav,
-html body:has(.po0-landing) .rspress-nav {
-  display: none !important;
-}
-
-html body:has(.po0-landing) .rp-doc,
-html body:has(.po0-landing) .rp-content,
-html body:has(.po0-landing) .rp-container,
-html body:has(.po0-landing) .rp-doc-container,
-html body:has(.po0-landing) .rspress-doc,
-html body:has(.po0-landing) .rspress-doc-container,
-html body:has(.po0-landing) main {
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100% !important;
-}
-
-html:has(.po0-landing),
-html:has(.po0-landing) body,
-html:has(.po0-landing) #root {
-  background: #050912 !important;
 }

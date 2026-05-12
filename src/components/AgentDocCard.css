@@ -6,13 +6,13 @@
 .po0-agent-card {
   --agent-card-bg: rgba(7, 16, 32, 0.74);
   --agent-card-bg-soft: rgba(13, 27, 48, 0.72);
-  --agent-card-line: rgba(120, 170, 220, 0.18);
-  --agent-card-line-strong: rgba(120, 170, 220, 0.42);
-  --agent-card-text: #e7eef9;
-  --agent-card-muted: #8ea1ba;
+  --agent-card-line: rgba(255, 255, 255, 0.18);
+  --agent-card-line-strong: rgba(255, 255, 255, 0.42);
+  --agent-card-text: #ededed;
+  --agent-card-muted: #232323;
   --agent-card-strong: #ffffff;
-  --agent-card-accent: #6fe6ff;
-  --agent-card-good: #4dffb8;
+  --agent-card-accent: #2ee08a;
+  --agent-card-good: #07c160;
   --agent-card-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
   --agent-card-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Inter", system-ui, sans-serif;
   width: min(980px, 100%);
@@ -26,7 +26,7 @@
   border-radius: 22px;
   color: var(--agent-card-text);
   background:
-    linear-gradient(90deg, rgba(58, 212, 255, 0.1), transparent 38%),
+    linear-gradient(90deg, rgba(7, 193, 96, 0.1), transparent 38%),
     linear-gradient(180deg, var(--agent-card-bg-soft), var(--agent-card-bg));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 22px 60px rgba(0, 0, 0, 0.22);
   font-family: var(--agent-card-body);
@@ -40,9 +40,9 @@
   border: 1px solid var(--agent-card-line-strong);
   border-radius: 14px;
   background:
-    linear-gradient(rgba(120, 170, 220, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 170, 220, 0.12) 1px, transparent 1px),
-    rgba(58, 212, 255, 0.08);
+    linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+    rgba(7, 193, 96, 0.08);
   background-size: 12px 12px;
 }
 
@@ -56,18 +56,18 @@
 
 .po0-agent-card__signal::before {
   inset: 11px;
-  border: 1px solid rgba(111, 230, 255, 0.52);
+  border: 1px solid rgba(35, 35, 35, 0.52);
 }
 
 .po0-agent-card__signal::after {
   inset: 20px;
   background: var(--agent-card-good);
-  box-shadow: 0 0 16px rgba(77, 255, 184, 0.58);
+  box-shadow: 0 0 16px rgba(7, 193, 96, 0.58);
 }
 
 .po0-agent-card__signal span {
   inset: 5px;
-  border: 1px dashed rgba(111, 230, 255, 0.34);
+  border: 1px dashed rgba(35, 35, 35, 0.34);
   animation: po0AgentSpin 18s linear infinite;
 }
 
@@ -122,7 +122,7 @@
   border: 1px solid var(--agent-card-line);
   border-radius: 999px;
   color: var(--agent-card-accent);
-  background: rgba(58, 212, 255, 0.08);
+  background: rgba(7, 193, 96, 0.08);
   font-family: var(--agent-card-mono);
   font-size: 12px;
   font-weight: 700;
@@ -132,7 +132,7 @@
 
 .po0-agent-card__links a:hover {
   border-color: var(--agent-card-line-strong);
-  background: rgba(58, 212, 255, 0.14);
+  background: rgba(7, 193, 96, 0.14);
   transform: translateY(-1px);
 }
 
@@ -143,7 +143,7 @@
   gap: 10px;
   min-width: 0;
   padding: 10px;
-  border: 1px solid rgba(120, 170, 220, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 15px;
   background: rgba(2, 8, 18, 0.42);
 }
