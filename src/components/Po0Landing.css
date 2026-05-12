@@ -595,11 +595,17 @@
 
 /* Scroll-reveal entrance */
 .po0-reveal {
-  opacity: 0;
-  transform: translateY(24px);
+  opacity: 1;
+  transform: none;
   transition:
     opacity 700ms ease var(--reveal-delay, 0ms),
     transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
+  will-change: auto;
+}
+
+.po0-landing[data-reveal-ready="true"] .po0-reveal:not(.is-revealed):not([data-revealed="true"]) {
+  opacity: 0;
+  transform: translateY(24px);
   will-change: opacity, transform;
 }
 
@@ -610,7 +616,7 @@
   will-change: auto;
 }
 
-.po0-landing__pillars .po0-reveal {
+.po0-landing[data-reveal-ready="true"] .po0-landing__pillars .po0-reveal:not(.is-revealed):not([data-revealed="true"]) {
   transform: translateY(24px);
 }
 

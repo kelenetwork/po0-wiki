@@ -38,26 +38,44 @@ function buildPath(a: { x: number; y: number }, b: { x: number; y: number }) {
 
 function useReveal() {
   useEffect(() => {
+    const landing = document.querySelector<HTMLElement>('.po0-landing');
     const targets = Array.from(document.querySelectorAll<HTMLElement>('.po0-reveal'));
-    targets.forEach((node, index) => {
-      node.dataset.reveal = '';
-      node.style.setProperty('--reveal-delay', `${Math.min(index % 6, 5) * 80}ms`);
-    });
+    landing?.setAttribute('data-reveal-ready', 'true');
 
     const reveal = (node: HTMLElement) => {
       node.dataset.revealed = 'true';
       node.classList.add('is-revealed');
     };
 
+    targets.forEach((node, index) => {
+      node.dataset.reveal = '';
+      node.style.setProperty('--reveal-delay', `${Math.min(index % 6, 5) * 80}ms`);
+      if (node.getBoundingClientRect().top < window.innerHeight) {
+        reveal(node);
+      }
+    });
+
+    const revealRemaining = () => {
+      targets.forEach((node) => {
+        if (!node.classList.contains('is-revealed')) {
+          reveal(node);
+        }
+      });
+    };
+
+    const fallbackTimer = window.setTimeout(revealRemaining, 800);
+
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
-      targets.forEach(reveal);
-      return undefined;
+      revealRemaining();
+      window.clearTimeout(fallbackTimer);
+      return () => window.clearTimeout(fallbackTimer);
     }
 
     if (typeof IntersectionObserver === 'undefined') {
-      targets.forEach(reveal);
-      return undefined;
+      revealRemaining();
+      window.clearTimeout(fallbackTimer);
+      return () => window.clearTimeout(fallbackTimer);
     }
 
     const io = new IntersectionObserver((entries) => {
@@ -69,9 +87,14 @@ function useReveal() {
       }
     }, { threshold: 0, rootMargin: '0px 0px -10% 0px' });
 
-    targets.forEach((node) => io.observe(node));
+    targets.forEach((node) => {
+      if (!node.classList.contains('is-revealed')) {
+        io.observe(node);
+      }
+    });
 
     return () => {
+      window.clearTimeout(fallbackTimer);
       io.disconnect();
     };
   }, []);
