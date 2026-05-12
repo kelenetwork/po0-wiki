@@ -11,10 +11,18 @@
    :root variables as the rest of the site. */
 
 /* Hide Rspress nav on Po0 themed pages — we ship our own header */
+/* Hide the default Rspress nav chrome on our custom-themed pages
+   (.po0-shell wraps /status, /looking-glass, /admin; .po0-landing is
+   the home page). Each ships its own header so the stock one would
+   double-stack. */
 html body:has(.po0-shell) header.rp-nav,
 html body:has(.po0-shell) header.rspress-nav,
 html body:has(.po0-shell) .rp-nav,
-html body:has(.po0-shell) .rspress-nav {
+html body:has(.po0-shell) .rspress-nav,
+html body:has(.po0-landing) header.rp-nav,
+html body:has(.po0-landing) header.rspress-nav,
+html body:has(.po0-landing) .rp-nav,
+html body:has(.po0-landing) .rspress-nav {
   display: none !important;
 }
 
@@ -24,7 +32,14 @@ html body:has(.po0-shell) .rp-container,
 html body:has(.po0-shell) .rp-doc-container,
 html body:has(.po0-shell) .rspress-doc,
 html body:has(.po0-shell) .rspress-doc-container,
-html body:has(.po0-shell) main {
+html body:has(.po0-shell) main,
+html body:has(.po0-landing) .rp-doc,
+html body:has(.po0-landing) .rp-content,
+html body:has(.po0-landing) .rp-container,
+html body:has(.po0-landing) .rp-doc-container,
+html body:has(.po0-landing) .rspress-doc,
+html body:has(.po0-landing) .rspress-doc-container,
+html body:has(.po0-landing) main {
   max-width: none !important;
   margin: 0 !important;
   padding: 0 !important;

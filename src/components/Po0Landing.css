@@ -427,11 +427,11 @@
   animation: po0Dash 2.4s linear infinite;
 }
 
-.po0-landing__atlas-link--cyan .po0-landing__atlas-line { stroke: #5ff; }
-.po0-landing__atlas-link--violet .po0-landing__atlas-line--base { stroke: rgba(35, 35, 35, 0.78); }
+.po0-landing__atlas-link--cyan .po0-landing__atlas-line { stroke: rgba(7, 193, 96, 0.7); }
+.po0-landing__atlas-link--violet .po0-landing__atlas-line--base { stroke: rgba(7, 193, 96, 0.38); }
 .po0-landing__atlas-link--violet .po0-landing__atlas-line--flow {
-  stroke: #232323;
-  filter: drop-shadow(0 0 6px rgba(7, 193, 96, 0.72)) drop-shadow(0 0 14px rgba(35, 35, 35, 0.42));
+  stroke: rgba(46, 224, 138, 0.95);
+  filter: drop-shadow(0 0 6px rgba(7, 193, 96, 0.78)) drop-shadow(0 0 14px rgba(7, 193, 96, 0.42));
 }
 
 .po0-landing__atlas-target-halo,
@@ -444,7 +444,7 @@
 
 .po0-landing__atlas-node-core {
   fill: var(--po0-text-strong);
-  stroke: #5ff;
+  stroke: var(--po0-accent);
   stroke-width: 1.5;
   filter: drop-shadow(0 0 6px rgba(7, 193, 96, 0.8));
 }
@@ -460,17 +460,17 @@
 }
 
 .po0-landing__atlas-target text {
-  fill: rgba(35, 35, 35, 0.92);
+  fill: var(--po0-text-strong);
   font-size: 11px;
 }
 
 .po0-landing__atlas-city--target .po0-landing__atlas-node-core {
-  fill: rgba(35, 35, 35, 0.92);
-  opacity: 0.86;
+  fill: var(--po0-text-strong);
+  opacity: 1;
 }
 
 .po0-landing__atlas-city--target .po0-landing__atlas-target-halo {
-  stroke: rgba(7, 193, 96, 0.38);
+  stroke: rgba(7, 193, 96, 0.62);
 }
 
 .po0-landing__atlas-pulse {
@@ -484,8 +484,8 @@
 }
 
 .po0-landing__atlas-reticle {
-  fill: rgba(35, 35, 35, 0.84);
-  opacity: 0.88;
+  fill: rgba(7, 193, 96, 0.78);
+  opacity: 0.9;
   transform-box: fill-box;
   transform-origin: center;
   filter: drop-shadow(0 0 5px rgba(7, 193, 96, 0.66));
