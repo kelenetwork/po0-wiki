@@ -114,8 +114,8 @@ export default function Po0Landing() {
   const links = useMemo(() => ([
     { from: 'shanghai' as const, to: 'hongkong' as const, color: 'cyan' },
     { from: 'shanghai' as const, to: 'tokyo' as const, color: 'cyan' },
-    { from: 'guangzhou' as const, to: 'hongkong' as const, color: 'violet' },
-    { from: 'guangzhou' as const, to: 'tokyo' as const, color: 'violet' },
+    { from: 'guangzhou' as const, to: 'hongkong' as const, color: 'cyan' },
+    { from: 'guangzhou' as const, to: 'tokyo' as const, color: 'cyan' },
   ]), []);
 
   return (
@@ -208,31 +208,14 @@ export default function Po0Landing() {
                   const city = CITY_POINTS[id];
                   return (
                     <g key={id} className="po0-landing__atlas-city po0-landing__atlas-city--source is-active">
-                      <circle cx={city.x} cy={city.y} r="24" fill="url(#po0CityGlow)" />
-                      <circle className="po0-landing__atlas-node-ring" cx={city.x} cy={city.y} r="10" />
-                      <circle className="po0-landing__atlas-node-core" cx={city.x} cy={city.y} r="5.8" />
-                      <circle className="po0-landing__atlas-pulse" cx={city.x} cy={city.y} r="6" />
-                      <g className="po0-landing__atlas-reticle" transform={`translate(${city.x - 8} ${city.y - 8})`}>
-                        <path d="M8 0 9.8 3.6H6.2Z" />
-                        <path d="M8 16 6.2 12.4h3.6Z" />
-                        <path d="M0 8 3.6 6.2v3.6Z" />
-                        <path d="M16 8 12.4 9.8V6.2Z" />
-                      </g>
+                      <circle className="po0-landing__atlas-node-core" cx={city.x} cy={city.y} r="5.5" />
                       <text x={city.x - 14} y={city.y - 16} textAnchor="end">{city.label}</text>
                     </g>
                   );
                 })}
                 {Object.entries(TARGET_POINTS).map(([id, tgt]) => (
                   <g key={id} className="po0-landing__atlas-target po0-landing__atlas-city--target">
-                    <circle className="po0-landing__atlas-target-halo" cx={tgt.x} cy={tgt.y} r="15" />
-                    <circle className="po0-landing__atlas-node-core" cx={tgt.x} cy={tgt.y} r="3.8" />
-                    <circle className="po0-landing__atlas-target-pulse" cx={tgt.x} cy={tgt.y} r="3.6" />
-                    <g className="po0-landing__atlas-reticle po0-landing__atlas-reticle--target" transform={`translate(${tgt.x - 8} ${tgt.y - 8})`}>
-                      <path d="M8 0 9.8 3.6H6.2Z" />
-                      <path d="M8 16 6.2 12.4h3.6Z" />
-                      <path d="M0 8 3.6 6.2v3.6Z" />
-                      <path d="M16 8 12.4 9.8V6.2Z" />
-                    </g>
+                    <circle className="po0-landing__atlas-node-core" cx={tgt.x} cy={tgt.y} r="4" />
                     <text x={tgt.x + tgt.dx} y={tgt.y + tgt.dy} textAnchor={tgt.anchor}>{tgt.label}</text>
                   </g>
                 ))}
