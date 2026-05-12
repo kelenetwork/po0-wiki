@@ -704,3 +704,231 @@
   text-align: center;
 }
 
+
+
+/* ========================================================================
+   misaka phase 4 — match the actual LG DOM (select-based toolbar, not
+   a grid of action buttons). Style the native <select>'s as misaka chips
+   and patch the terminal header to render 3 macOS-style dots inline.
+   ======================================================================== */
+
+.lg-toolbar {
+  display: grid !important;
+  grid-template-columns: 1fr 1.6fr 1.4fr auto !important;
+  gap: 10px !important;
+  align-items: end !important;
+}
+
+.lg-toolbar > label {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+}
+.lg-toolbar > label > span {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+}
+.lg-toolbar select,
+.lg-toolbar input {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--po0-bg-2) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  padding: 10px 32px 10px 14px !important;
+  color: var(--po0-text) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 12.5px !important;
+  width: 100% !important;
+  cursor: pointer;
+  /* custom chevron */
+  background-image: linear-gradient(45deg, transparent 50%, var(--po0-text-faint) 50%), linear-gradient(135deg, var(--po0-text-faint) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+.lg-toolbar select:hover,
+.lg-toolbar input:hover {
+  border-color: var(--po0-line-strong) !important;
+}
+.lg-toolbar select:focus {
+  outline: none !important;
+  border-color: var(--po0-accent) !important;
+  box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.12) !important;
+}
+.lg-toolbar option {
+  background: var(--po0-bg-2);
+  color: var(--po0-text);
+}
+
+.lg-source-readonly {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+}
+.lg-source-readonly > span {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+}
+.lg-source-readonly strong {
+  display: block !important;
+  background: var(--po0-bg-2) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  padding: 10px 14px !important;
+  color: var(--po0-text) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Run button override (the previous rule used .lg-run but its parent grid
+   was forcing it to align stretch — clamp to natural input height) */
+.lg-run {
+  align-self: end !important;
+  white-space: nowrap !important;
+  min-height: 40px;
+}
+
+/* Summary grid uses <article> not .lg-summary-card */
+.lg-summary-grid article {
+  background: var(--po0-bg-2) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  padding: 14px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+.lg-summary-grid article > span {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+  margin-bottom: 2px;
+}
+.lg-summary-grid article > strong {
+  font-family: var(--po0-font-display) !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+  font-size: 22px !important;
+  line-height: 1.1 !important;
+  color: var(--po0-text-strong) !important;
+  letter-spacing: -0.005em !important;
+}
+.lg-summary-grid article > small {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10.5px !important;
+  color: var(--po0-text-faint) !important;
+  letter-spacing: 0.04em;
+}
+
+/* Terminal top — three inline span dots (not a single CSS pseudo) */
+.lg-terminal-top {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 10px 16px !important;
+  border-bottom: 1px solid var(--po0-line) !important;
+  background: var(--po0-bg) !important;
+}
+.lg-terminal-top::before {
+  /* override the previous radial-dots ::before that conflicts with real spans */
+  content: none !important;
+}
+.lg-terminal-top > span {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.lg-terminal-top > span:nth-of-type(1) { background: #ff5f56; }
+.lg-terminal-top > span:nth-of-type(2) { background: var(--po0-warn); }
+.lg-terminal-top > span:nth-of-type(3) { background: var(--po0-accent); }
+.lg-terminal-top > strong {
+  margin-left: 6px !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+}
+.lg-terminal-card pre {
+  margin: 0 !important;
+  padding: 16px 18px !important;
+  background: #000 !important;
+  color: var(--po0-text-dim) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 12px !important;
+  line-height: 1.65 !important;
+  white-space: pre-wrap !important;
+  word-break: break-word;
+  max-height: 540px;
+  overflow-y: auto;
+  border: 0 !important;
+}
+
+/* Tweak existing lg-sidebar -> ensure aside has the heading shown
+   (it uses <p class="status-kicker">Nodes</p>, no <h2>). Add nice
+   panel-title styling for that paragraph. */
+.lg-sidebar__head {
+  border-bottom: 1px solid var(--po0-line) !important;
+  margin-bottom: 14px !important;
+  padding-bottom: 12px !important;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.lg-sidebar__head .status-kicker {
+  font-family: var(--po0-font-display) !important;
+  font-style: italic !important;
+  font-size: 20px !important;
+  font-weight: 400 !important;
+  color: var(--po0-text-strong) !important;
+  text-transform: none !important;
+  letter-spacing: -0.005em !important;
+}
+.lg-sidebar__head > strong,
+.lg-sidebar__head > span:last-child {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+  font-weight: 500 !important;
+}
+
+/* Layout: ensure 320px sidebar (not the LG default) */
+.looking-glass-console {
+  grid-template-columns: 320px minmax(0, 1fr) !important;
+  gap: 20px !important;
+}
+
+@media (max-width: 900px) {
+  .looking-glass-console {
+    grid-template-columns: 1fr !important;
+  }
+  .lg-toolbar {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .lg-toolbar .lg-run {
+    grid-column: 1 / -1 !important;
+  }
+}
