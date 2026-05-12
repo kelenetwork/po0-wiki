@@ -1149,3 +1149,110 @@
 .status-probe.status-dashboard {
   padding: clamp(20px, 2vw, 28px) !important;
 }
+
+
+/* ============================================================
+   misaka phase 5 — latency card head row with status dot
+   ============================================================ */
+
+.latency-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  margin: 18px 0 0 !important;
+}
+
+.latency-card {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  padding: 16px 18px !important;
+  background: var(--po0-bg-1) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  box-shadow: none !important;
+  position: relative !important;
+}
+
+.latency-card__head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-bottom: 4px !important;
+}
+
+.latency-card__head .latency-card__route {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+  margin: 0 !important;
+}
+
+.latency-card__head .dot {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 999px !important;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1.5px rgba(7, 193, 96, 0.18) !important;
+}
+.latency-card__head .dot.online { background: var(--po0-accent) !important; }
+.latency-card__head .dot.warn   { background: var(--po0-warn) !important; box-shadow: 0 0 0 1.5px rgba(245, 165, 36, 0.2) !important; }
+.latency-card__head .dot.pending { background: var(--po0-text-faint) !important; box-shadow: 0 0 0 1.5px rgba(115, 115, 115, 0.18) !important; }
+.latency-card__head .dot.offline { background: var(--po0-danger) !important; box-shadow: 0 0 0 1.5px rgba(224, 68, 78, 0.2) !important; }
+
+.latency-card__value {
+  font-family: var(--po0-font-display) !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+  font-size: 30px !important;
+  line-height: 1 !important;
+  color: var(--po0-text-strong) !important;
+  letter-spacing: -0.005em !important;
+  margin: 4px 0 0 !important;
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 3px !important;
+}
+.latency-card__value .unit {
+  font-family: var(--po0-font-mono) !important;
+  font-style: normal !important;
+  font-size: 12px !important;
+  color: var(--po0-text-dim) !important;
+  font-weight: 400 !important;
+}
+
+.latency-card__target {
+  margin: 6px 0 0 !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10.5px !important;
+  color: var(--po0-text-faint) !important;
+  letter-spacing: 0.04em !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.latency-card__meta {
+  margin-top: 4px !important;
+  display: flex !important;
+  gap: 12px !important;
+}
+.latency-card__meta small {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  color: var(--po0-text-faint) !important;
+  letter-spacing: 0.04em !important;
+}
+.latency-card--green .latency-card__meta small:first-child { color: var(--po0-accent) !important; }
+.latency-card--amber .latency-card__value { color: var(--po0-warn) !important; }
+.latency-card--pending .latency-card__value { color: var(--po0-text-faint) !important; }
+
+@media (max-width: 900px) {
+  .latency-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 560px) {
+  .latency-grid { grid-template-columns: 1fr !important; }
+}
