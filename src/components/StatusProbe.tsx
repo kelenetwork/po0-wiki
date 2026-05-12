@@ -347,6 +347,24 @@ function average(values: number[]) {
     : 0;
 }
 
+function minNumber(values: number[], fallback: number) {
+  if (!values.length) return fallback;
+  let result = values[0];
+  for (let index = 1; index < values.length; index += 1) {
+    if (values[index] < result) result = values[index];
+  }
+  return result;
+}
+
+function maxNumber(values: number[], fallback: number) {
+  if (!values.length) return fallback;
+  let result = values[0];
+  for (let index = 1; index < values.length; index += 1) {
+    if (values[index] > result) result = values[index];
+  }
+  return result;
+}
+
 function chartSeriesStats(points: ChartPoint[]): ChartSeriesStats {
   const usable = points.filter(
     (point) => point.latency_ms > 0 && point.loss_pct < 100,
@@ -357,9 +375,10 @@ function chartSeriesStats(points: ChartPoint[]): ChartSeriesStats {
     p50: percentile(latencies, 0.5),
     p95: percentile(latencies, 0.95),
     avgLoss: average(points.map((point) => point.loss_pct)),
-    maxLoss: points.length
-      ? Math.max(...points.map((point) => point.loss_pct))
-      : 0,
+    maxLoss: maxNumber(
+      points.map((point) => point.loss_pct),
+      0,
+    ),
     avgJitter: average(usable.map((point) => point.jitter_ms)),
     samples: usable.length,
   };
@@ -392,9 +411,10 @@ function buildChartModel(
       .map((point) => ({ ...point, time: pointTime(point) }))
       .filter((point) => Number.isFinite(point.time)),
   );
-  const maxObservedTime = allTimedPoints.length
-    ? Math.max(...allTimedPoints.map((point) => point.time))
-    : Date.now();
+  const maxObservedTime = maxNumber(
+    allTimedPoints.map((point) => point.time),
+    Date.now(),
+  );
   const range =
     rangeOptions.find((item) => item.key === rangeKey) ?? rangeOptions[0];
   const minTime = maxObservedTime - range.durationMs;
@@ -411,8 +431,8 @@ function buildChartModel(
   const highValues = usablePoints.map(
     (point) => point.latency_ms + Math.max(point.jitter_ms, 1),
   );
-  const minLatency = lowValues.length ? Math.min(...lowValues) : 0;
-  const maxLatency = highValues.length ? Math.max(...highValues) : 100;
+  const minLatency = minNumber(lowValues, 0);
+  const maxLatency = maxNumber(highValues, 100);
   // Do not let one-off timeout spikes flatten the whole chart. SmokePing-style
   // pages usually keep the normal band readable and let the loss strip show breaks.
   const readableMax = Math.max(
@@ -496,9 +516,10 @@ function buildChartModel(
     const points = visiblePoints.filter(
       (point) => point.time >= start && point.time < end,
     );
-    const loss = points.length
-      ? Math.max(...points.map((point) => point.loss_pct))
-      : 0;
+    const loss = maxNumber(
+      points.map((point) => point.loss_pct),
+      0,
+    );
     return {
       x: chartBounds.left + index * binWidth,
       width: Math.max(1, binWidth - 1),
@@ -506,9 +527,7 @@ function buildChartModel(
     };
   });
   const allHistoryTimes = allTimedPoints.map((point) => point.time);
-  const historyStart = allHistoryTimes.length
-    ? Math.min(...allHistoryTimes)
-    : maxObservedTime;
+  const historyStart = minNumber(allHistoryTimes, maxObservedTime);
   const availableMs = Math.max(0, maxObservedTime - historyStart);
   const coveredMs = Math.min(range.durationMs, availableMs);
   const coverageLabel =
