@@ -136,27 +136,40 @@ export function usePublicProbeSnapshot() {
   });
 
   useEffect(() => {
-    const controller = new AbortController();
+    let cancelled = false;
+    // First try the head-injected eager fetch promise. It started before the
+    // JS chunk was even parsed, so by hydration time it's usually resolved
+    // or close to it. Only fall back to a fresh fetch if the head script
+    // never ran (e.g. ad-blocker injected CSP) or already failed.
+    const eager = typeof window !== 'undefined'
+      ? (window as unknown as { __po0SnapshotPromise?: Promise<unknown> }).__po0SnapshotPromise
+      : null;
 
-    fetch('/api/public/probes/snapshot', {
-      signal: controller.signal,
-      headers: { Accept: 'application/json' },
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error('snapshot unavailable');
-        return response.json();
-      })
-      .then((data: unknown) => {
-        if (!isPublicProbeSnapshot(data)) throw new Error('snapshot empty');
-        setSnapshot(data);
-        setOrigin('api');
-        writeCachedSnapshot(data);
-      })
-      .catch(() => {
-        // keep whatever snapshot we already have (cache or mock)
-      });
+    const handle = (data: unknown) => {
+      if (cancelled) return;
+      if (!isPublicProbeSnapshot(data)) return;
+      setSnapshot(data);
+      setOrigin('api');
+      writeCachedSnapshot(data);
+    };
 
-    return () => controller.abort();
+    if (eager) {
+      eager.then(handle).catch(() => {/* keep current state */});
+    } else {
+      const controller = new AbortController();
+      fetch('/api/public/probes/snapshot', {
+        signal: controller.signal,
+        headers: { Accept: 'application/json' },
+      })
+        .then((response) => (response.ok ? response.json() : Promise.reject(new Error('snapshot unavailable'))))
+        .then(handle)
+        .catch(() => {/* keep current state */});
+      return () => {
+        cancelled = true;
+        controller.abort();
+      };
+    }
+    return () => { cancelled = true; };
   }, []);
 
   return useMemo(() => ({ snapshot, origin }), [snapshot, origin]);
