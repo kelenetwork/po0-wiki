@@ -65,7 +65,7 @@
 }
 
 .status-kicker {
-  color: var(--kele-accent-strong, #006f68);
+  color: var(--po0-accent);
   font-family: var(--kele-mono, monospace);
   font-size: 0.74rem;
   font-weight: 900;
@@ -75,7 +75,7 @@
 
 .status-head h3 {
   margin-top: 6px;
-  color: var(--kele-ink, #14201f);
+  color: var(--po0-text);
   font-family: var(--kele-font, serif);
   font-size: clamp(1.25rem, 2vw, 1.55rem);
   letter-spacing: -0.05em;
@@ -96,7 +96,7 @@
 .status-pill {
   border: 1px solid rgba(0, 156, 141, 0.26);
   padding: 6px 10px;
-  color: var(--kele-accent-strong, #006f68);
+  color: var(--po0-accent);
   background: rgba(0, 156, 141, 0.11);
 }
 
@@ -112,7 +112,7 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  border: 1px solid var(--kele-line, rgba(35, 35, 35, 0.14));
+  border: 1px solid var(--po0-line);
   border-radius: 20px;
   padding: 13px;
   background: rgba(17, 17, 17, 0.62);
@@ -134,7 +134,7 @@
 
 .probe-row strong,
 .source-node-card strong {
-  color: var(--kele-ink, #14201f);
+  color: var(--po0-text);
 }
 
 .probe-row small,
@@ -145,7 +145,7 @@
 .status-legend,
 .latency-card__route,
 .latency-card__meta small {
-  color: var(--kele-muted, #66716f);
+  color: var(--po0-text-dim);
 }
 
 .probe-row small {
@@ -153,7 +153,7 @@
 }
 
 .probe-row em {
-  color: var(--kele-accent-strong, #006f68);
+  color: var(--po0-accent);
   font-family: var(--kele-mono, monospace);
   font-style: normal;
   font-weight: 900;
@@ -195,7 +195,7 @@
 
 .status-dashboard__topbar h2 {
   margin-top: 8px;
-  color: var(--kele-ink, #14201f);
+  color: var(--po0-text);
   font-family: var(--kele-font, serif);
   font-size: clamp(2rem, 4.4vw, 3.7rem);
   letter-spacing: -0.08em;
@@ -206,7 +206,7 @@
   display: flex;
   gap: 8px;
   padding: 6px;
-  border: 1px solid var(--kele-line, rgba(35, 35, 35, 0.14));
+  border: 1px solid var(--po0-line);
   border-radius: 999px;
   background: rgba(17, 17, 17, 0.52);
 }
@@ -216,7 +216,7 @@
 .status-tabs button {
   border: 0;
   padding: 7px 12px;
-  color: var(--kele-muted, #66716f);
+  color: var(--po0-text-dim);
   background: transparent;
   cursor: default;
 }
@@ -256,12 +256,12 @@
 }
 
 .status-panel-title span {
-  color: var(--kele-muted, #66716f);
+  color: var(--po0-text-dim);
   font-weight: 900;
 }
 
 .status-panel-title strong {
-  color: var(--kele-accent-strong, #006f68);
+  color: var(--po0-accent);
 }
 
 .source-node-list,
@@ -273,7 +273,7 @@
 .source-node-card {
   display: grid;
   gap: 12px;
-  border: 1px solid var(--kele-line, rgba(35, 35, 35, 0.14));
+  border: 1px solid var(--po0-line);
   border-radius: 22px;
   padding: 14px;
   background: rgba(17, 17, 17, 0.52);
@@ -287,7 +287,7 @@
 }
 
 .source-node-card code {
-  color: var(--kele-ink, #14201f);
+  color: var(--po0-text);
   font-family: var(--kele-mono, monospace);
   font-size: 0.78rem;
 }
@@ -323,9 +323,9 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  border: 1px solid var(--kele-line, rgba(35, 35, 35, 0.14));
+  border: 1px solid var(--po0-line);
   padding: 8px 12px;
-  color: var(--kele-muted, #66716f);
+  color: var(--po0-text-dim);
   background: rgba(17, 17, 17, 0.68);
   cursor: pointer;
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
@@ -343,7 +343,7 @@
 
 .source-filter button.active,
 .status-legend button.active {
-  color: var(--kele-accent-strong, #006f68);
+  color: var(--po0-accent);
   border-color: rgba(0, 156, 141, 0.5);
   background: rgba(0, 156, 141, 0.12);
 }
@@ -412,7 +412,7 @@
   align-items: baseline;
   gap: 0.3rem;
   margin: 0;
-  color: var(--kele-ink, #14201f);
+  color: var(--po0-text);
   font-family: var(--kele-mono, monospace);
   font-size: clamp(1.75rem, 3vw, 2.35rem);
   font-weight: 900;
@@ -429,7 +429,7 @@
 
 .latency-card__target {
   margin: 0;
-  color: var(--kele-ink, #14201f);
+  color: var(--po0-text);
   font-size: 0.9rem;
   font-weight: 900;
 }
@@ -453,14 +453,15 @@
 }
 
 .latency-card--pending .latency-card__value {
-  color: #7b8583;
+  color: var(--po0-text-faint);
   font-size: 1.45rem;
 }
 
-.latency-card--green { color: #007f74; }
-.latency-card--blue { color: #1d1d1d; }
-.latency-card--amber { color: #c17400; }
-.latency-card--violet { color: #232323; }
+/* misaka: card surfaces stay neutral; only the dot + accent meta color tones. */
+.latency-card--green   { color: var(--po0-text); }
+.latency-card--blue    { color: var(--po0-text); }
+.latency-card--amber   { color: var(--po0-text); }
+.latency-card--violet  { color: var(--po0-text); }
 
 .status-chart-head {
   align-items: flex-start;
@@ -470,7 +471,7 @@
 
 .status-chart-head h3 {
   margin-top: 6px;
-  color: var(--kele-ink, #14201f);
+  color: var(--po0-text);
   font-family: var(--kele-font, serif);
   font-size: clamp(1.5rem, 2.8vw, 2.2rem);
   letter-spacing: -0.06em;
@@ -507,7 +508,7 @@
 }
 
 .chart-grid {
-  stroke: var(--kele-line, rgba(35, 35, 35, 0.14));
+  stroke: var(--po0-line);
   stroke-width: 1;
 }
 
@@ -518,7 +519,7 @@
 
 .chart-axis,
 .chart-empty {
-  fill: var(--kele-muted, #66716f);
+  fill: var(--po0-text-dim);
   font-family: var(--kele-mono, monospace);
   font-size: 12px;
   font-weight: 800;
@@ -597,7 +598,7 @@
 }
 
 .status-legend button > strong {
-  color: var(--kele-ink, #14201f);
+  color: var(--po0-text);
   font-family: var(--kele-mono, monospace);
   font-size: 0.82rem;
   letter-spacing: -0.03em;
@@ -605,7 +606,7 @@
 
 .status-legend button > small {
   grid-column: 2 / 4;
-  color: var(--kele-muted, #66716f);
+  color: var(--po0-text-dim);
   font-family: var(--kele-mono, monospace);
   font-size: 0.68rem;
   font-weight: 800;
@@ -1255,4 +1256,211 @@
 }
 @media (max-width: 560px) {
   .latency-grid { grid-template-columns: 1fr !important; }
+}
+
+
+/* ============================================================
+   misaka phase 6 — chart-head two-column layout, latency-card
+   numbers strictly white serif italic, legend slim chip row
+   ============================================================ */
+
+.status-chart-head {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  margin-bottom: 18px !important;
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid var(--po0-line) !important;
+}
+
+.status-chart-head > div:first-child {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+}
+
+.status-chart-head h3 {
+  font-family: var(--po0-font-display) !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+  font-size: 22px !important;
+  color: var(--po0-text-strong) !important;
+  margin: 2px 0 0 !important;
+  letter-spacing: -0.005em !important;
+}
+
+.status-chart-head .status-kicker {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.32em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-accent) !important;
+}
+
+.status-chart-head small {
+  display: block !important;
+  margin-top: 4px !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 11px !important;
+  color: var(--po0-text-faint) !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Tabs inside chart head (1天/7天/30天) — small misaka chip row */
+.status-chart-head .status-tabs {
+  display: flex !important;
+  gap: 4px !important;
+  background: transparent !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+.status-chart-head .status-tabs button {
+  appearance: none;
+  background: transparent !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  padding: 6px 12px !important;
+  color: var(--po0-text-dim) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.06em !important;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms, background 120ms;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+.status-chart-head .status-tabs button:hover {
+  border-color: var(--po0-line-strong) !important;
+  color: var(--po0-text) !important;
+}
+.status-chart-head .status-tabs button.active {
+  background: var(--po0-bg-2) !important;
+  border-color: rgba(7, 193, 96, 0.4) !important;
+  color: var(--po0-accent) !important;
+}
+
+/* Status dashboard topbar — only the "实时状态已更新" badge now */
+.status-dashboard__topbar {
+  display: flex !important;
+  align-items: center !important;
+  margin-bottom: 18px !important;
+  padding-bottom: 0 !important;
+  border: 0 !important;
+}
+.status-source-meta {
+  font-family: var(--po0-font-mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: var(--po0-text-faint) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.status-source-meta::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--po0-accent);
+  box-shadow: 0 0 0 1.5px rgba(7, 193, 96, 0.18);
+}
+
+/* Legend — keep position inside chart-head spawn? no, mockup has legend
+   inline under the chart head row, single line chips. Override the
+   previous status-legend rules. */
+.status-legend {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  margin-top: 12px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  /* No longer auto-fit grid; pure flex row */
+  grid-template-columns: none !important;
+}
+
+.status-legend button {
+  appearance: none;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 5px 10px !important;
+  background: var(--po0-bg-2) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius-sm) !important;
+  color: var(--po0-text-dim) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  cursor: pointer;
+  white-space: nowrap;
+  height: auto !important;
+  width: auto !important;
+}
+.status-legend button:hover {
+  border-color: var(--po0-line-strong) !important;
+  color: var(--po0-text) !important;
+}
+.status-legend button.active {
+  border-color: rgba(7, 193, 96, 0.4) !important;
+  color: var(--po0-text-strong) !important;
+}
+
+/* Latency card values: hard-set white serif italic, no inheritance overrides */
+.latency-card .latency-card__value,
+.latency-card--green .latency-card__value,
+.latency-card--blue .latency-card__value,
+.latency-card--amber .latency-card__value,
+.latency-card--violet .latency-card__value {
+  color: var(--po0-text-strong) !important;
+}
+.latency-card--amber .latency-card__value {
+  color: var(--po0-warn) !important;
+}
+.latency-card--pending .latency-card__value {
+  color: var(--po0-text-faint) !important;
+}
+
+/* Source-filter chip row — keep it but slim it down */
+.source-filter {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 6px !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin-bottom: 14px !important;
+  border-radius: 0 !important;
+}
+.source-filter button {
+  appearance: none;
+  background: var(--po0-bg-1) !important;
+  border: 1px solid var(--po0-line) !important;
+  border-radius: var(--po0-radius) !important;
+  padding: 6px 12px !important;
+  color: var(--po0-text-dim) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.04em !important;
+  cursor: pointer;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  transition: border-color 120ms, color 120ms;
+}
+.source-filter button:hover {
+  border-color: var(--po0-line-strong) !important;
+  color: var(--po0-text) !important;
+}
+.source-filter button.active {
+  border-color: rgba(7, 193, 96, 0.45) !important;
+  background: var(--po0-bg-2) !important;
+  color: var(--po0-accent) !important;
 }

@@ -829,23 +829,9 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
       </div>
 
       <div className="status-dashboard__topbar">
-        <div>
-          <span className="status-source-meta">
-            {origin === "api" ? "实时状态已更新" : "正在同步状态"}
-          </span>
-        </div>
-        <div className="status-tabs" aria-label="时间范围">
-          {rangeOptions.map((range) => (
-            <button
-              type="button"
-              className={selectedRange === range.key ? "active" : ""}
-              key={range.key}
-              onClick={() => setSelectedRange(range.key)}
-            >
-              {range.label}
-            </button>
-          ))}
-        </div>
+        <span className="status-source-meta">
+          {origin === "api" ? "实时状态已更新" : "正在同步状态"}
+        </span>
       </div>
 
       <div className="status-layout">
@@ -916,6 +902,18 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
                     : "默认展示在线线路"}{" "}
                   · {chartModel.coverageLabel} · 绿色为正常，红色为丢包
                 </small>
+              </div>
+              <div className="status-tabs" aria-label="时间范围">
+                {rangeOptions.map((range) => (
+                  <button
+                    type="button"
+                    className={selectedRange === range.key ? "active" : ""}
+                    key={range.key}
+                    onClick={() => setSelectedRange(range.key)}
+                  >
+                    {range.label}
+                  </button>
+                ))}
               </div>
               <div className="status-legend" aria-label="线路图例">
                 <button
