@@ -11,12 +11,10 @@
 
 .lg-sidebar,
 .lg-workbench {
-  border: 1px solid var(--kele-line, rgba(20, 32, 31, 0.14));
-  border-radius: var(--kele-radius-lg, 34px);
-  color: var(--kele-ink, #14201f);
-  background: var(--kele-card, rgba(255, 252, 243, 0.9));
-  box-shadow: var(--kele-shadow, 0 30px 80px rgba(37, 45, 41, 0.13));
-  backdrop-filter: blur(20px);
+  border: 1px solid var(--po0-line);
+  border-radius: var(--po0-radius-lg);
+  color: var(--po0-text);
+  background: var(--po0-bg-1);
 }
 
 .lg-sidebar {
@@ -33,10 +31,10 @@
   content: "";
   position: absolute;
   inset: -160px -120px auto auto;
-  width: 340px;
-  height: 340px;
+  width: 280px;
+  height: 280px;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(0, 156, 141, 0.18), transparent 68%);
+  background: radial-gradient(circle, rgba(7, 193, 96, 0.06), transparent 68%);
   pointer-events: none;
 }
 

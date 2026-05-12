@@ -85,13 +85,14 @@ html:has(.po0-shell) #root {
 .po0-shell__brand {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   color: var(--po0-text-strong);
   text-decoration: none;
   font-family: var(--po0-font-display);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  font-size: clamp(20px, 1.6vw, 26px);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  font-size: clamp(18px, 1.4vw, 22px);
 }
 
 .po0-shell__brand i {
@@ -101,8 +102,8 @@ html:has(.po0-shell) #root {
 }
 
 .po0-shell__brand svg {
-  filter: drop-shadow(0 0 18px rgba(7, 193, 96, 0.45));
-  animation: po0Spin 22s linear infinite;
+  filter: drop-shadow(0 0 12px rgba(7, 193, 96, 0.45));
+  color: var(--po0-accent);
 }
 
 .po0-shell__nav nav {
@@ -113,13 +114,14 @@ html:has(.po0-shell) #root {
 
 .po0-shell__nav nav a {
   position: relative;
-  color: var(--po0-text);
-  font-family: var(--po0-font-display);
-  font-size: clamp(15px, 1.1vw, 17px);
+  color: var(--po0-text-dim);
+  font-family: var(--po0-font-mono);
+  font-size: 11.5px;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   text-decoration: none;
-  transition: color 0.18s ease;
+  transition: color 120ms ease;
 }
 
 .po0-shell__nav nav a::after {
@@ -193,40 +195,52 @@ html:has(.po0-shell) #root {
 }
 
 .po0-shell__eyebrow {
-  margin: 0 0 14px;
-  color: var(--po0-accent-strong);
+  margin: 0 0 12px;
+  color: var(--po0-accent);
   font-family: var(--po0-font-mono);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 10.5px;
+  font-weight: 500;
   letter-spacing: 0.32em;
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.po0-shell__eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--po0-accent);
+  box-shadow: 0 0 0 0 rgba(7, 193, 96, 0.6);
+  animation: po0-pulse-dot 2s ease-out infinite;
 }
 
 .po0-shell__title {
   margin: 0;
   font-family: var(--po0-font-display);
-  font-size: clamp(2.4rem, 4.6vw, 4rem);
+  font-style: italic;
+  font-size: clamp(2rem, 3.8vw, 3.4rem);
   font-weight: 400;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.01em;
   color: var(--po0-text-strong);
-  line-height: 1.12;
+  line-height: 1.1;
 }
 
 .po0-shell__title em {
   font-style: italic;
-  background: linear-gradient(120deg, var(--po0-accent-strong) 0%, var(--po0-violet) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--po0-accent);
 }
 
 .po0-shell__lead {
   margin: 18px 0 0;
-  max-width: 720px;
-  color: var(--po0-muted);
-  font-family: var(--po0-font-display);
-  font-size: clamp(1rem, 1.2vw, 1.18rem);
-  line-height: 1.85;
+  max-width: 640px;
+  color: var(--po0-text-dim);
+  font-family: var(--po0-font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: 0.005em;
 }
 
 /* ------------------------------------------------------------ */
