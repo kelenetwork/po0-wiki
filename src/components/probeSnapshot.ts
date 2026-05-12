@@ -92,9 +92,48 @@ function isPublicProbeSnapshot(value: unknown): value is PublicProbeSnapshot {
     && candidate.checks.length > 0;
 }
 
+const SNAPSHOT_CACHE_KEY = 'po0:snapshot:v1';
+const SNAPSHOT_CACHE_TTL_MS = 5 * 60 * 1000; // 5 min — purely for UX, server data is fresh on next fetch
+
+type CachedSnapshot = { snapshot: PublicProbeSnapshot; cachedAt: number };
+
+function readCachedSnapshot(): CachedSnapshot | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(SNAPSHOT_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as CachedSnapshot;
+    if (!parsed || !isPublicProbeSnapshot(parsed.snapshot) || typeof parsed.cachedAt !== 'number') return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedSnapshot(snapshot: PublicProbeSnapshot) {
+  if (typeof window === 'undefined') return;
+  try {
+    const payload: CachedSnapshot = { snapshot, cachedAt: Date.now() };
+    window.localStorage.setItem(SNAPSHOT_CACHE_KEY, JSON.stringify(payload));
+  } catch {
+    // localStorage may be full / disabled — ignore
+  }
+}
+
 export function usePublicProbeSnapshot() {
-  const [snapshot, setSnapshot] = useState<PublicProbeSnapshot>(mockProbeSnapshot);
-  const [origin, setOrigin] = useState<'api' | 'mock'>('mock');
+  // Prime state synchronously from localStorage so the UI shows real data
+  // on the very first render of subsequent visits (no "正在同步状态" flash).
+  const [snapshot, setSnapshot] = useState<PublicProbeSnapshot>(() => {
+    const cached = readCachedSnapshot();
+    if (cached && Date.now() - cached.cachedAt < SNAPSHOT_CACHE_TTL_MS) {
+      return cached.snapshot;
+    }
+    return cached?.snapshot ?? mockProbeSnapshot;
+  });
+  const [origin, setOrigin] = useState<'api' | 'mock'>(() => {
+    const cached = readCachedSnapshot();
+    return cached && isPublicProbeSnapshot(cached.snapshot) ? 'api' : 'mock';
+  });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -111,12 +150,10 @@ export function usePublicProbeSnapshot() {
         if (!isPublicProbeSnapshot(data)) throw new Error('snapshot empty');
         setSnapshot(data);
         setOrigin('api');
+        writeCachedSnapshot(data);
       })
       .catch(() => {
-        if (!controller.signal.aborted) {
-          setSnapshot(mockProbeSnapshot);
-          setOrigin('mock');
-        }
+        // keep whatever snapshot we already have (cache or mock)
       });
 
     return () => controller.abort();

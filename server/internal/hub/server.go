@@ -1,6 +1,7 @@
 package hub
 
 import (
+	"strconv"
 	"context"
 	"encoding/json"
 	"errors"
@@ -99,13 +100,29 @@ func (s *Server) healthz(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
 }
 
+// publicSnapshot returns a (filtered) snapshot for the public dashboard.
+// Defaults: ?since = 24h ago, ?limit = 3000 per check (≈25h at 30s
+// cadence). This keeps the JSON payload around 1–2MB instead of ~40MB
+// when there are weeks of history accumulated.
 func (s *Server) publicSnapshot(w http.ResponseWriter, r *http.Request) {
-	snapshot, err := s.store.Snapshot(r.Context())
+	sinceISO := r.URL.Query().Get("since")
+	limit := 3000
+	if v := r.URL.Query().Get("limit"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n >= 0 {
+			limit = n
+		}
+	}
+	if sinceISO == "" {
+		sinceISO = time.Now().UTC().Add(-24 * time.Hour).Format(time.RFC3339)
+	}
+	snapshot, err := s.store.SnapshotWindow(r.Context(), sinceISO, limit)
 	if err != nil {
-		log.Printf("hub: publicSnapshot: Snapshot failed: %v", err)
+		log.Printf("hub: publicSnapshot: SnapshotWindow failed: %v", err)
 		writeError(w, http.StatusInternalServerError, "snapshot unavailable")
 		return
 	}
+	// gzip-encoded if the client supports it (handled by ResponseWriter chain)
+	w.Header().Set("Cache-Control", "public, max-age=15")
 	writeJSON(w, http.StatusOK, snapshot)
 }
 

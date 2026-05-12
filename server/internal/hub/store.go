@@ -594,8 +594,24 @@ func (s *Store) ListAdminChecks(ctx context.Context) ([]AdminCheck, error) {
 	return checks, rows.Err()
 }
 
+// ListSeriesSummary returns recent series points for every check.
+// `sinceISO` is an inclusive RFC3339 lower bound (empty string => no lower
+// bound). `perCheckLimit` caps the number of points returned per check
+// (<=0 => no cap). Default callers should pass the last 24h to keep the
+// payload small (status page chart never plots more than 24h anyway).
 func (s *Store) ListSeriesSummary(ctx context.Context) ([]SeriesSummary, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT p.check_id, p.latency_ms, p.loss_pct, p.jitter_ms, p.updated_at FROM series_points p JOIN checks c ON c.id = p.check_id JOIN sources s ON s.id = c.source_id JOIN targets t ON t.id = c.target_id ORDER BY s.sort_order, t.sort_order, c.id, p.updated_at`)
+	return s.ListSeriesSummaryFiltered(ctx, "", 0)
+}
+
+func (s *Store) ListSeriesSummaryFiltered(ctx context.Context, sinceISO string, perCheckLimit int) ([]SeriesSummary, error) {
+	query := `SELECT p.check_id, p.latency_ms, p.loss_pct, p.jitter_ms, p.updated_at FROM series_points p JOIN checks c ON c.id = p.check_id JOIN sources s ON s.id = c.source_id JOIN targets t ON t.id = c.target_id`
+	args := []any{}
+	if sinceISO != "" {
+		query += ` WHERE p.updated_at >= ?`
+		args = append(args, sinceISO)
+	}
+	query += ` ORDER BY s.sort_order, t.sort_order, c.id, p.updated_at`
+	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -618,9 +634,36 @@ func (s *Store) ListSeriesSummary(ctx context.Context) ([]SeriesSummary, error) 
 	}
 	series := make([]SeriesSummary, 0, len(order))
 	for _, checkID := range order {
-		series = append(series, SeriesSummary{CheckID: checkID, Points: byCheck[checkID]})
+		points := byCheck[checkID]
+		if perCheckLimit > 0 && len(points) > perCheckLimit {
+			points = points[len(points)-perCheckLimit:]
+		}
+		series = append(series, SeriesSummary{CheckID: checkID, Points: points})
 	}
 	return series, nil
+}
+
+// SnapshotWindow returns a snapshot whose series points are filtered to
+// `since` and capped at `perCheckLimit` per check. Used to avoid shipping
+// ~35k points per check (~40MB) on each page load.
+func (s *Store) SnapshotWindow(ctx context.Context, sinceISO string, perCheckLimit int) (Snapshot, error) {
+	sources, err := s.ListSources(ctx)
+	if err != nil {
+		return Snapshot{}, err
+	}
+	targets, err := s.ListTargets(ctx)
+	if err != nil {
+		return Snapshot{}, err
+	}
+	checks, err := s.ListChecks(ctx)
+	if err != nil {
+		return Snapshot{}, err
+	}
+	series, err := s.ListSeriesSummaryFiltered(ctx, sinceISO, perCheckLimit)
+	if err != nil {
+		return Snapshot{}, err
+	}
+	return Snapshot{Sources: sources, Targets: targets, Checks: checks, Series: series}, nil
 }
 
 func (s *Store) CreateSource(ctx context.Context, req CreateSourceRequest) (Source, error) {
