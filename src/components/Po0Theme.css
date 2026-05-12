@@ -947,17 +947,17 @@ html body:has(.po0-shell) main.po0-shell__main {
 /* ------------------------------------------------------------ */
 /* v12 light functional pages: /status and /looking-glass only    */
 /* ------------------------------------------------------------ */
-html:has(.kele-status-page),
-html:has(.kele-status-page) body,
-html:has(.kele-status-page) #root,
-html:has(.kele-lg-page),
-html:has(.kele-lg-page) body,
-html:has(.kele-lg-page) #root {
+html:has(.po0-shell--status),
+html:has(.po0-shell--status) body,
+html:has(.po0-shell--status) #root,
+html:has(.po0-shell--looking-glass),
+html:has(.po0-shell--looking-glass) body,
+html:has(.po0-shell--looking-glass) #root {
   background: #f4f8ff !important;
 }
 
-.po0-shell:has(.kele-status-page),
-.po0-shell:has(.kele-lg-page) {
+.po0-shell--status,
+.po0-shell--looking-glass {
   --po0-page-bg: #f4f8ff;
   --po0-page-bg-2: #edf5ff;
   --po0-page-ink: #132033;
@@ -976,8 +976,8 @@ html:has(.kele-lg-page) #root {
     linear-gradient(180deg, #fbfdff 0%, var(--po0-page-bg) 45%, #eef6ff 100%) !important;
 }
 
-.po0-shell:has(.kele-status-page)::before,
-.po0-shell:has(.kele-lg-page)::before {
+.po0-shell--status::before,
+.po0-shell--looking-glass::before {
   display: block !important;
   background:
     linear-gradient(rgba(40, 100, 170, 0.055) 1px, transparent 1px),
@@ -988,39 +988,39 @@ html:has(.kele-lg-page) #root {
   -webkit-mask-image: linear-gradient(180deg, black 0%, black 72%, transparent 100%) !important;
 }
 
-.po0-shell:has(.kele-status-page) .po0-shell__brand,
-.po0-shell:has(.kele-lg-page) .po0-shell__brand,
-.po0-shell:has(.kele-status-page) .po0-shell__nav nav a,
-.po0-shell:has(.kele-lg-page) .po0-shell__nav nav a {
+.po0-shell--status .po0-shell__brand,
+.po0-shell--looking-glass .po0-shell__brand,
+.po0-shell--status .po0-shell__nav nav a,
+.po0-shell--looking-glass .po0-shell__nav nav a {
   color: var(--po0-page-strong) !important;
 }
 
-.po0-shell:has(.kele-status-page) .po0-shell__brand i,
-.po0-shell:has(.kele-lg-page) .po0-shell__brand i {
+.po0-shell--status .po0-shell__brand i,
+.po0-shell--looking-glass .po0-shell__brand i {
   background: rgba(31, 71, 120, 0.28) !important;
 }
 
-.po0-shell:has(.kele-status-page) .po0-shell__cta,
-.po0-shell:has(.kele-lg-page) .po0-shell__cta {
+.po0-shell--status .po0-shell__cta,
+.po0-shell--looking-glass .po0-shell__cta {
   background: rgba(255, 255, 255, 0.76) !important;
   border-color: var(--po0-page-line-strong) !important;
   opacity: 0.95 !important;
 }
 
-.po0-shell:has(.kele-status-page) .po0-shell__title,
-.po0-shell:has(.kele-lg-page) .po0-shell__title,
+.po0-shell--status .po0-shell__title,
+.po0-shell--looking-glass .po0-shell__title,
 .kele-status-hero h1 {
   color: var(--po0-page-strong) !important;
 }
 
-.po0-shell:has(.kele-status-page) .po0-shell__lead,
-.po0-shell:has(.kele-lg-page) .po0-shell__lead,
+.po0-shell--status .po0-shell__lead,
+.po0-shell--looking-glass .po0-shell__lead,
 .kele-status-hero p:not(.kele-section-kicker) {
   color: var(--po0-page-muted) !important;
 }
 
-.po0-shell:has(.kele-status-page) .po0-shell__eyebrow,
-.po0-shell:has(.kele-lg-page) .po0-shell__eyebrow,
+.po0-shell--status .po0-shell__eyebrow,
+.po0-shell--looking-glass .po0-shell__eyebrow,
 .kele-status-hero p.kele-section-kicker,
 .kele-section-kicker,
 .status-kicker {
@@ -1324,213 +1324,213 @@ html:has(.kele-lg-page) #root {
 /* ------------------------------------------------------------ */
 /* v13 light readability: keep functional cards white and legible */
 /* ------------------------------------------------------------ */
-.po0-shell:has(.kele-status-page) .status-probe,
-.po0-shell:has(.kele-status-page) .status-probe *,
-.po0-shell:has(.kele-lg-page) .looking-glass-console,
-.po0-shell:has(.kele-lg-page) .looking-glass-console * {
+.po0-shell--status .status-probe,
+.po0-shell--status .status-probe *,
+.po0-shell--looking-glass .looking-glass-console,
+.po0-shell--looking-glass .looking-glass-console * {
   text-shadow: none !important;
 }
 
-.po0-shell:has(.kele-status-page) .status-source-panel,
-.po0-shell:has(.kele-status-page) .status-chart-card,
-.po0-shell:has(.kele-status-page) .latency-card,
-.po0-shell:has(.kele-status-page) .source-filter,
-.po0-shell:has(.kele-status-page) .source-node-card,
-.po0-shell:has(.kele-status-page) .probe-row,
-.po0-shell:has(.kele-lg-page) .lg-sidebar,
-.po0-shell:has(.kele-lg-page) .lg-workbench,
-.po0-shell:has(.kele-lg-page) .lg-region,
-.po0-shell:has(.kele-lg-page) .lg-node,
-.po0-shell:has(.kele-lg-page) .lg-summary-grid article {
+.po0-shell--status .status-source-panel,
+.po0-shell--status .status-chart-card,
+.po0-shell--status .latency-card,
+.po0-shell--status .source-filter,
+.po0-shell--status .source-node-card,
+.po0-shell--status .probe-row,
+.po0-shell--looking-glass .lg-sidebar,
+.po0-shell--looking-glass .lg-workbench,
+.po0-shell--looking-glass .lg-region,
+.po0-shell--looking-glass .lg-node,
+.po0-shell--looking-glass .lg-summary-grid article {
   color: #132033 !important;
 }
 
-.po0-shell:has(.kele-status-page) .status-panel-title,
-.po0-shell:has(.kele-status-page) .status-panel-title span,
-.po0-shell:has(.kele-status-page) .source-node-card strong,
-.po0-shell:has(.kele-status-page) .source-node-card__main strong,
-.po0-shell:has(.kele-status-page) .latency-card__target,
-.po0-shell:has(.kele-status-page) .latency-card__value,
-.po0-shell:has(.kele-status-page) .probe-row strong,
-.po0-shell:has(.kele-status-page) .status-chart-head h3,
-.po0-shell:has(.kele-lg-page) .lg-region__title strong,
-.po0-shell:has(.kele-lg-page) .lg-node strong,
-.po0-shell:has(.kele-lg-page) .lg-node:not(:disabled) strong,
-.po0-shell:has(.kele-lg-page) .lg-toolbar label,
-.po0-shell:has(.kele-lg-page) .lg-source-readonly strong,
-.po0-shell:has(.kele-lg-page) .lg-summary-grid strong {
+.po0-shell--status .status-panel-title,
+.po0-shell--status .status-panel-title span,
+.po0-shell--status .source-node-card strong,
+.po0-shell--status .source-node-card__main strong,
+.po0-shell--status .latency-card__target,
+.po0-shell--status .latency-card__value,
+.po0-shell--status .probe-row strong,
+.po0-shell--status .status-chart-head h3,
+.po0-shell--looking-glass .lg-region__title strong,
+.po0-shell--looking-glass .lg-node strong,
+.po0-shell--looking-glass .lg-node:not(:disabled) strong,
+.po0-shell--looking-glass .lg-toolbar label,
+.po0-shell--looking-glass .lg-source-readonly strong,
+.po0-shell--looking-glass .lg-summary-grid strong {
   color: #07172b !important;
 }
 
-.po0-shell:has(.kele-status-page) .status-source-meta,
-.po0-shell:has(.kele-status-page) .status-dashboard__topbar span,
-.po0-shell:has(.kele-status-page) .status-panel-title strong,
-.po0-shell:has(.kele-status-page) .source-node-card small,
-.po0-shell:has(.kele-status-page) .source-node-card__meta,
-.po0-shell:has(.kele-status-page) .source-node-card__meta span,
-.po0-shell:has(.kele-status-page) .latency-card__route,
-.po0-shell:has(.kele-status-page) .latency-card__meta small,
-.po0-shell:has(.kele-status-page) .probe-row small,
-.po0-shell:has(.kele-status-page) .status-kicker,
-.po0-shell:has(.kele-status-page) .status-chart-head small,
-.po0-shell:has(.kele-status-page) .status-legend,
-.po0-shell:has(.kele-lg-page) .lg-region__title small,
-.po0-shell:has(.kele-lg-page) .lg-node small,
-.po0-shell:has(.kele-lg-page) .lg-summary-grid span,
-.po0-shell:has(.kele-lg-page) .lg-summary-grid small,
-.po0-shell:has(.kele-lg-page) .lg-toolbar label span,
-.po0-shell:has(.kele-lg-page) .lg-empty {
+.po0-shell--status .status-source-meta,
+.po0-shell--status .status-dashboard__topbar span,
+.po0-shell--status .status-panel-title strong,
+.po0-shell--status .source-node-card small,
+.po0-shell--status .source-node-card__meta,
+.po0-shell--status .source-node-card__meta span,
+.po0-shell--status .latency-card__route,
+.po0-shell--status .latency-card__meta small,
+.po0-shell--status .probe-row small,
+.po0-shell--status .status-kicker,
+.po0-shell--status .status-chart-head small,
+.po0-shell--status .status-legend,
+.po0-shell--looking-glass .lg-region__title small,
+.po0-shell--looking-glass .lg-node small,
+.po0-shell--looking-glass .lg-summary-grid span,
+.po0-shell--looking-glass .lg-summary-grid small,
+.po0-shell--looking-glass .lg-toolbar label span,
+.po0-shell--looking-glass .lg-empty {
   color: #33465f !important;
 }
 
-.po0-shell:has(.kele-status-page) .source-filter button,
-.po0-shell:has(.kele-status-page) .status-legend button,
-.po0-shell:has(.kele-status-page) .status-tabs button {
+.po0-shell--status .source-filter button,
+.po0-shell--status .status-legend button,
+.po0-shell--status .status-tabs button {
   color: #132033 !important;
   background: rgba(255, 255, 255, 0.88) !important;
   border-color: rgba(37, 99, 168, 0.24) !important;
 }
 
-.po0-shell:has(.kele-status-page) .source-filter button.active,
-.po0-shell:has(.kele-status-page) .status-legend button.active,
-.po0-shell:has(.kele-status-page) .status-tabs button.active {
+.po0-shell--status .source-filter button.active,
+.po0-shell--status .status-legend button.active,
+.po0-shell--status .status-tabs button.active {
   color: #07172b !important;
   background: linear-gradient(135deg, rgba(205, 242, 255, 0.98), rgba(231, 228, 255, 0.92)) !important;
 }
 
-.po0-shell:has(.kele-status-page) .node-status,
-.po0-shell:has(.kele-status-page) .status-pill,
-.po0-shell:has(.kele-status-page) .status-source-meta {
+.po0-shell--status .node-status,
+.po0-shell--status .status-pill,
+.po0-shell--status .status-source-meta {
   color: #132033 !important;
 }
 
-.po0-shell:has(.kele-status-page) .node-status--online {
+.po0-shell--status .node-status--online {
   color: #006b63 !important;
   background: rgba(0, 169, 154, 0.16) !important;
 }
 
-.po0-shell:has(.kele-status-page) .node-status--warn {
+.po0-shell--status .node-status--warn {
   color: #8d5400 !important;
   background: rgba(217, 145, 26, 0.17) !important;
 }
 
-.po0-shell:has(.kele-status-page) .node-status--pending {
+.po0-shell--status .node-status--pending {
   color: #33465f !important;
   background: rgba(139, 152, 170, 0.18) !important;
 }
 
-.po0-shell:has(.kele-status-page) .node-status--offline {
+.po0-shell--status .node-status--offline {
   color: #8f321f !important;
   background: rgba(181, 67, 45, 0.16) !important;
 }
 
-.po0-shell:has(.kele-status-page) .status-legend button:not(.active),
-.po0-shell:has(.kele-lg-page) .lg-node:disabled,
-.po0-shell:has(.kele-lg-page) .lg-node.is-offline {
+.po0-shell--status .status-legend button:not(.active),
+.po0-shell--looking-glass .lg-node:disabled,
+.po0-shell--looking-glass .lg-node.is-offline {
   opacity: 1 !important;
 }
 
-.po0-shell:has(.kele-lg-page) .lg-node:disabled strong,
-.po0-shell:has(.kele-lg-page) .lg-node.is-offline strong {
+.po0-shell--looking-glass .lg-node:disabled strong,
+.po0-shell--looking-glass .lg-node.is-offline strong {
   color: #33465f !important;
 }
 
-.po0-shell:has(.kele-lg-page) .lg-node:disabled small,
-.po0-shell:has(.kele-lg-page) .lg-node.is-offline small {
+.po0-shell--looking-glass .lg-node:disabled small,
+.po0-shell--looking-glass .lg-node.is-offline small {
   color: #3f526a !important;
 }
 
-.po0-shell:has(.kele-lg-page) .lg-toolbar select,
-.po0-shell:has(.kele-lg-page) .lg-toolbar input,
-.po0-shell:has(.kele-lg-page) .lg-source-readonly strong {
+.po0-shell--looking-glass .lg-toolbar select,
+.po0-shell--looking-glass .lg-toolbar input,
+.po0-shell--looking-glass .lg-source-readonly strong {
   color: #07172b !important;
   background: #ffffff !important;
   caret-color: #07172b !important;
 }
 
-.po0-shell:has(.kele-lg-page) .lg-toolbar select::placeholder,
-.po0-shell:has(.kele-lg-page) .lg-toolbar input::placeholder {
+.po0-shell--looking-glass .lg-toolbar select::placeholder,
+.po0-shell--looking-glass .lg-toolbar input::placeholder {
   color: #33465f !important;
 }
 
 /* v14 emergency legibility: cut the frosted wash on light functional cards */
-.po0-shell:has(.kele-status-page) .status-dashboard,
-.po0-shell:has(.kele-status-page) .status-source-panel,
-.po0-shell:has(.kele-status-page) .status-chart-card,
-.po0-shell:has(.kele-status-page) .latency-card,
-.po0-shell:has(.kele-status-page) .source-filter,
-.po0-shell:has(.kele-status-page) .source-node-card,
-.po0-shell:has(.kele-status-page) .probe-row,
-.po0-shell:has(.kele-lg-page) .lg-sidebar,
-.po0-shell:has(.kele-lg-page) .lg-workbench,
-.po0-shell:has(.kele-lg-page) .lg-region,
-.po0-shell:has(.kele-lg-page) .lg-node,
-.po0-shell:has(.kele-lg-page) .lg-summary-grid article,
-.po0-shell:has(.kele-lg-page) .lg-toolbar select,
-.po0-shell:has(.kele-lg-page) .lg-toolbar input,
-.po0-shell:has(.kele-lg-page) .lg-source-readonly strong {
+.po0-shell--status .status-dashboard,
+.po0-shell--status .status-source-panel,
+.po0-shell--status .status-chart-card,
+.po0-shell--status .latency-card,
+.po0-shell--status .source-filter,
+.po0-shell--status .source-node-card,
+.po0-shell--status .probe-row,
+.po0-shell--looking-glass .lg-sidebar,
+.po0-shell--looking-glass .lg-workbench,
+.po0-shell--looking-glass .lg-region,
+.po0-shell--looking-glass .lg-node,
+.po0-shell--looking-glass .lg-summary-grid article,
+.po0-shell--looking-glass .lg-toolbar select,
+.po0-shell--looking-glass .lg-toolbar input,
+.po0-shell--looking-glass .lg-source-readonly strong {
   opacity: 1 !important;
   filter: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-.po0-shell:has(.kele-status-page) .status-source-panel,
-.po0-shell:has(.kele-status-page) .status-chart-card,
-.po0-shell:has(.kele-status-page) .source-filter,
-.po0-shell:has(.kele-status-page) .source-node-card,
-.po0-shell:has(.kele-lg-page) .lg-sidebar,
-.po0-shell:has(.kele-lg-page) .lg-workbench,
-.po0-shell:has(.kele-lg-page) .lg-region,
-.po0-shell:has(.kele-lg-page) .lg-node,
-.po0-shell:has(.kele-lg-page) .lg-summary-grid article {
+.po0-shell--status .status-source-panel,
+.po0-shell--status .status-chart-card,
+.po0-shell--status .source-filter,
+.po0-shell--status .source-node-card,
+.po0-shell--looking-glass .lg-sidebar,
+.po0-shell--looking-glass .lg-workbench,
+.po0-shell--looking-glass .lg-region,
+.po0-shell--looking-glass .lg-node,
+.po0-shell--looking-glass .lg-summary-grid article {
   background: #ffffff !important;
 }
 
-.po0-shell:has(.kele-status-page) .latency-card,
-.po0-shell:has(.kele-lg-page) .lg-toolbar select,
-.po0-shell:has(.kele-lg-page) .lg-toolbar input,
-.po0-shell:has(.kele-lg-page) .lg-source-readonly strong {
+.po0-shell--status .latency-card,
+.po0-shell--looking-glass .lg-toolbar select,
+.po0-shell--looking-glass .lg-toolbar input,
+.po0-shell--looking-glass .lg-source-readonly strong {
   background: #f9fcff !important;
 }
 
-.po0-shell:has(.kele-status-page) .source-node-card *,
-.po0-shell:has(.kele-status-page) .source-filter button *,
-.po0-shell:has(.kele-status-page) .status-legend button *,
-.po0-shell:has(.kele-status-page) .status-panel-title *,
-.po0-shell:has(.kele-status-page) .status-chart-head *,
-.po0-shell:has(.kele-lg-page) .lg-node *,
-.po0-shell:has(.kele-lg-page) .lg-region__title *,
-.po0-shell:has(.kele-lg-page) .lg-toolbar *,
-.po0-shell:has(.kele-lg-page) .lg-summary-grid * {
+.po0-shell--status .source-node-card *,
+.po0-shell--status .source-filter button *,
+.po0-shell--status .status-legend button *,
+.po0-shell--status .status-panel-title *,
+.po0-shell--status .status-chart-head *,
+.po0-shell--looking-glass .lg-node *,
+.po0-shell--looking-glass .lg-region__title *,
+.po0-shell--looking-glass .lg-toolbar *,
+.po0-shell--looking-glass .lg-summary-grid * {
   opacity: 1 !important;
   filter: none !important;
 }
 
-.po0-shell:has(.kele-status-page) .source-node-card strong,
-.po0-shell:has(.kele-status-page) .source-filter button,
-.po0-shell:has(.kele-status-page) .status-legend button,
-.po0-shell:has(.kele-lg-page) .lg-node strong,
-.po0-shell:has(.kele-lg-page) .lg-region__title strong,
-.po0-shell:has(.kele-lg-page) .lg-toolbar label,
-.po0-shell:has(.kele-lg-page) .lg-summary-grid strong {
+.po0-shell--status .source-node-card strong,
+.po0-shell--status .source-filter button,
+.po0-shell--status .status-legend button,
+.po0-shell--looking-glass .lg-node strong,
+.po0-shell--looking-glass .lg-region__title strong,
+.po0-shell--looking-glass .lg-toolbar label,
+.po0-shell--looking-glass .lg-summary-grid strong {
   color: #07172b !important;
 }
 
-.po0-shell:has(.kele-status-page) .source-node-card small,
-.po0-shell:has(.kele-status-page) .source-node-card__meta,
-.po0-shell:has(.kele-status-page) .status-chart-head small,
-.po0-shell:has(.kele-lg-page) .lg-node small,
-.po0-shell:has(.kele-lg-page) .lg-region__title small,
-.po0-shell:has(.kele-lg-page) .lg-toolbar label span,
-.po0-shell:has(.kele-lg-page) .lg-summary-grid span,
-.po0-shell:has(.kele-lg-page) .lg-summary-grid small {
+.po0-shell--status .source-node-card small,
+.po0-shell--status .source-node-card__meta,
+.po0-shell--status .status-chart-head small,
+.po0-shell--looking-glass .lg-node small,
+.po0-shell--looking-glass .lg-region__title small,
+.po0-shell--looking-glass .lg-toolbar label span,
+.po0-shell--looking-glass .lg-summary-grid span,
+.po0-shell--looking-glass .lg-summary-grid small {
   color: #33465f !important;
 }
 
 /* v15 final light-scope fix: scope from document, not shell :has() */
-html:has(.kele-status-page) .po0-shell,
-html:has(.kele-lg-page) .po0-shell {
+html:has(.po0-shell--status) .po0-shell,
+html:has(.po0-shell--looking-glass) .po0-shell {
   color: #132033 !important;
   background:
     radial-gradient(circle at 13% 8%, rgba(58, 212, 255, 0.20), transparent 30rem),
@@ -1538,33 +1538,33 @@ html:has(.kele-lg-page) .po0-shell {
     linear-gradient(180deg, #fbfdff 0%, #f4f8ff 48%, #eef6ff 100%) !important;
 }
 
-html:has(.kele-status-page) .po0-shell__brand,
-html:has(.kele-status-page) .po0-shell__nav nav a,
-html:has(.kele-lg-page) .po0-shell__brand,
-html:has(.kele-lg-page) .po0-shell__nav nav a,
-html:has(.kele-status-page) .po0-shell__title,
-html:has(.kele-lg-page) .po0-shell__title {
+html:has(.po0-shell--status) .po0-shell__brand,
+html:has(.po0-shell--status) .po0-shell__nav nav a,
+html:has(.po0-shell--looking-glass) .po0-shell__brand,
+html:has(.po0-shell--looking-glass) .po0-shell__nav nav a,
+html:has(.po0-shell--status) .po0-shell__title,
+html:has(.po0-shell--looking-glass) .po0-shell__title {
   color: #07172b !important;
 }
 
-html:has(.kele-status-page) .po0-shell__lead,
-html:has(.kele-lg-page) .po0-shell__lead {
+html:has(.po0-shell--status) .po0-shell__lead,
+html:has(.po0-shell--looking-glass) .po0-shell__lead {
   color: #33465f !important;
 }
 
-html:has(.kele-status-page) .status-source-panel,
-html:has(.kele-status-page) .status-chart-card,
-html:has(.kele-status-page) .source-filter,
-html:has(.kele-status-page) .source-node-card,
-html:has(.kele-status-page) .latency-card,
-html:has(.kele-lg-page) .lg-sidebar,
-html:has(.kele-lg-page) .lg-workbench,
-html:has(.kele-lg-page) .lg-region,
-html:has(.kele-lg-page) .lg-node,
-html:has(.kele-lg-page) .lg-summary-grid article,
-html:has(.kele-lg-page) .lg-toolbar select,
-html:has(.kele-lg-page) .lg-toolbar input,
-html:has(.kele-lg-page) .lg-source-readonly strong {
+html:has(.po0-shell--status) .status-source-panel,
+html:has(.po0-shell--status) .status-chart-card,
+html:has(.po0-shell--status) .source-filter,
+html:has(.po0-shell--status) .source-node-card,
+html:has(.po0-shell--status) .latency-card,
+html:has(.po0-shell--looking-glass) .lg-sidebar,
+html:has(.po0-shell--looking-glass) .lg-workbench,
+html:has(.po0-shell--looking-glass) .lg-region,
+html:has(.po0-shell--looking-glass) .lg-node,
+html:has(.po0-shell--looking-glass) .lg-summary-grid article,
+html:has(.po0-shell--looking-glass) .lg-toolbar select,
+html:has(.po0-shell--looking-glass) .lg-toolbar input,
+html:has(.po0-shell--looking-glass) .lg-source-readonly strong {
   opacity: 1 !important;
   filter: none !important;
   backdrop-filter: none !important;
@@ -1573,49 +1573,49 @@ html:has(.kele-lg-page) .lg-source-readonly strong {
   color: #132033 !important;
 }
 
-html:has(.kele-status-page) .source-node-card strong,
-html:has(.kele-status-page) .source-filter button,
-html:has(.kele-status-page) .status-legend button,
-html:has(.kele-status-page) .status-panel-title,
-html:has(.kele-status-page) .status-panel-title span,
-html:has(.kele-status-page) .latency-card__target,
-html:has(.kele-status-page) .probe-row strong,
-html:has(.kele-lg-page) .lg-region__title strong,
-html:has(.kele-lg-page) .lg-node strong,
-html:has(.kele-lg-page) .lg-toolbar label,
-html:has(.kele-lg-page) .lg-summary-grid strong {
+html:has(.po0-shell--status) .source-node-card strong,
+html:has(.po0-shell--status) .source-filter button,
+html:has(.po0-shell--status) .status-legend button,
+html:has(.po0-shell--status) .status-panel-title,
+html:has(.po0-shell--status) .status-panel-title span,
+html:has(.po0-shell--status) .latency-card__target,
+html:has(.po0-shell--status) .probe-row strong,
+html:has(.po0-shell--looking-glass) .lg-region__title strong,
+html:has(.po0-shell--looking-glass) .lg-node strong,
+html:has(.po0-shell--looking-glass) .lg-toolbar label,
+html:has(.po0-shell--looking-glass) .lg-summary-grid strong {
   color: #07172b !important;
   -webkit-text-fill-color: #07172b !important;
   opacity: 1 !important;
 }
 
-html:has(.kele-status-page) .source-node-card small,
-html:has(.kele-status-page) .source-node-card__meta,
-html:has(.kele-status-page) .source-node-card__meta span,
-html:has(.kele-status-page) .status-chart-head small,
-html:has(.kele-status-page) .latency-card__route,
-html:has(.kele-status-page) .latency-card__meta small,
-html:has(.kele-lg-page) .lg-region__title small,
-html:has(.kele-lg-page) .lg-node small,
-html:has(.kele-lg-page) .lg-toolbar label span,
-html:has(.kele-lg-page) .lg-summary-grid span,
-html:has(.kele-lg-page) .lg-summary-grid small {
+html:has(.po0-shell--status) .source-node-card small,
+html:has(.po0-shell--status) .source-node-card__meta,
+html:has(.po0-shell--status) .source-node-card__meta span,
+html:has(.po0-shell--status) .status-chart-head small,
+html:has(.po0-shell--status) .latency-card__route,
+html:has(.po0-shell--status) .latency-card__meta small,
+html:has(.po0-shell--looking-glass) .lg-region__title small,
+html:has(.po0-shell--looking-glass) .lg-node small,
+html:has(.po0-shell--looking-glass) .lg-toolbar label span,
+html:has(.po0-shell--looking-glass) .lg-summary-grid span,
+html:has(.po0-shell--looking-glass) .lg-summary-grid small {
   color: #33465f !important;
   -webkit-text-fill-color: #33465f !important;
   opacity: 1 !important;
 }
 
-html:has(.kele-status-page) .source-filter button.active,
-html:has(.kele-status-page) .status-legend button.active,
-html:has(.kele-status-page) .status-tabs button.active,
-html:has(.kele-lg-page) .lg-node.is-active {
+html:has(.po0-shell--status) .source-filter button.active,
+html:has(.po0-shell--status) .status-legend button.active,
+html:has(.po0-shell--status) .status-tabs button.active,
+html:has(.po0-shell--looking-glass) .lg-node.is-active {
   background: linear-gradient(135deg, #d7f7ff 0%, #ece9ff 100%) !important;
   color: #07172b !important;
   -webkit-text-fill-color: #07172b !important;
 }
 
-html:has(.kele-status-page) .status-dashboard,
-html:has(.kele-lg-page) .looking-glass-console {
+html:has(.po0-shell--status) .status-dashboard,
+html:has(.po0-shell--looking-glass) .looking-glass-console {
   background: rgba(255,255,255,0.72) !important;
 }
 
@@ -1978,7 +1978,7 @@ html[data-admin="1"] .admin-login .admin-form input {
 
 /* Status latency trace clarity pass */
 .po0-shell--status .status-legend,
-html:has(.kele-status-page) .status-legend {
+html:has(.po0-shell--status) .status-legend {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(210px, 1fr)) !important;
   flex: 1 1 620px !important;
@@ -1986,7 +1986,7 @@ html:has(.kele-status-page) .status-legend {
 }
 
 .po0-shell--status .status-legend button,
-html:has(.kele-status-page) .status-legend button {
+html:has(.po0-shell--status) .status-legend button {
   display: grid !important;
   grid-template-columns: 10px minmax(0, 1fr) auto !important;
   gap: 4px 8px !important;
@@ -1997,7 +1997,7 @@ html:has(.kele-status-page) .status-legend button {
 }
 
 .po0-shell--status .status-legend .legend-label,
-html:has(.kele-status-page) .status-legend .legend-label {
+html:has(.po0-shell--status) .status-legend .legend-label {
   min-width: 0 !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -2005,14 +2005,14 @@ html:has(.kele-status-page) .status-legend .legend-label {
 }
 
 .po0-shell--status .status-legend button > strong,
-html:has(.kele-status-page) .status-legend button > strong {
+html:has(.po0-shell--status) .status-legend button > strong {
   color: #062033 !important;
   font-family: var(--po0-mono, ui-monospace, monospace) !important;
   font-size: 0.82rem !important;
 }
 
 .po0-shell--status .status-legend button > small,
-html:has(.kele-status-page) .status-legend button > small {
+html:has(.po0-shell--status) .status-legend button > small {
   grid-column: 2 / 4 !important;
   color: #627790 !important;
   font-family: var(--po0-mono, ui-monospace, monospace) !important;
@@ -2021,19 +2021,19 @@ html:has(.kele-status-page) .status-legend button > small {
 }
 
 .po0-shell--status .chart-plot-bg,
-html:has(.kele-status-page) .chart-plot-bg {
+html:has(.po0-shell--status) .chart-plot-bg {
   fill: rgba(255, 255, 255, 0.46) !important;
   stroke: rgba(58, 107, 160, 0.18) !important;
 }
 
 .po0-shell--status .chart-smoke,
-html:has(.kele-status-page) .chart-smoke {
+html:has(.po0-shell--status) .chart-smoke {
   opacity: 0.16 !important;
   mix-blend-mode: multiply !important;
 }
 
 .po0-shell--status .chart-line-underlay,
-html:has(.kele-status-page) .chart-line-underlay {
+html:has(.po0-shell--status) .chart-line-underlay {
   fill: none !important;
   stroke: rgba(255, 255, 255, 0.9) !important;
   stroke-width: 6.4 !important;
@@ -2042,20 +2042,20 @@ html:has(.kele-status-page) .chart-line-underlay {
 }
 
 .po0-shell--status .chart-line,
-html:has(.kele-status-page) .chart-line {
+html:has(.po0-shell--status) .chart-line {
   stroke-width: 2.65 !important;
   filter: drop-shadow(0 6px 10px rgba(37, 82, 130, 0.16)) !important;
 }
 
 .po0-shell--status .chart-last-point,
-html:has(.kele-status-page) .chart-last-point {
+html:has(.po0-shell--status) .chart-last-point {
   stroke: rgba(255, 255, 255, 0.94) !important;
   stroke-width: 2.2 !important;
   filter: drop-shadow(0 3px 8px rgba(37, 82, 130, 0.25)) !important;
 }
 
 .po0-shell--status .chart-loss-label,
-html:has(.kele-status-page) .chart-loss-label {
+html:has(.po0-shell--status) .chart-loss-label {
   fill: #637a92 !important;
   font-size: 10px !important;
   opacity: 0.78 !important;
@@ -2063,7 +2063,7 @@ html:has(.kele-status-page) .chart-loss-label {
 
 @media (max-width: 900px) {
   .po0-shell--status .status-legend,
-  html:has(.kele-status-page) .status-legend {
+  html:has(.po0-shell--status) .status-legend {
     grid-template-columns: 1fr !important;
     width: 100% !important;
     flex-basis: 100% !important;
@@ -2072,13 +2072,13 @@ html:has(.kele-status-page) .chart-loss-label {
 
 /* Status latency trace v3 compact chips */
 .po0-shell--status .status-legend,
-html:has(.kele-status-page) .status-legend {
+html:has(.po0-shell--status) .status-legend {
   grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)) !important;
   flex: 0 1 760px !important;
 }
 
 .po0-shell--status .status-legend button,
-html:has(.kele-status-page) .status-legend button {
+html:has(.po0-shell--status) .status-legend button {
   min-height: 42px !important;
   padding: 7px 9px !important;
   grid-template-columns: 8px minmax(0, 1fr) auto !important;
@@ -2086,24 +2086,24 @@ html:has(.kele-status-page) .status-legend button {
 }
 
 .po0-shell--status .status-legend i,
-html:has(.kele-status-page) .status-legend i {
+html:has(.po0-shell--status) .status-legend i {
   width: 8px !important;
   height: 8px !important;
 }
 
 .po0-shell--status .status-legend button > strong,
-html:has(.kele-status-page) .status-legend button > strong {
+html:has(.po0-shell--status) .status-legend button > strong {
   font-size: 0.76rem !important;
 }
 
 .po0-shell--status .status-legend button > small,
-html:has(.kele-status-page) .status-legend button > small {
+html:has(.po0-shell--status) .status-legend button > small {
   font-size: 0.59rem !important;
   opacity: 0.76 !important;
 }
 
 .po0-shell--status .chart-tooltip text,
-html:has(.kele-status-page) .chart-tooltip text {
+html:has(.po0-shell--status) .chart-tooltip text {
   font-size: 9.4px !important;
   letter-spacing: -0.03em !important;
 }

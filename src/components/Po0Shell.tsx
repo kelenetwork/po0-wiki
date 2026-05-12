@@ -52,7 +52,10 @@ export default function Po0Shell({ current, eyebrow, title, lead, children }: Po
           <span />
         </a>
       </header>
-      <main className="po0-shell__main">
+      <main className={`po0-shell__main${
+        current === 'status' ? ' kele-status-page' :
+        current === 'looking-glass' ? ' kele-lg-page' : ''
+      }`}>
         <section className="po0-shell__hero">
           <p className="po0-shell__eyebrow">{eyebrow}</p>
           <h1 className="po0-shell__title">{title}</h1>
