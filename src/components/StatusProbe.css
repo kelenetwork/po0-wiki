@@ -371,27 +371,9 @@
   padding: 18px;
 }
 
-.latency-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto auto 0;
-  width: 4px;
-  height: 100%;
-  background: currentColor;
-  opacity: 0.68;
-}
-
-.latency-card::after {
-  content: "";
-  position: absolute;
-  right: -30px;
-  bottom: -34px;
-  width: 118px;
-  height: 118px;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  opacity: 0.18;
-}
+/* Legacy decorative ::before (left color stripe) and ::after (right
+   bottom faint ring) removed for the misaka redesign — they overlap
+   the body text and conflict with the slim status dot in the head. */
 
 .latency-card__route,
 .latency-card__target {
@@ -1463,4 +1445,76 @@
   border-color: rgba(7, 193, 96, 0.45) !important;
   background: var(--po0-bg-2) !important;
   color: var(--po0-accent) !important;
+}
+
+
+/* ============================================================
+   misaka phase 7 — latency-card meta as small misaka chips,
+   tighter card padding, no decorative pseudo-elements
+   ============================================================ */
+
+.latency-card {
+  padding: 14px 16px !important;
+  min-height: 0 !important;
+}
+
+.latency-card__head {
+  margin-bottom: 2px !important;
+}
+
+.latency-card__value {
+  font-size: 28px !important;
+  margin: 2px 0 0 !important;
+}
+.latency-card__value .unit {
+  font-size: 11px !important;
+}
+
+.latency-card__target {
+  margin: 6px 0 0 !important;
+  font-size: 10px !important;
+  letter-spacing: 0.05em !important;
+}
+
+.latency-card__meta {
+  margin-top: 8px !important;
+  display: flex !important;
+  gap: 6px !important;
+  flex-wrap: wrap;
+}
+
+.latency-card__meta small {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 3px 9px !important;
+  border-radius: 999px !important;
+  background: var(--po0-bg-2) !important;
+  border: 1px solid var(--po0-line) !important;
+  color: var(--po0-text-faint) !important;
+  font-family: var(--po0-font-mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.04em !important;
+  white-space: nowrap;
+  font-weight: 400 !important;
+}
+
+/* tone the first chip (抖动) based on card variant */
+.latency-card--green .latency-card__meta small:first-child {
+  color: var(--po0-accent) !important;
+  border-color: rgba(7, 193, 96, 0.3) !important;
+  background: rgba(7, 193, 96, 0.06) !important;
+}
+.latency-card--amber .latency-card__meta small:first-child {
+  color: var(--po0-warn) !important;
+  border-color: rgba(245, 165, 36, 0.3) !important;
+  background: rgba(245, 165, 36, 0.06) !important;
+}
+.latency-card--violet .latency-card__meta small:first-child,
+.latency-card--blue .latency-card__meta small:first-child {
+  color: var(--po0-info) !important;
+  border-color: rgba(106, 189, 243, 0.3) !important;
+  background: rgba(106, 189, 243, 0.06) !important;
+}
+.latency-card--pending .latency-card__meta small {
+  color: var(--po0-text-mute) !important;
 }

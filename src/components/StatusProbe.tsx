@@ -891,6 +891,33 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
             ))}
           </div>
 
+          <div className="latency-grid" aria-label="目标延迟卡片">
+            {filteredLatencies.map((item) => {
+              const tone = item.pending ? "pending" : item.tone === "amber" ? "warn" : "online";
+              return (
+                <article
+                  className={`latency-card latency-card--${item.tone}${item.pending ? " latency-card--pending" : ""}`}
+                  key={item.id}
+                >
+                  <div className="latency-card__head">
+                    <span className="latency-card__route">{item.location}</span>
+                    <span className={`dot ${tone}`} />
+                  </div>
+                  <strong className="latency-card__value">
+                    <span>{item.latencyValue}</span>
+                    {item.latencyUnit && (
+                      <span className="unit">{item.latencyUnit}</span>
+                    )}
+                  </strong>
+                  <p className="latency-card__target">{item.target}</p>
+                  <div className="latency-card__meta">
+                    <small>抖动 {item.jitter}</small>
+                    <small>丢包 {item.loss}</small>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
           <div className="status-chart-card">
             <div className="status-chart-head">
               <div>
@@ -1139,33 +1166,6 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
             </svg>
           </div>
 
-          <div className="latency-grid" aria-label="目标延迟卡片">
-            {filteredLatencies.map((item) => {
-              const tone = item.pending ? "pending" : item.tone === "amber" ? "warn" : "online";
-              return (
-                <article
-                  className={`latency-card latency-card--${item.tone}${item.pending ? " latency-card--pending" : ""}`}
-                  key={item.id}
-                >
-                  <div className="latency-card__head">
-                    <span className="latency-card__route">{item.location}</span>
-                    <span className={`dot ${tone}`} />
-                  </div>
-                  <strong className="latency-card__value">
-                    <span>{item.latencyValue}</span>
-                    {item.latencyUnit && (
-                      <span className="unit">{item.latencyUnit}</span>
-                    )}
-                  </strong>
-                  <p className="latency-card__target">{item.target}</p>
-                  <div className="latency-card__meta">
-                    <small>抖动 {item.jitter}</small>
-                    <small>丢包 {item.loss}</small>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
         </div>
       </div>
     </section>
