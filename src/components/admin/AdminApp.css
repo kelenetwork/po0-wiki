@@ -148,10 +148,10 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
 .admin-matrix,
 .admin-form.admin-card,
 .admin-stat {
-  border: 1px solid var(--kele-line, rgba(20, 32, 31, 0.14));
+  border: 1px solid var(--kele-line, rgba(35, 35, 35, 0.14));
   border-radius: 26px;
-  background: var(--kele-card, rgba(255, 252, 243, 0.9));
-  box-shadow: var(--kele-shadow, 0 30px 80px rgba(37, 45, 41, 0.13));
+  background: var(--kele-card, rgba(17, 17, 17, 0.9));
+  box-shadow: var(--kele-shadow, 0 30px 80px rgba(0, 0, 0, 0.13));
   backdrop-filter: blur(18px);
 }
 
@@ -223,11 +223,11 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
 
 .admin-form input,
 .admin-form select {
-  border: 1px solid var(--kele-line, rgba(20, 32, 31, 0.14));
+  border: 1px solid var(--kele-line, rgba(35, 35, 35, 0.14));
   border-radius: 16px;
   padding: 11px 12px;
   color: var(--kele-ink, #14201f);
-  background: rgba(255, 252, 243, 0.72);
+  background: rgba(17, 17, 17, 0.72);
   font: inherit;
 }
 
@@ -277,11 +277,11 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
 .admin-error button { color: var(--kele-danger, #e0444e); }
 
 .admin-shell button {
-  border: 1px solid var(--kele-line, rgba(20, 32, 31, 0.14));
+  border: 1px solid var(--kele-line, rgba(35, 35, 35, 0.14));
   border-radius: 999px;
   padding: 9px 14px;
   color: var(--kele-ink, #14201f);
-  background: rgba(255, 252, 243, 0.76);
+  background: rgba(17, 17, 17, 0.76);
   cursor: pointer;
   text-decoration: none;
   font-weight: 900;
@@ -329,7 +329,7 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
 
 .admin-shell th,
 .admin-shell td {
-  border-bottom: 1px solid var(--kele-line, rgba(20, 32, 31, 0.14));
+  border-bottom: 1px solid var(--kele-line, rgba(35, 35, 35, 0.14));
   padding: 13px;
   text-align: left;
   vertical-align: top;
@@ -337,13 +337,13 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
 
 .admin-shell th {
   color: var(--kele-muted, #66716f);
-  background: rgba(255, 252, 243, 0.46);
+  background: rgba(17, 17, 17, 0.46);
   font-size: 12px;
   font-weight: 900;
 }
 
 .admin-shell td {
-  background: rgba(255, 252, 243, 0.66);
+  background: rgba(17, 17, 17, 0.66);
   font-size: 14px;
 }
 
@@ -362,12 +362,12 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
   right: 0;
   z-index: 3;
   min-width: 250px;
-  background: rgba(255, 252, 243, 0.94) !important;
-  box-shadow: -16px 0 24px rgba(20, 32, 31, 0.08);
+  background: rgba(17, 17, 17, 0.94) !important;
+  box-shadow: -16px 0 24px rgba(35, 35, 35, 0.08);
 }
 
 .admin-detail td {
-  background: rgba(255, 252, 243, 0.46);
+  background: rgba(17, 17, 17, 0.46);
   color: var(--kele-muted, #66716f);
 }
 
@@ -415,7 +415,7 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
   z-index: 100;
   display: flex;
   justify-content: flex-end;
-  background: rgba(7, 18, 20, .52);
+  background: rgba(22, 22, 22, .52);
 }
 
 .admin-drawer {
@@ -499,7 +499,7 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
   .admin-card, .admin-table-wrap, .admin-matrix, .admin-stat { background: var(--kele-card, rgba(12,25,28,.88)); }
   .admin-shell td, .admin-shell th, .admin-actions, .admin-drawer { background: rgba(12, 25, 28, 0.9) !important; }
   .admin-shell tr:hover td { background: rgba(7, 193, 96, 0.08) !important; }
-  .admin-form input, .admin-form select, .admin-shell button { background: rgba(7, 18, 20, 0.66); color: var(--kele-ink, #edf7f4); border-color: var(--kele-line, rgba(221,246,238,.15)); }
+  .admin-form input, .admin-form select, .admin-shell button { background: rgba(22, 22, 22, 0.66); color: var(--kele-ink, #edf7f4); border-color: var(--kele-line, rgba(221,246,238,.15)); }
   .install-view code, .status-pending { background: rgba(221,246,238,.09) !important; color: var(--kele-ink, #edf7f4); }
 }
 
