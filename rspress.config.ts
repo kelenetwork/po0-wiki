@@ -297,6 +297,7 @@ export default defineConfig({
             { text: '挂载 Nyanpass 面板', link: '/guide/tutorials/nyanpass-panel' },
             { text: 'nftables 转发脚本配置', link: '/guide/tutorials/nftables-script' },
             { text: 'nftables 手动转发配置', link: '/guide/tutorials/nftables-port-forwarding' },
+            { text: '防火墙白名单自动加白', link: '/guide/tutorials/po0fw-whitelist' },
           ],
         },
         {
