@@ -2,7 +2,7 @@
 
 Po0 的「鸡险」增值服务附带防火墙白名单：开启后**只有白名单里的来源 /24 网段才能访问入站端口**。家宽 IP 经常变，手动加白很烦 —— 本教程让设备**自动加白**。
 
-脚本开源：[github.com/kelenetwork/po0fw](https://github.com/kelenetwork/po0fw) · iOS 代理客户端版（群友出品）：[po0fw.rlyio.com](https://po0fw.rlyio.com/)
+脚本与全部客户端模块开源：[github.com/kelenetwork/po0fw](https://github.com/kelenetwork/po0fw) · iOS/Mac 代理客户端**一键安装页**：[kelenetwork.github.io/po0fw](https://kelenetwork.github.io/po0fw/)
 
 ## 📋 选择你的平台
 
@@ -12,7 +12,7 @@ Po0 的「鸡险」增值服务附带防火墙白名单：开启后**只有白�
 | Linux / macOS | 一键脚本 | 10 分钟内 | [↓ 安装](#linux--macos) |
 | Windows | 一键脚本 | 网络事件即时 + 10 分钟兜底 | [↓ 安装](#windows) |
 | 安卓 | MacroDroid 等自动化 App | 切网即时 + 15 分钟兜底 | [↓ 安装](#安卓) |
-| iOS 有代理 App | 群友脚本模块 | 切网即时 + 10 分钟兜底 | [↓ 安装](#ios) |
+| iOS/Mac 有代理 App | 脚本模块（Surge/Loon/Stash/QX/小火箭/Egern） | 切网即时 + 10 分钟兜底 | [↓ 安装](#ios) |
 | iOS 无代理 App | 快捷指令 | 切 Wi-Fi 即时（无定时） | [↓ 安装](#ios) |
 
 ⭐ **家里有软路由的，优先只装软路由**：全家设备连 Wi-Fi 时天然被覆盖，手机只需管出门蜂窝场景。
@@ -67,7 +67,10 @@ powershell -ExecutionPolicy Bypass -File i.ps1 -Tokens "pgnfw_你的token"
 
 ### iOS
 
-**有代理 App**（Surge / Loon / Stash / QX / 小火箭 / Egern）→ 直接装群友模块 [po0fw iOS 版](https://po0fw.rlyio.com/)，带面板、切网即时触发 + 10 分钟 cron 兜底，功能最全。
+**有代理 App**（Surge / Loon / Stash / QX / 小火箭 / Egern）→ 打开**一键安装页** [kelenetwork.github.io/po0fw](https://kelenetwork.github.io/po0fw/)，点你客户端的「一键安装」按钮，装好后在模块参数里填 token 即可。带面板显示、蜂窝 📶 标记、切网即时触发 + 10 分钟 cron 兜底，功能最全。
+
+> 一键按钮没反应？部分浏览器拦截 App URL Scheme，点「复制链接」后到客户端里「从 URL 安装/导入」。QX 需手动把片段加进 `[task_local]`，详见安装页说明。
+> 模块部分借鉴学习自 [reallinzc/po0fw](https://github.com/reallinzc/po0fw)，感谢原作者。
 
 **无代理 App** → 系统「快捷指令」：
 
