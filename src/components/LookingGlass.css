@@ -114,7 +114,7 @@
 
 .lg-node.is-active {
   background: var(--po0-bg-2);
-  border-color: rgba(7, 193, 96, 0.4);
+  border-color: rgba(11, 143, 77, 0.4);
 }
 
 .lg-node.is-offline,
@@ -128,7 +128,7 @@
   height: 6px;
   border-radius: 999px;
   flex-shrink: 0;
-  box-shadow: 0 0 0 1.5px rgba(7, 193, 96, 0.18);
+  box-shadow: 0 0 0 1.5px rgba(11, 143, 77, 0.18);
 }
 .lg-node-dot.online   { background: var(--po0-accent); }
 .lg-node-dot.busy     { background: var(--po0-warn); box-shadow: 0 0 0 1.5px rgba(245, 165, 36, 0.2); }
@@ -231,12 +231,12 @@
 
 .lg-step.is-done {
   color: var(--po0-accent);
-  border-color: rgba(7, 193, 96, 0.3);
+  border-color: rgba(11, 143, 77, 0.3);
 }
 
 .lg-step.is-current {
   color: var(--po0-text-strong);
-  border-color: rgba(7, 193, 96, 0.45);
+  border-color: rgba(11, 143, 77, 0.45);
 }
 
 .lg-step__num {
@@ -292,12 +292,12 @@
 }
 
 .lg-action:hover {
-  border-color: rgba(7, 193, 96, 0.4);
+  border-color: rgba(11, 143, 77, 0.4);
 }
 
 .lg-action.is-active {
   border-color: var(--po0-accent);
-  background: rgba(7, 193, 96, 0.06);
+  background: rgba(11, 143, 77, 0.06);
 }
 
 .lg-action__icon {
@@ -375,7 +375,7 @@
 .lg-target-input select:focus {
   outline: none;
   border-color: var(--po0-accent);
-  box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.12);
+  box-shadow: 0 0 0 3px rgba(11, 143, 77, 0.12);
 }
 
 .lg-target-input option {

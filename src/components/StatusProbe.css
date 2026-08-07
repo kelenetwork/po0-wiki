@@ -20,7 +20,7 @@
   width: 280px;
   height: 280px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(7, 193, 96, 0.07), transparent 65%);
+  background: radial-gradient(circle, rgba(11, 143, 77, 0.07), transparent 65%);
   pointer-events: none;
 }
 
@@ -760,7 +760,7 @@
   width: 6px !important;
   height: 6px !important;
   border-radius: 999px !important;
-  box-shadow: 0 0 0 1.5px rgba(7, 193, 96, 0.18) !important;
+  box-shadow: 0 0 0 1.5px rgba(11, 143, 77, 0.18) !important;
   flex-shrink: 0;
 }
 .status-probe .dot.online,
@@ -817,7 +817,7 @@
   height: 6px;
   border-radius: 999px;
   background: var(--po0-accent);
-  box-shadow: 0 0 0 1.5px rgba(7, 193, 96, 0.18);
+  box-shadow: 0 0 0 1.5px rgba(11, 143, 77, 0.18);
 }
 
 /* Time-range tabs as misaka chips */
@@ -842,7 +842,7 @@
 }
 .status-tabs button.active {
   background: var(--po0-bg-2) !important;
-  border-color: rgba(7, 193, 96, 0.4) !important;
+  border-color: rgba(11, 143, 77, 0.4) !important;
   color: var(--po0-accent) !important;
 }
 
@@ -1091,7 +1091,7 @@
   color: var(--po0-text) !important;
 }
 .source-filter button.active {
-  border-color: rgba(7, 193, 96, 0.45) !important;
+  border-color: rgba(11, 143, 77, 0.45) !important;
   background: var(--po0-bg-2) !important;
   color: var(--po0-accent) !important;
 }
@@ -1179,7 +1179,7 @@
   height: 6px !important;
   border-radius: 999px !important;
   flex-shrink: 0;
-  box-shadow: 0 0 0 1.5px rgba(7, 193, 96, 0.18) !important;
+  box-shadow: 0 0 0 1.5px rgba(11, 143, 77, 0.18) !important;
 }
 .latency-card__head .dot.online { background: var(--po0-accent) !important; }
 .latency-card__head .dot.warn   { background: var(--po0-warn) !important; box-shadow: 0 0 0 1.5px rgba(245, 165, 36, 0.2) !important; }
@@ -1322,7 +1322,7 @@
 }
 .status-chart-head .status-tabs button.active {
   background: var(--po0-bg-2) !important;
-  border-color: rgba(7, 193, 96, 0.4) !important;
+  border-color: rgba(11, 143, 77, 0.4) !important;
   color: var(--po0-accent) !important;
 }
 
@@ -1350,7 +1350,7 @@
   height: 6px;
   border-radius: 999px;
   background: var(--po0-accent);
-  box-shadow: 0 0 0 1.5px rgba(7, 193, 96, 0.18);
+  box-shadow: 0 0 0 1.5px rgba(11, 143, 77, 0.18);
 }
 
 /* Legend — keep position inside chart-head spawn? no, mockup has legend
@@ -1391,7 +1391,7 @@
   color: var(--po0-text) !important;
 }
 .status-legend button.active {
-  border-color: rgba(7, 193, 96, 0.4) !important;
+  border-color: rgba(11, 143, 77, 0.4) !important;
   color: var(--po0-text-strong) !important;
 }
 
@@ -1442,7 +1442,7 @@
   color: var(--po0-text) !important;
 }
 .source-filter button.active {
-  border-color: rgba(7, 193, 96, 0.45) !important;
+  border-color: rgba(11, 143, 77, 0.45) !important;
   background: var(--po0-bg-2) !important;
   color: var(--po0-accent) !important;
 }
@@ -1501,8 +1501,8 @@
 /* tone the first chip (抖动) based on card variant */
 .latency-card--green .latency-card__meta small:first-child {
   color: var(--po0-accent) !important;
-  border-color: rgba(7, 193, 96, 0.3) !important;
-  background: rgba(7, 193, 96, 0.06) !important;
+  border-color: rgba(11, 143, 77, 0.3) !important;
+  background: rgba(11, 143, 77, 0.06) !important;
 }
 .latency-card--amber .latency-card__meta small:first-child {
   color: var(--po0-warn) !important;

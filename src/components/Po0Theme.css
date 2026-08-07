@@ -49,7 +49,7 @@ html body:has(.po0-landing) main {
 html:has(.po0-shell),
 html:has(.po0-shell) body,
 html:has(.po0-shell) #root {
-  background: #0a0a0a !important;
+  background: #fafafa !important;
 }
 
 /* Shared shell wrapper */
@@ -61,9 +61,8 @@ html:has(.po0-shell) #root {
   min-height: 100vh;
   color: var(--po0-text);
   background:
-    radial-gradient(circle at 12% 8%, rgba(7, 193, 96, 0.16), transparent 28rem),
-    radial-gradient(circle at 92% 60%, rgba(35, 35, 35, 0.12), transparent 26rem),
-    linear-gradient(180deg, var(--po0-bg) 0%, var(--po0-bg-2) 60%, var(--po0-bg-3) 100%);
+    radial-gradient(ellipse 60% 40% at 50% -5%, rgba(11, 143, 77, 0.08), transparent 65%),
+    linear-gradient(180deg, var(--po0-bg) 0%, var(--po0-bg) 100%);
   font-family: var(--po0-font-body);
   overflow-x: hidden;
 }
@@ -74,8 +73,8 @@ html:has(.po0-shell) #root {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(circle at 50% 22%, black 18%, transparent 78%);
   -webkit-mask-image: radial-gradient(circle at 50% 22%, black 18%, transparent 78%);
@@ -104,9 +103,9 @@ html:has(.po0-shell) #root {
   color: var(--po0-text-strong);
   text-decoration: none;
   font-family: var(--po0-font-display);
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: -0.005em;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   font-size: clamp(18px, 1.4vw, 22px);
 }
 
@@ -117,7 +116,6 @@ html:has(.po0-shell) #root {
 }
 
 .po0-shell__brand svg {
-  filter: drop-shadow(0 0 12px rgba(7, 193, 96, 0.45));
   color: var(--po0-accent);
 }
 
@@ -167,7 +165,7 @@ html:has(.po0-shell) #root {
   width: 28px;
   height: 28px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.04);
   border: 1px solid var(--po0-line);
   text-decoration: none;
   transition: opacity 0.2s ease, background 0.2s ease;
@@ -176,7 +174,7 @@ html:has(.po0-shell) #root {
 
 .po0-shell__cta:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .po0-shell__cta span {
@@ -184,7 +182,7 @@ html:has(.po0-shell) #root {
   height: 8px;
   border-radius: 50%;
   background: var(--po0-good);
-  box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.18);
+  box-shadow: 0 0 0 3px rgba(11, 143, 77, 0.18);
   animation: po0Pulse 1.6s ease-in-out infinite;
 }
 
@@ -228,23 +226,23 @@ html:has(.po0-shell) #root {
   height: 8px;
   border-radius: 999px;
   background: var(--po0-accent);
-  box-shadow: 0 0 0 0 rgba(7, 193, 96, 0.6);
+  box-shadow: 0 0 0 0 rgba(11, 143, 77, 0.5);
   animation: po0-pulse-dot 2s ease-out infinite;
 }
 
 .po0-shell__title {
   margin: 0;
   font-family: var(--po0-font-display);
-  font-style: italic;
+  font-style: normal;
   font-size: clamp(2rem, 3.8vw, 3.4rem);
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  font-weight: 800;
+  letter-spacing: -0.03em;
   color: var(--po0-text-strong);
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 .po0-shell__title em {
-  font-style: italic;
+  font-style: normal;
   color: var(--po0-accent);
 }
 
@@ -252,8 +250,8 @@ html:has(.po0-shell) #root {
   margin: 18px 0 0;
   max-width: 640px;
   color: var(--po0-text-dim);
-  font-family: var(--po0-font-mono);
-  font-size: 13px;
+  font-family: var(--po0-font-sans);
+  font-size: 15.5px;
   line-height: 1.7;
   letter-spacing: 0.005em;
 }

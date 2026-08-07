@@ -20,8 +20,8 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
   color: var(--po0-text);
   background-color: var(--po0-bg);
   background-image:
-    radial-gradient(900px circle at 0% 0%, rgba(7, 193, 96, 0.05), transparent 60%),
-    radial-gradient(700px circle at 100% 100%, rgba(7, 193, 96, 0.03), transparent 60%);
+    radial-gradient(900px circle at 0% 0%, rgba(11, 143, 77, 0.05), transparent 60%),
+    radial-gradient(700px circle at 100% 100%, rgba(11, 143, 77, 0.03), transparent 60%);
   font-family: var(--po0-font-mono);
   font-size: 13px;
 }
@@ -72,9 +72,9 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
 .admin-sidebar a.active,
 .admin-sidebar a:hover,
 .admin-sidebar button:hover {
-  border-color: rgba(7, 193, 96, 0.24);
+  border-color: rgba(11, 143, 77, 0.24);
   color: #f5fffb;
-  background: rgba(7, 193, 96, 0.12);
+  background: rgba(11, 143, 77, 0.12);
 }
 
 .admin-shell {
@@ -498,7 +498,7 @@ body:has(.admin-layout) .rp-doc, body:has(.admin-layout) .rspress-doc-container,
   .admin-layout { color: var(--kele-ink, #edf7f4); }
   .admin-card, .admin-table-wrap, .admin-matrix, .admin-stat { background: var(--kele-card, rgba(12,25,28,.88)); }
   .admin-shell td, .admin-shell th, .admin-actions, .admin-drawer { background: rgba(12, 25, 28, 0.9) !important; }
-  .admin-shell tr:hover td { background: rgba(7, 193, 96, 0.08) !important; }
+  .admin-shell tr:hover td { background: rgba(11, 143, 77, 0.08) !important; }
   .admin-form input, .admin-form select, .admin-shell button { background: rgba(22, 22, 22, 0.66); color: var(--kele-ink, #edf7f4); border-color: var(--kele-line, rgba(221,246,238,.15)); }
   .install-view code, .status-pending { background: rgba(221,246,238,.09) !important; color: var(--kele-ink, #edf7f4); }
 }

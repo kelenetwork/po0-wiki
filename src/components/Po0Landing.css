@@ -13,16 +13,15 @@
   /* Force dark color-scheme in the landing subtree even when the system
      prefers-color-scheme is light and rspress hasn't toggled .dark on <html>.
      Prevents form controls / scrollbars rendering in light variants. */
-  color-scheme: dark;
+  color-scheme: light;
   /* Solid color fallback first: if any gradient layer fails to parse on older
      mobile browsers, the whole `background` shorthand would be ignored,
      leaving the page transparent over rspress's light theme and producing a
      white-on-white screen. background-color is a separate property so it
      always survives even if background-image fails. */
-  background-color: var(--po0-bg, #0a0a0a);
+  background-color: var(--po0-bg, #fafafa);
   background-image:
-    radial-gradient(900px circle at 0% 0%, rgba(7, 193, 96, 0.05), transparent 60%),
-    radial-gradient(700px circle at 100% 100%, rgba(7, 193, 96, 0.03), transparent 60%);
+    radial-gradient(ellipse 60% 50% at 50% -10%, rgba(11, 143, 77, 0.08), transparent 60%);
   font-family: var(--po0-font-body);
   overflow-x: hidden;
 }
@@ -33,8 +32,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(circle at 50% 30%, black 18%, transparent 78%);
   -webkit-mask-image: radial-gradient(circle at 50% 30%, black 18%, transparent 78%);
@@ -63,7 +62,7 @@
   color: var(--po0-text-strong);
   text-decoration: none;
   font-family: var(--po0-font-display);
-  font-style: italic;
+  font-style: normal;
   font-weight: 400;
   letter-spacing: -0.005em;
   font-size: clamp(18px, 1.4vw, 22px);
@@ -76,7 +75,6 @@
 }
 
 .po0-landing__brand svg {
-  filter: drop-shadow(0 0 12px rgba(7, 193, 96, 0.45));
   color: var(--po0-accent);
 }
 
@@ -125,7 +123,7 @@
   width: 28px;
   height: 28px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.04);
   border: 1px solid var(--po0-line);
   text-decoration: none;
   transition: opacity 0.2s ease, background 0.2s ease;
@@ -134,7 +132,7 @@
 
 .po0-landing__cta:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .po0-landing__cta-pulse {
@@ -142,7 +140,7 @@
   height: 8px;
   border-radius: 50%;
   background: var(--po0-good);
-  box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.18);
+  box-shadow: 0 0 0 3px rgba(11, 143, 77, 0.18);
   animation: po0Pulse 1.6s ease-in-out infinite;
 }
 
@@ -195,7 +193,7 @@
   align-items: baseline;
   gap: 0.2em;
   font-family: var(--po0-font-display);
-  font-style: italic;
+  font-style: normal;
   font-size: clamp(3.6rem, 7.6vw, 7.6rem);
   font-weight: 400;
   letter-spacing: -0.01em;
@@ -211,9 +209,8 @@
 }
 
 .po0-landing__hero-word--accent {
-  font-style: italic;
+  font-style: normal;
   color: var(--po0-accent);
-  text-shadow: 0 0 32px rgba(7, 193, 96, 0.32);
   animation: po0WordIn 0.9s cubic-bezier(0.22, 0.8, 0.18, 1) forwards;
 }
 
@@ -224,7 +221,6 @@
   margin-left: 0.08ch;
   background: var(--po0-accent);
   vertical-align: -0.04em;
-  box-shadow: 0 0 12px rgba(7, 193, 96, 0.6);
   animation: po0Caret 1.05s steps(2) infinite;
 }
 
@@ -239,7 +235,7 @@
 }
 
 .po0-landing__hero-sub em {
-  font-style: italic;
+  font-style: normal;
   font-family: var(--po0-font-display);
   color: var(--po0-text-strong);
   font-size: 1.15em;
@@ -275,7 +271,7 @@
 
 .po0-landing__btn:hover {
   border-color: var(--po0-accent);
-  background: rgba(7, 193, 96, 0.06);
+  background: rgba(11, 143, 77, 0.06);
   color: var(--po0-text-strong);
 }
 
@@ -327,9 +323,9 @@
   isolation: isolate;
   border-radius: 28px;
   background:
-    radial-gradient(circle at 52% 48%, rgba(7, 193, 96, 0.08), transparent 34%),
-    linear-gradient(180deg, rgba(10, 10, 10, 0.12), rgba(10, 10, 10, 0));
-  filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.5));
+    radial-gradient(circle at 52% 48%, rgba(11, 143, 77, 0.07), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.1));
 }
 
 .po0-landing__atlas-canvas::before {
@@ -342,14 +338,14 @@
   inset: 0;
   z-index: 0;
   background:
-    linear-gradient(rgba(7, 193, 96, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(7, 193, 96, 0.08) 1px, transparent 1px),
-    linear-gradient(rgba(7, 193, 96, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(7, 193, 96, 0.035) 1px, transparent 1px);
+    linear-gradient(rgba(11, 143, 77, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 143, 77, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(11, 143, 77, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 143, 77, 0.035) 1px, transparent 1px);
   background-size: 72px 72px, 72px 72px, 18px 18px, 18px 18px;
   mask-image: radial-gradient(circle at 54% 50%, black 8%, transparent 72%);
   -webkit-mask-image: radial-gradient(circle at 54% 50%, black 8%, transparent 72%);
-  mix-blend-mode: screen;
+  mix-blend-mode: multiply;
   animation: po0AtlasGridPan 30s linear infinite;
 }
 
@@ -373,8 +369,8 @@
 }
 
 .po0-landing__atlas-map svg path {
-  fill: rgba(7, 193, 96, 0.045);
-  stroke: rgba(35, 35, 35, 0.28);
+  fill: rgba(11, 143, 77, 0.06);
+  stroke: rgba(0, 0, 0, 0.18);
   stroke-width: 0.7;
   vector-effect: non-scaling-stroke;
   transition: fill 0.2s ease;
@@ -385,8 +381,8 @@
 .po0-landing__atlas-map svg path[id="CNHK"],
 .po0-landing__atlas-map svg path[id="CNMO"],
 .po0-landing__atlas-map svg path[id="CNTW"] {
-  fill: rgba(7, 193, 96, 0.18);
-  stroke: rgba(35, 35, 35, 0.7);
+  fill: rgba(11, 143, 77, 0.2);
+  stroke: rgba(0, 0, 0, 0.4);
 }
 
 .po0-landing__atlas-overlay {
@@ -400,9 +396,8 @@
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
-  text-shadow: 0 0 8px rgba(7, 193, 96, 0.4);
   paint-order: stroke;
-  stroke: rgba(5, 12, 24, 0.92);
+  stroke: rgba(255, 255, 255, 0.92);
   stroke-width: 3.5;
   stroke-linejoin: round;
 }
@@ -423,40 +418,40 @@
   stroke-width: 2.15;
   stroke-dasharray: 2 18 46 18;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 6px rgba(7, 193, 96, 0.8)) drop-shadow(0 0 14px rgba(7, 193, 96, 0.48));
+  filter: drop-shadow(0 0 6px rgba(11, 143, 77, 0.8)) drop-shadow(0 0 14px rgba(11, 143, 77, 0.48));
   animation: po0Dash 2.4s linear infinite;
 }
 
-.po0-landing__atlas-link--cyan .po0-landing__atlas-line { stroke: rgba(7, 193, 96, 0.7); }
-.po0-landing__atlas-link--violet .po0-landing__atlas-line--base { stroke: rgba(7, 193, 96, 0.38); }
+.po0-landing__atlas-link--cyan .po0-landing__atlas-line { stroke: rgba(11, 143, 77, 0.7); }
+.po0-landing__atlas-link--violet .po0-landing__atlas-line--base { stroke: rgba(11, 143, 77, 0.38); }
 .po0-landing__atlas-link--violet .po0-landing__atlas-line--flow {
-  stroke: rgba(46, 224, 138, 0.95);
-  filter: drop-shadow(0 0 6px rgba(7, 193, 96, 0.78)) drop-shadow(0 0 14px rgba(7, 193, 96, 0.42));
+  stroke: rgba(8, 122, 65, 0.95);
+  filter: drop-shadow(0 0 6px rgba(11, 143, 77, 0.78)) drop-shadow(0 0 14px rgba(11, 143, 77, 0.42));
 }
 
 .po0-landing__atlas-target-halo,
 .po0-landing__atlas-node-ring {
   fill: none;
-  stroke: rgba(7, 193, 96, 0.62);
+  stroke: rgba(11, 143, 77, 0.62);
   stroke-width: 1.4;
-  filter: drop-shadow(0 0 6px rgba(7, 193, 96, 0.64));
+  filter: drop-shadow(0 0 6px rgba(11, 143, 77, 0.64));
 }
 
 .po0-landing__atlas-node-core {
   fill: var(--po0-text-strong);
   stroke: var(--po0-accent);
   stroke-width: 1.5;
-  filter: drop-shadow(0 0 6px rgba(7, 193, 96, 0.8));
+  filter: drop-shadow(0 0 6px rgba(11, 143, 77, 0.8));
 }
 
 .po0-landing__atlas-target-pulse {
   fill: none;
-  stroke: rgba(7, 193, 96, 0.78);
+  stroke: rgba(11, 143, 77, 0.78);
   stroke-width: 1.3;
   transform-origin: center;
   transform-box: fill-box;
   animation: po0CityPulse 2.4s ease-out infinite both;
-  filter: drop-shadow(0 0 6px rgba(7, 193, 96, 0.8));
+  filter: drop-shadow(0 0 6px rgba(11, 143, 77, 0.8));
 }
 
 .po0-landing__atlas-target text {
@@ -470,25 +465,25 @@
 }
 
 .po0-landing__atlas-city--target .po0-landing__atlas-target-halo {
-  stroke: rgba(7, 193, 96, 0.62);
+  stroke: rgba(11, 143, 77, 0.62);
 }
 
 .po0-landing__atlas-pulse {
   fill: none;
-  stroke: rgba(7, 193, 96, 0.72);
+  stroke: rgba(11, 143, 77, 0.72);
   stroke-width: 1.4;
   transform-origin: center;
   transform-box: fill-box;
   animation: po0CityPulse 2.2s ease-out infinite both;
-  filter: drop-shadow(0 0 8px rgba(7, 193, 96, 0.82));
+  filter: drop-shadow(0 0 8px rgba(11, 143, 77, 0.82));
 }
 
 .po0-landing__atlas-reticle {
-  fill: rgba(7, 193, 96, 0.78);
+  fill: rgba(11, 143, 77, 0.78);
   opacity: 0.9;
   transform-box: fill-box;
   transform-origin: center;
-  filter: drop-shadow(0 0 5px rgba(7, 193, 96, 0.66));
+  filter: drop-shadow(0 0 5px rgba(11, 143, 77, 0.66));
   animation: po0Spin 10s linear infinite;
 }
 
@@ -549,7 +544,8 @@
   padding: 26px;
   border: 1px solid var(--po0-line);
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(13, 27, 48, 0.78), rgba(8, 16, 30, 0.6));
+  background: var(--po0-bg-1);
+  box-shadow: var(--po0-shadow-glow);
   transition: transform 0.4s ease, border-color 0.4s ease;
 }
 
@@ -691,8 +687,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 18% 36%, rgba(7, 193, 96, 0.08), transparent 52%),
-    radial-gradient(circle at 82% 70%, rgba(7, 193, 96, 0.04), transparent 54%);
+    radial-gradient(circle at 18% 36%, rgba(11, 143, 77, 0.08), transparent 52%),
+    radial-gradient(circle at 82% 70%, rgba(11, 143, 77, 0.04), transparent 54%);
   filter: blur(6px);
   opacity: 0.55;
 }
@@ -715,7 +711,7 @@
 .po0-landing__how h2 {
   margin: 0;
   font-family: var(--po0-font-display);
-  font-style: italic;
+  font-style: normal;
   font-size: clamp(2rem, 3.6vw, 2.8rem);
   font-weight: 400;
   letter-spacing: -0.005em;
@@ -725,7 +721,7 @@
 
 .po0-landing__why h2 em,
 .po0-landing__how h2 em {
-  font-style: italic;
+  font-style: normal;
   color: var(--po0-accent);
 }
 
@@ -776,12 +772,12 @@
 /* Card 2 is the "secondary" variant: neutral grayscale highlight rather
    than mixing a second hue. Misaka style favours a single accent. */
 .po0-landing__why-card:nth-child(2)::after {
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.04), transparent 65%);
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.025), transparent 65%);
 }
 
 .po0-landing__why-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(7, 193, 96, 0.35);
+  border-color: rgba(11, 143, 77, 0.35);
 }
 
 .po0-landing__why-card:hover::after {
@@ -827,7 +823,7 @@
 .po0-landing__why-card h3 {
   margin: 0;
   font-family: var(--po0-font-display);
-  font-style: italic;
+  font-style: normal;
   font-size: clamp(1.4rem, 1.8vw, 1.8rem);
   font-weight: 400;
   color: var(--po0-text-strong);
@@ -863,8 +859,8 @@
 .po0-landing__why-tags li {
   padding: 4px 10px;
   border-radius: 4px;
-  background: rgba(7, 193, 96, 0.06);
-  border: 1px solid rgba(7, 193, 96, 0.25);
+  background: rgba(11, 143, 77, 0.06);
+  border: 1px solid rgba(11, 143, 77, 0.25);
   color: var(--po0-accent);
   font-family: var(--po0-font-mono);
   font-size: 10.5px;
@@ -883,7 +879,7 @@
   margin-top: clamp(80px, 12vw, 160px);
   padding: clamp(48px, 6vw, 100px) clamp(8px, 2vw, 24px);
   border-radius: 28px;
-  background: rgba(17, 17, 17, 0.35);
+  background: rgba(255, 255, 255, 0.6);
   border: 1px solid var(--po0-line);
   overflow: hidden;
 }
@@ -894,8 +890,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse at 50% 35%, black 0%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse at 50% 35%, black 0%, transparent 75%);
@@ -913,14 +909,14 @@
 .po0-landing__how-orbit span {
   position: absolute;
   inset: 0;
-  border: 1px dashed rgba(7, 193, 96, 0.22);
+  border: 1px dashed rgba(11, 143, 77, 0.22);
   border-radius: 50%;
   animation: po0Spin 30s linear infinite;
 }
 
 .po0-landing__how-orbit span:nth-child(2) {
   inset: 60px;
-  border-color: rgba(35, 35, 35, 0.22);
+  border-color: rgba(0, 0, 0, 0.1);
   animation-duration: 22s;
   animation-direction: reverse;
 }
@@ -966,8 +962,7 @@
   right: 12%;
   height: 1px;
   background:
-    linear-gradient(90deg, rgba(7, 193, 96, 0.2), rgba(35, 35, 35, 0.4) 50%, rgba(255, 184, 77, 0.3));
-  filter: drop-shadow(0 0 6px rgba(7, 193, 96, 0.4));
+    linear-gradient(90deg, rgba(11, 143, 77, 0.3), rgba(212, 212, 216, 0.8) 50%, rgba(180, 83, 9, 0.3));
   z-index: -1;
 }
 
@@ -1001,7 +996,7 @@
 
 .po0-landing__how-step:hover {
   transform: translateY(-3px);
-  border-color: rgba(7, 193, 96, 0.35);
+  border-color: rgba(11, 143, 77, 0.35);
 }
 
 .po0-landing__how-step:hover::before { opacity: 0.7; }
@@ -1028,8 +1023,8 @@
   width: max-content;
   padding: 3px 10px;
   border-radius: 4px;
-  background: rgba(7, 193, 96, 0.06);
-  border: 1px solid rgba(7, 193, 96, 0.25);
+  background: rgba(11, 143, 77, 0.06);
+  border: 1px solid rgba(11, 143, 77, 0.25);
   color: var(--po0-accent);
   font-family: var(--po0-font-mono);
   font-size: 10px;
@@ -1040,7 +1035,7 @@
 .po0-landing__how-step h3 {
   margin: 0;
   font-family: var(--po0-font-display);
-  font-style: italic;
+  font-style: normal;
   font-size: clamp(1.3rem, 1.7vw, 1.7rem);
   font-weight: 400;
   color: var(--po0-text-strong);
