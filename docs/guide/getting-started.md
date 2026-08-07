@@ -27,6 +27,7 @@ title: 指南首页
 - [系统重装 Debian 12](/guide/tutorials/reinstall-debian)
 - [nftables 转发脚本配置](/guide/tutorials/nftables-script)
 - [nftables 手动转发配置](/guide/tutorials/nftables-port-forwarding)
+- [鸡险防火墙白名单自动加白（po0fw）](/guide/tutorials/po0fw-whitelist)
 
 ## 我需要监控或面板
 
