@@ -86,14 +86,14 @@ type StatusProbeProps = {
 
 const toneCycle: TargetLatency["tone"][] = ["green", "blue", "amber", "violet"];
 const chartColors = [
-  "#07c160", // misaka green — primary
-  "#2ee08a", // green-tint — secondary
-  "#6abdf3", // info blue — tertiary
-  "#a3a3a3", // neutral 1
-  "#737373", // neutral 2
-  "#f5a524", // amber (warn-flavored, used sparingly)
-  "#525252", // neutral 3
-  "#e0444e", // danger (reserved for actual problem lines)
+  "#0b8f4d", // brand green — primary
+  "#2679c2", // blue
+  "#7c3aed", // violet
+  "#0d9488", // teal
+  "#b45309", // amber
+  "#be185d", // magenta
+  "#52525b", // neutral
+  "#dc2626", // danger (reserved for actual problem lines)
 ];
 const chartBounds = {
   left: 72,
@@ -1131,7 +1131,7 @@ export default function StatusProbe({ compact = false }: StatusProbeProps) {
                     y1={chartBounds.top - Math.max(hoverPoint.y - 58, 48)}
                     y2={chartBounds.bottom - Math.max(hoverPoint.y - 58, 48)}
                   />
-                  <rect width="168" height="56" rx="10" />
+                  <rect width="178" height="72" rx="10" />
                   <circle cx="13" cy="15" r="4" fill={hoverPoint.color} />
                   <text x="23" y="18">
                     {hoverPoint.seriesLabel}

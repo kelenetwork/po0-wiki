@@ -501,38 +501,39 @@
 
 .chart-axis,
 .chart-empty {
-  fill: var(--po0-text-dim);
+  fill: var(--po0-text-faint);
   font-family: var(--kele-mono, monospace);
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .chart-axis-title {
-  font-size: 11px;
-  letter-spacing: 0.04em;
+  font-size: 10px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  fill: var(--po0-text-faint);
+  font-weight: 600;
 }
 
 .chart-jitter {
-  opacity: 0.2;
+  opacity: 0.12;
   stroke-linecap: round;
   stroke-width: 8;
 }
 
 .chart-line {
   fill: none;
-  stroke-width: 3.2;
+  stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.08));
 }
 
 .chart-loss-bin { rx: 2px; }
 .chart-hit-area { cursor: crosshair; fill: transparent; }
 .chart-tooltip { pointer-events: none; }
-.chart-tooltip rect { fill: var(--po0-bg-1); stroke: var(--po0-line); }
-.chart-tooltip text { fill: #edf7f4; font-family: var(--kele-mono, monospace); font-size: 11px; font-weight: 800; }
-.chart-hover-line { stroke: rgba(138, 150, 148, 0.5); stroke-dasharray: 4 4; stroke-width: 1; }
+.chart-tooltip rect { fill: rgba(255, 255, 255, 0.97); stroke: var(--po0-line-strong); }
+.chart-tooltip text { fill: var(--po0-text); font-family: var(--kele-mono, monospace); font-size: 11px; font-weight: 600; }
+.chart-hover-line { stroke: rgba(0, 0, 0, 0.25); stroke-dasharray: 4 4; stroke-width: 1; }
 
 @media (max-width: 1120px) {
   .status-layout { grid-template-columns: 1fr; }
@@ -595,33 +596,38 @@
 }
 
 .chart-plot-bg {
-  fill: rgba(0, 0, 0, 0.015);
+  fill: #ffffff;
   stroke: var(--po0-line);
   stroke-width: 1;
 }
 
+.chart-grid {
+  stroke: #f0f0f2;
+  stroke-width: 1;
+}
+
 .chart-smoke {
-  opacity: 0.13;
+  opacity: 0.08;
   mix-blend-mode: multiply;
 }
 
 .chart-line-underlay {
   fill: none;
-  stroke: var(--po0-bg);
-  stroke-width: 4;
+  stroke: #fff;
+  stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 .chart-line {
-  stroke-width: 2.65;
+  stroke-width: 1.6;
 }
 
 .chart-last-point {
-  stroke: var(--po0-accent);
-  stroke-width: 2.2;
-  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.1));
+  stroke: #fff;
+  stroke-width: 2;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.2));
 }
 
 .chart-loss-bin {
