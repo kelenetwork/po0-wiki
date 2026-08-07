@@ -73,9 +73,24 @@ powershell -ExecutionPolicy Bypass -File i.ps1 -Tokens "pgnfw_你的token"
 
 注册计划任务「po0fw」：每 10 分钟 + 网络连接事件双触发。任务计划程序里可以看到运行记录。
 
-### 安卓（Termux）
+### 安卓
 
-装 [Termux](https://termux.dev/)，然后：
+安卓主流代理客户端（Clash Meta / sing-box 等）没有 iOS 那样的脚本引擎，但加白只是一个 POST 请求，用自动化 App 做反而更简单，**不依赖任何代理客户端**。
+
+**方案一：MacroDroid（推荐，免 root）**
+
+建 2 个宏，动作都是同一个 `HTTP 请求`（方法 **POST**，URL 填 `https://124.221.69.228/api/firewall/pgnfw_你的token/add`）：
+
+1. 触发器「网络连接变化」（Wi-Fi + 移动数据都勾）→ 切网即时加白
+2. 触发器「定期触发」间隔 15 分钟 → 兜底；建议加「网络已连接」约束
+
+装好后按 App 引导关闭电池优化，否则后台会被杀。多台机器就在宏里多加几个 HTTP 请求动作；固定槽位在 URL 末尾加 `?slot=0`。
+
+**方案二：HTTP Shortcuts（开源极简）**
+
+新建快捷方式 → POST → 填加白 URL → 设置定时每 15 分钟；还可以加桌面小部件一键手动加白。
+
+**方案三：Termux（命令行党）**
 
 ```sh
 pkg install -y curl
@@ -83,7 +98,20 @@ curl -sSL https://raw.githubusercontent.com/kelenetwork/po0fw/main/install-linux
 sv-enable crond   # 启用定时任务
 ```
 
-注意 Termux 被杀后台后定时会停；建议在系统设置里给 Termux 加电池白名单。**如果你家里有软路由，优先在软路由装** —— 手机连家里 Wi-Fi 时天然被覆盖。
+Termux 被杀后台定时会停，记得加电池白名单。
+
+> **通用建议**：如果你家里有软路由，优先在软路由装 —— 手机连家里 Wi-Fi 时天然被覆盖，手机端只需要管蜂窝场景。
+
+### iOS
+
+**用代理客户端的**（Surge / Loon / Stash / QX / Shadowrocket / Egern）：直接装群友 reallinzc 的成熟模块，带面板、蜂窝标记、切网即时触发 → [po0fw iOS 版](https://po0fw.rlyio.com/)
+
+**不用代理 App 的**：iOS 自带「快捷指令」就能做：
+
+1. 新建快捷指令 → 添加操作「获取 URL 内容」→ URL 填加白地址 → 方法选 **POST**
+2. 「自动化」→ 新建个人自动化 → 触发条件「Wi-Fi」任意网络 → 运行该快捷指令，关掉「运行前询问」
+
+快捷指令没有严格定时，Wi-Fi 切换触发已覆盖主要换 IP 场景（回家/公司/热点）；蜂窝频繁换 IP 的重度用户建议用代理客户端模块。
 
 ## 常用命令
 
