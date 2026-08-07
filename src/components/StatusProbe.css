@@ -115,11 +115,11 @@
   border: 1px solid var(--po0-line);
   border-radius: 20px;
   padding: 13px;
-  background: rgba(17, 17, 17, 0.62);
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .dark .probe-row {
-  background: rgba(17, 17, 17, 0.62);
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .probe-row strong,
@@ -208,10 +208,10 @@
   padding: 6px;
   border: 1px solid var(--po0-line);
   border-radius: 999px;
-  background: rgba(17, 17, 17, 0.52);
+  background: rgba(255, 255, 255, 0.85);
 }
 
-.dark .status-tabs { background: rgba(17, 17, 17, 0.58); }
+.dark .status-tabs { background: rgba(255, 255, 255, 0.85); }
 
 .status-tabs button {
   border: 0;
@@ -276,10 +276,10 @@
   border: 1px solid var(--po0-line);
   border-radius: 22px;
   padding: 14px;
-  background: rgba(17, 17, 17, 0.52);
+  background: rgba(255, 255, 255, 0.85);
 }
 
-.dark .source-node-card { background: rgba(22, 22, 22, 0.42); }
+.dark .source-node-card { background: rgba(255, 255, 255, 0.9); }
 
 .source-node-card__main {
   justify-content: flex-start;
@@ -326,19 +326,19 @@
   border: 1px solid var(--po0-line);
   padding: 8px 12px;
   color: var(--po0-text-dim);
-  background: rgba(17, 17, 17, 0.68);
+  background: rgba(255, 255, 255, 0.85);
   cursor: pointer;
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
 .dark .source-filter button,
-.dark .status-legend button { background: rgba(22, 22, 22, 0.62); }
+.dark .status-legend button { background: rgba(255, 255, 255, 0.9); }
 
 .source-filter button:hover,
 .status-legend button:hover {
   transform: translateY(-1px);
   border-color: rgba(0, 156, 141, 0.42);
-  box-shadow: 0 12px 24px rgba(35, 35, 35, 0.1);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
 }
 
 .source-filter button.active,
@@ -524,7 +524,7 @@
   stroke-width: 3.2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 8px 14px rgba(35, 35, 35, 0.16));
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.08));
 }
 
 .chart-loss-bin { rx: 2px; }
@@ -595,7 +595,7 @@
 }
 
 .chart-plot-bg {
-  fill: rgba(255, 255, 255, 0.012);
+  fill: rgba(0, 0, 0, 0.015);
   stroke: var(--po0-line);
   stroke-width: 1;
 }
@@ -621,7 +621,7 @@
 .chart-last-point {
   stroke: var(--po0-accent);
   stroke-width: 2.2;
-  filter: drop-shadow(0 3px 8px rgba(35, 35, 35, 0.24));
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.1));
 }
 
 .chart-loss-bin {
@@ -635,7 +635,7 @@
 }
 
 .chart-tooltip rect {
-  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.26));
+  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.1));
 }
 
 @media (max-width: 900px) {

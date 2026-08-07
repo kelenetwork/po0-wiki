@@ -87,11 +87,10 @@
 .po0-landing__nav nav a {
   position: relative;
   color: var(--po0-text-dim);
-  font-family: var(--po0-font-mono);
-  font-size: 11.5px;
+  font-family: var(--po0-font-sans);
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   text-decoration: none;
   transition: color 120ms ease;
 }
@@ -174,7 +173,7 @@
   font-family: var(--po0-font-mono);
   font-size: clamp(11px, 0.95vw, 13px);
   font-weight: 600;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   display: flex;
   align-items: center;
@@ -203,9 +202,9 @@
 
 .po0-landing__hero-word {
   display: inline-block;
-  opacity: 0;
-  transform: translate3d(0, 0.4em, 0);
-  animation: po0WordIn 0.9s cubic-bezier(0.22, 0.8, 0.18, 1) forwards;
+  opacity: 1;
+  transform: none;
+  animation: po0WordIn 0.9s cubic-bezier(0.22, 0.8, 0.18, 1) backwards;
 }
 
 .po0-landing__hero-word--accent {
@@ -262,10 +261,10 @@
   color: var(--po0-text);
   background: var(--po0-bg-1);
   text-decoration: none;
-  font-family: var(--po0-font-mono);
-  font-size: 12.5px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-family: var(--po0-font-sans);
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
 }
 
@@ -276,7 +275,7 @@
 }
 
 .po0-landing__btn--primary {
-  color: #000;
+  color: #fff;
   background: var(--po0-accent);
   border-color: var(--po0-accent);
   font-weight: 700;
@@ -301,7 +300,7 @@
   color: var(--po0-faint);
   font-family: var(--po0-font-mono);
   font-size: 11px;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -518,7 +517,7 @@
   font-family: var(--po0-font-mono);
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -563,7 +562,7 @@
   font-family: var(--po0-font-mono);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.12em;
 }
 
 .po0-landing__pillars-grid p {
@@ -1029,7 +1028,7 @@
   font-family: var(--po0-font-mono);
   font-size: 10px;
   font-weight: 500;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.1em;
 }
 
 .po0-landing__how-step h3 {

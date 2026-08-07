@@ -254,7 +254,7 @@
 
 .lg-step.is-done .lg-step__num {
   background: var(--po0-accent);
-  color: #000;
+  color: #fff;
 }
 
 .lg-step.is-current .lg-step__num {
@@ -392,7 +392,7 @@
   padding: 0 24px;
   height: 41px;
   background: var(--po0-accent);
-  color: #000;
+  color: #fff;
   border: 0;
   border-radius: var(--po0-radius);
   font-family: var(--po0-font-mono);
