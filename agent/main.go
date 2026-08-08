@@ -27,6 +27,7 @@ func main() {
 		log.Fatalf("load config: %v", err)
 	}
 	hostname, _ := os.Hostname()
+	startProbeListener(cfg)
 	agent := &runner{
 		cfg:      cfg,
 		client:   newClient(cfg),

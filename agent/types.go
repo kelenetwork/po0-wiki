@@ -8,6 +8,12 @@ type Config struct {
 	ReportIntervalSeconds int    `json:"report_interval_seconds"`
 	TCPTimeoutMS          int    `json:"tcp_timeout_ms"`
 	InsecureSkipVerify    bool   `json:"insecure_skip_verify"`
+
+	// Optional visitor-probe HTTPS endpoint (wiki LG visitor latency test).
+	// Empty ProbeListen disables it entirely.
+	ProbeListen   string `json:"probe_listen,omitempty"`
+	ProbeCertFile string `json:"probe_cert_file,omitempty"`
+	ProbeKeyFile  string `json:"probe_key_file,omitempty"`
 }
 
 type Check struct {
