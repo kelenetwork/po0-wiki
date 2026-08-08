@@ -32,8 +32,8 @@ const ENTRIES: EntryDef[] = [
     label: '华南入口',
     tag: 'SOUTH · BGP',
     sourceId: 'src-rfc-ctc',
-    endpoint: '',
-    enabled: false,
+    endpoint: 'https://probe-south.kele.my:2053',
+    enabled: true,
   },
 ];
 
@@ -46,7 +46,8 @@ const EXIT_IP_TIMEOUT_MS = 6000;
 // 需要显式放行，否则请求会被工具链吞掉、测出来的是中转延迟而非真实直连。
 // 用 /24 段而非单 IP：既能覆盖入口换机，也不把确切地址摆在明面上。
 const DIRECT_RULES: { label: string; rule: string }[] = [
-  { label: '华东入口', rule: '- IP-CIDR,110.42.192.0/24,DIRECT,no-resolve' },
+  { label: '华东入口', rule: '- IP-CIDR,43.142.145.0/24,DIRECT,no-resolve' },
+  { label: '华南入口', rule: '- IP-CIDR,106.52.236.0/24,DIRECT,no-resolve' },
 ];
 
 type SampleState = {
