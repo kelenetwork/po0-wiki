@@ -2,7 +2,7 @@
 
 Po0 的「鸡险」增值服务附带防火墙白名单：开启后**只有白名单里的来源 /24 网段才能访问入站端口**。家宽 IP 经常变，手动加白很烦 —— 本教程让设备**自动加白**。
 
-脚本与全部客户端模块开源：[github.com/kelenetwork/po0fw](https://github.com/kelenetwork/po0fw) · iOS/Mac 代理客户端**一键安装页**：[kelenetwork.github.io/po0fw](https://kelenetwork.github.io/po0fw/)
+脚本与全部客户端模块开源：[github.com/kelenetwork/po0fw](https://github.com/kelenetwork/po0fw) · iOS/Mac 代理客户端**一键安装页**：[po0fw.uuuz.de](https://po0fw.uuuz.de/)
 
 ## 📋 选择你的平台
 
@@ -67,7 +67,7 @@ powershell -ExecutionPolicy Bypass -File i.ps1 -Tokens "pgnfw_你的token"
 
 ### iOS
 
-**有代理 App**（Surge / Loon / Stash / QX / 小火箭 / Egern）→ 打开**一键安装页** [kelenetwork.github.io/po0fw](https://kelenetwork.github.io/po0fw/)，点你客户端的「一键安装」按钮，装好后在模块参数里填 token 即可。带面板显示、蜂窝 📶 标记、切网即时触发 + 10 分钟 cron 兜底，功能最全。
+**有代理 App**（Surge / Loon / Stash / QX / 小火箭 / Egern）→ 打开**一键安装页** [po0fw.uuuz.de](https://po0fw.uuuz.de/)，点你客户端的「一键安装」按钮，装好后在模块参数里填 token 即可。带面板显示、蜂窝 📶 标记、切网即时触发 + 10 分钟 cron 兜底，功能最全。
 
 > 一键按钮没反应？部分浏览器拦截 App URL Scheme，点「复制链接」后到客户端里「从 URL 安装/导入」。QX 需手动把片段加进 `[task_local]`，详见安装页说明。
 > 模块部分借鉴学习自 [reallinzc/po0fw](https://github.com/reallinzc/po0fw)，感谢原作者。
