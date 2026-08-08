@@ -4,6 +4,7 @@ title: Looking Glass
 ---
 
 import LookingGlass from '../src/components/LookingGlass';
+import VisitorProbe from '../src/components/VisitorProbe';
 import Po0Shell from '../src/components/Po0Shell';
 
 <Po0Shell
@@ -12,5 +13,6 @@ import Po0Shell from '../src/components/Po0Shell';
   title={<>网络体验<em>即时检测</em>。</>}
   lead="选择发起点与目标，快速查看不同区域到 Po0 服务的连通表现与路径结果。"
 >
+  <VisitorProbe />
   <LookingGlass />
 </Po0Shell>
