@@ -9,32 +9,28 @@ other port untouched.
 - Its BGP-derived `china.txt` and `china6.txt` lists are updated daily
 - IPv4 and IPv6 are enforced in an isolated nftables table
 - Non-CN connections to TCP `2053` are rejected with a TCP reset
-- BeroDE refreshes the list daily and pushes it to both entry nodes over SSH
-- Each node loads its last known-good ruleset locally during boot, before Agent
+- Each entry node refreshes its own list daily through the HTTP(S) proxy already
+  configured on `wiki-probe-agent.service`
+- No proxy URL or credentials are duplicated into the firewall units
+- The last known-good ruleset loads locally during boot, before the Agent
 
-## Node deployment
+## Deployment
 
 Generate `rules.nft` from the repository's `china.txt` and `china6.txt`, place
 it beside `install.sh`, copy the whole directory to an entry node, then run
-`install.sh` as root. The installer snapshots the pre-change nftables ruleset
-under `/root/backups/` and does not flush or replace unrelated nftables tables.
+`install.sh` as root. The installer:
 
-## Controller deployment
+1. snapshots the pre-change nftables and unit state under `/root/backups/`;
+2. installs the boot ruleset and local daily updater;
+3. runs one real update through the Agent's existing proxy;
+4. enables `wiki-probe-cn-firewall-update.timer` only after verification.
 
-Install these files on BeroDE:
-
-- `generate_rules.py` → `/usr/local/libexec/wiki-probe-cn-firewall-generate`
-- `wiki-probe-cn-firewall-remote-apply` → `/usr/local/libexec/`
-- `wiki-probe-cn-firewall-controller-update` → `/usr/local/sbin/`
-- controller service/timer → `/etc/systemd/system/`
-
-The controller downloads these maintained files directly from GitHub:
+The updater downloads:
 
 - `https://raw.githubusercontent.com/gaoyifan/china-operator-ip/ip-lists/china.txt`
 - `https://raw.githubusercontent.com/gaoyifan/china-operator-ip/ip-lists/china6.txt`
 
-It uses the dedicated Po0 official SSH key already stored in OpenClaw secrets
-and `tools/run-remote-bash`; the private key is never copied to either entry
-node. A generated list is syntax-checked locally and again on each node before
-atomic table replacement. The timer only records success after both nodes have
-accepted the same list.
+It reads `HTTP_PROXY` / `HTTPS_PROXY` from the existing Agent unit at runtime,
+validates CIDR family and minimum list sizes, checks the nftables transaction,
+and only then replaces the active and persisted rules. A failed download or
+validation leaves the previous ruleset active.

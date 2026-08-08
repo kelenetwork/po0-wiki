@@ -5,7 +5,7 @@ Description=Daily refresh of Po0 visitor probe mainland China IP ranges
 OnCalendar=*-*-* 04:20:00
 RandomizedDelaySec=30m
 Persistent=true
-Unit=wiki-probe-cn-firewall-controller-update.service
+Unit=wiki-probe-cn-firewall-update.service
 
 [Install]
 WantedBy=timers.target

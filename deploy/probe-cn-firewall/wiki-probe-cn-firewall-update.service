@@ -1,0 +1,8 @@
+[Unit]
+Description=Refresh mainland China IP ranges for the Po0 visitor probe
+Wants=network-online.target
+After=network-online.target wiki-probe-agent.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/wiki-probe-cn-firewall-update
