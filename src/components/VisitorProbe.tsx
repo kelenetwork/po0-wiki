@@ -38,8 +38,9 @@ const ENTRIES: EntryDef[] = [
 ];
 
 const SAMPLE_COUNT = 10;
-const SAMPLE_TIMEOUT_MS = 5000;
-const WARMUP_COUNT = 2;
+const SAMPLE_TIMEOUT_MS = 8000;
+const WARMUP_COUNT = 1;
+const EXIT_IP_TIMEOUT_MS = 6000;
 
 type SampleState = {
   status: 'idle' | 'running' | 'done' | 'error';
@@ -80,13 +81,16 @@ async function measureOnce(base: string): Promise<number | null> {
   const url = `${base}/probe?t=${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const start = performance.now();
   const resp = await fetchWithTimeout(url, SAMPLE_TIMEOUT_MS);
-  return resp ? performance.now() - start : null;
+  // 只认真正到达入口的响应；204 是端点的正常返回
+  return resp && resp.ok ? performance.now() - start : null;
 }
 
+// 出口 IP 是锦上添花，绝不能拖垮或阻断延迟采样：
+// 单独超时、吞掉所有异常，失败就返回 undefined。
 async function fetchExitIp(base: string): Promise<string | undefined> {
-  const resp = await fetchWithTimeout(`${base}/ip?t=${Date.now()}`, SAMPLE_TIMEOUT_MS);
-  if (!resp) return undefined;
   try {
+    const resp = await fetchWithTimeout(`${base}/ip?t=${Date.now()}`, EXIT_IP_TIMEOUT_MS);
+    if (!resp || !resp.ok) return undefined;
     const data = (await resp.json()) as { ip?: string };
     return data.ip || undefined;
   } catch {
@@ -122,16 +126,32 @@ export default function VisitorProbe() {
 
   const runEntry = useCallback(async (entry: EntryDef) => {
     setStates((prev) => ({ ...prev, [entry.id]: { status: 'running', samples: [], failed: 0 } }));
-    const exitIp = await fetchExitIp(entry.endpoint);
-    for (let i = 0; i < WARMUP_COUNT; i++) await measureOnce(entry.endpoint);
+
+    // 出口 IP 与采样并行：它慢或失败都不该让样本卡在 0/N。
+    let exitIp: string | undefined;
+    const exitIpTask = fetchExitIp(entry.endpoint).then((ip) => {
+      exitIp = ip;
+      setStates((prev) => {
+        const cur = prev[entry.id];
+        return cur.status === 'running' ? { ...prev, [entry.id]: { ...cur, exitIp: ip } } : prev;
+      });
+    });
+
+    // 预热吃掉 DNS + TCP + TLS 握手，握手本身可能就要 1s 以上
+    await measureOnce(entry.endpoint).catch(() => null);
+
     const samples: number[] = [];
     let failed = 0;
     for (let i = 0; i < SAMPLE_COUNT; i++) {
-      const v = await measureOnce(entry.endpoint);
+      const v = await measureOnce(entry.endpoint).catch(() => null);
       if (v === null) failed += 1;
       else samples.push(v);
       setStates((prev) => ({ ...prev, [entry.id]: { status: 'running', samples: [...samples], failed, exitIp } }));
+      // 连续 3 次全败说明链路不通，早点收尾别让用户干等
+      if (failed >= 3 && samples.length === 0) break;
     }
+
+    await exitIpTask.catch(() => undefined);
     setStates((prev) => ({
       ...prev,
       [entry.id]: { status: samples.length > 0 ? 'done' : 'error', samples, failed, exitIp },
