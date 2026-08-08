@@ -1,6 +1,6 @@
 # 可乐 Wiki
 
-`wiki.kele.my` 的 Rspress 中文文档 / Wiki 项目，包含基础文档结构、服务状态占位组件，以及 Docker + Nginx 静态部署配置。
+`wiki.uuuz.de` 的 Rspress 中文文档 / Wiki 项目，包含基础文档结构、服务状态占位组件，以及 Docker + Nginx 静态部署配置。
 
 ## 技术栈
 
@@ -51,7 +51,7 @@ docker compose down
 本项目不写入系统服务，也不保存 Cloudflare 凭据。请在宿主机已有的 Cloudflare Tunnel 中添加公开主机名：
 
 ```text
-wiki.kele.my -> http://127.0.0.1:3320
+wiki.uuuz.de -> http://127.0.0.1:3320
 ```
 
 ## 目录说明

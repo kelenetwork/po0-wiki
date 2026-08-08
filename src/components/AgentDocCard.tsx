@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './AgentDocCard.css';
 
-const AGENT_PROMPT = 'Read https://wiki.kele.my/llms.txt and answer with Po0 Wiki context.';
+const AGENT_PROMPT = 'Read https://wiki.uuuz.de/llms.txt and answer with Po0 Wiki context.';
 
 type AgentDocCardProps = {
   className?: string;

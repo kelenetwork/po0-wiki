@@ -13,7 +13,7 @@ require_env() {
 require_env AGENT_ID
 require_env TOKEN
 
-HUB_URL="${HUB_URL:-https://wiki.kele.my/api/agent}"
+HUB_URL="${HUB_URL:-https://wiki.uuuz.de/api/agent}"
 RELEASE_TAG="${RELEASE_TAG:-latest}"
 BIN_PATH="${BIN_PATH:-/usr/local/bin/wiki-probe-agent}"
 CONFIG_PATH="${CONFIG_PATH:-/etc/wiki-probe-agent.json}"

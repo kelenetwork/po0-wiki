@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from '@rspress/core';
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
-const siteUrl = 'https://wiki.kele.my';
+const siteUrl = 'https://wiki.uuuz.de';
 
 const sitemapEntries = new Map<string, { filepath: string; routePath: string }>();
 
@@ -222,12 +222,12 @@ export default defineConfig({
     ['meta', { property: 'og:description', content: 'Po0 用户指南、选购参考、接入教程、Looking Glass 与实时线路状态。' }],
     ['meta', { property: 'og:site_name', content: 'Po0 Wiki' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:url', content: 'https://wiki.kele.my/' }],
-    ['meta', { property: 'og:image', content: 'https://wiki.kele.my/logo.png?v=misaka' }],
+    ['meta', { property: 'og:url', content: 'https://wiki.uuuz.de/' }],
+    ['meta', { property: 'og:image', content: 'https://wiki.uuuz.de/logo.png?v=misaka' }],
     ['meta', { name: 'twitter:card', content: 'summary' }],
     ['meta', { name: 'twitter:title', content: 'Po0 Wiki' }],
     ['meta', { name: 'twitter:description', content: 'Po0 用户指南、选购参考、接入教程、Looking Glass 与实时线路状态。' }],
-    ['meta', { name: 'twitter:image', content: 'https://wiki.kele.my/logo.png?v=misaka' }],
+    ['meta', { name: 'twitter:image', content: 'https://wiki.uuuz.de/logo.png?v=misaka' }],
     ['link', { rel: 'icon', href: '/favicon.ico?v=misaka' }],
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg?v=misaka' }],
     ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png?v=misaka' }],

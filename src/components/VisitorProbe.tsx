@@ -24,7 +24,7 @@ const ENTRIES: EntryDef[] = [
     label: '华东入口',
     tag: 'EAST · BGP',
     sourceId: 'SHBGP',
-    endpoint: 'https://probe-east.kele.my:2053',
+    endpoint: 'https://probe-east.uuuz.de:2053',
     enabled: true,
   },
   {
@@ -32,7 +32,7 @@ const ENTRIES: EntryDef[] = [
     label: '华南入口',
     tag: 'SOUTH · BGP',
     sourceId: 'src-rfc-ctc',
-    endpoint: 'https://probe-south.kele.my:2053',
+    endpoint: 'https://probe-south.uuuz.de:2053',
     enabled: true,
   },
 ];

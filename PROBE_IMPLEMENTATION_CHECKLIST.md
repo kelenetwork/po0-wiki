@@ -1,12 +1,12 @@
 # Probe / Looking Glass 实施清单
 
-目标：把 `wiki.kele.my` 从静态 Rspress Wiki 逐步升级为「Wiki + Looking Glass + TCP Probe 监控」系统。
+目标：把 `wiki.uuuz.de` 从静态 Rspress Wiki 逐步升级为「Wiki + Looking Glass + TCP Probe 监控」系统。
 
 核心约束：
 - 前台页面和 public API 不展示真实源 IP、目标 IP、端口。
 - 真实 host/port 只允许存在于后端 DB、管理接口、agent 专属任务中。
 - 大陆源机器不开放任何入站 Web/TLS 服务，只运行主动出站 agent。
-- 不新增公网暴露端口；优先复用 `https://wiki.kele.my/api/...`。
+- 不新增公网暴露端口；优先复用 `https://wiki.uuuz.de/api/...`。
 - 每批由 Codex 修改，主助手验收后才 commit / 部署。
 
 ## 执行流程
@@ -73,7 +73,7 @@
 要求：
 - docker-compose 增加 `probe-hub` 服务。
 - nginx `/api/` 反代到 `probe-hub:3331`。
-- 不新增公网端口，只通过现有 `wiki.kele.my` 访问。
+- 不新增公网端口，只通过现有 `wiki.uuuz.de` 访问。
 - 设置必要 env：`WIKI_PROBE_DB`、`WIKI_ADMIN_TOKEN`。
 
 验收：
@@ -81,7 +81,7 @@
 - `docker compose build`
 - 确认 `probe-hub` 未配置 `ports:`，只通过 compose 网络供 nginx 访问。
 - 本地 compose 启动后：`curl http://127.0.0.1:3320/api/public/probes/snapshot`
-- 线上部署后：`https://wiki.kele.my/api/public/probes/snapshot` 返回 200，且无敏感字段。
+- 线上部署后：`https://wiki.uuuz.de/api/public/probes/snapshot` 返回 200，且无敏感字段。
 
 状态：已完成，未部署。
 
@@ -535,7 +535,7 @@ I. 后端补齐
 
 ## 批次 D.2：公开仓 GitHub Release + 一键安装脚本
 
-目标：项目源代码 push 到公仓 `kelenetwork/po0-wiki`；agent 二进制托管 GitHub Release；大陆机器一行 curl 即可安装。wiki.kele.my 不再托管二进制，hub 不做安装代理。
+目标：项目源代码 push 到公仓 `kelenetwork/po0-wiki`；agent 二进制托管 GitHub Release；大陆机器一行 curl 即可安装。wiki.uuuz.de 不再托管二进制，hub 不做安装代理。
 
 ### 仓库
 - 公仓：`https://github.com/kelenetwork/po0-wiki`
@@ -556,7 +556,7 @@ I. 后端补齐
 ### scripts/install.sh
 - POSIX bash + `set -euo pipefail`。
 - 接收必填 env：`AGENT_ID`、`TOKEN`。
-- 可选 env：`HUB_URL`（默认 `https://wiki.kele.my/api/agent`）、`RELEASE_TAG`（默认 `latest`）、`BIN_PATH`、`CONFIG_PATH`、`SERVICE_NAME`、`RELEASE_BASE_URL`。
+- 可选 env：`HUB_URL`（默认 `https://wiki.uuuz.de/api/agent`）、`RELEASE_TAG`（默认 `latest`）、`BIN_PATH`、`CONFIG_PATH`、`SERVICE_NAME`、`RELEASE_BASE_URL`。
 - 自动检测 arch：`amd64 | arm64 | armv7`，否则 fail。
 - 从 GitHub Release 下载 `wiki-probe-agent-linux-${arch}` 与 `.sha256`，用 `sha256sum -c` 校验。
 - 写 binary（0755）/ config（0600）/ systemd unit（0644）。
@@ -570,7 +570,7 @@ I. 后端补齐
 
 ### Hub
 - `GET /api/admin/agents/{id}/install` 新增字段：
-  - `one_line`：`curl -fsSL https://github.com/kelenetwork/po0-wiki/releases/latest/download/install.sh | sudo AGENT_ID=$ID TOKEN=$TOKEN HUB_URL=https://wiki.kele.my/api/agent bash`。
+  - `one_line`：`curl -fsSL https://github.com/kelenetwork/po0-wiki/releases/latest/download/install.sh | sudo AGENT_ID=$ID TOKEN=$TOKEN HUB_URL=https://wiki.uuuz.de/api/agent bash`。
   - `one_line_uninstall`：`curl -fsSL https://github.com/kelenetwork/po0-wiki/releases/latest/download/uninstall.sh | sudo bash`。
   - 保留 `systemd_unit`、`config_json`、`install_command`。
 - 可通过 `WIKI_RELEASE_BASE_URL` 覆盖 release asset base URL。

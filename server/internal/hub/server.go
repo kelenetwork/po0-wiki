@@ -29,7 +29,7 @@ func NewServer(store *Store, adminToken string) *Server {
 	if releaseBaseURL == "" {
 		releaseBaseURL = defaultReleaseBaseURL
 	}
-	return &Server{store: store, adminToken: adminToken, agentHubURL: "https://wiki.kele.my/api/agent", releaseBaseURL: releaseBaseURL}
+	return &Server{store: store, adminToken: adminToken, agentHubURL: "https://wiki.uuuz.de/api/agent", releaseBaseURL: releaseBaseURL}
 }
 
 func (s *Server) Routes() http.Handler {
@@ -236,7 +236,7 @@ func validLGTool(tool string) bool {
 func runLocalLookingGlass(ctx context.Context, tool string, source Source, target AdminTarget) string {
 	var builder strings.Builder
 	fmt.Fprintf(&builder, "⚠ 测试发起点：Hub (上海) — Hub-local fallback。\n")
-	fmt.Fprintf(&builder, "   这是 wiki.kele.my 服务器本机执行，不是 agent dispatch。\n")
+	fmt.Fprintf(&builder, "   这是 wiki.uuuz.de 服务器本机执行，不是 agent dispatch。\n")
 	fmt.Fprintf(&builder, "# Looking Glass Run\n")
 	fmt.Fprintf(&builder, "# Requested source: %s (%s)\n", source.DisplayName, source.ID)
 	fmt.Fprintf(&builder, "# Execution mode: Hub-local fallback (not agent dispatch)\n")
