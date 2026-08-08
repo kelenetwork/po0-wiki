@@ -42,13 +42,11 @@ const SAMPLE_TIMEOUT_MS = 8000;
 const WARMUP_COUNT = 1;
 const EXIT_IP_TIMEOUT_MS = 6000;
 
-// 测量失败时给出的直连分流规则。入口走非标准端口，全局接管模式下
-// 需要显式放行，否则请求会被工具链吞掉。
+// 直连分流规则（Clash / Mihomo 语法）。入口走非标准端口，全局接管模式下
+// 需要显式放行，否则请求会被工具链吞掉、测出来的是中转延迟而非真实直连。
+// 用 /24 段而非单 IP：既能覆盖入口换机，也不把确切地址摆在明面上。
 const DIRECT_RULES: { label: string; rule: string }[] = [
-  { label: 'Clash / Mihomo', rule: '- DOMAIN-SUFFIX,probe-east.kele.my,DIRECT' },
-  { label: 'Surge / Loon / Stash', rule: 'DOMAIN-SUFFIX,probe-east.kele.my,DIRECT' },
-  { label: 'Quantumult X', rule: 'host-suffix, probe-east.kele.my, direct' },
-  { label: 'sing-box', rule: '{ "domain_suffix": ["probe-east.kele.my"], "outbound": "direct" }' },
+  { label: '华东入口', rule: '- IP-CIDR,110.42.192.0/24,DIRECT,no-resolve' },
 ];
 
 type SampleState = {
@@ -296,6 +294,35 @@ export default function VisitorProbe() {
               </div>
             </header>
 
+            <div className="vp-notice">
+              <div className="vp-notice__head">
+                <span className="vp-notice__icon">!</span>
+                <div>
+                  <b>开始前：让测速入口走直连</b>
+                  <p>
+                    若你开着全局接管模式的网络工具，请求会绕一圈中转，测出来的不是你的真实直连延迟。
+                    加一条规则放行即可，不影响其它任何分流配置。
+                  </p>
+                </div>
+              </div>
+              {DIRECT_RULES.map((r) => (
+                <div key={r.label} className="vp-rules__item">
+                  <span className="vp-rules__label">{r.label}</span>
+                  <code>{r.rule}</code>
+                  <button
+                    type="button"
+                    onClick={() => void copyRule(r.rule)}
+                    aria-label={`复制 ${r.label} 规则`}
+                  >
+                    {copiedRule === r.rule ? '已复制' : '复制'}
+                  </button>
+                </div>
+              ))}
+              <p className="vp-rules__note">
+                Clash / Mihomo 语法，写在 rules 顶部；其它客户端按各自格式转写同一网段即可。
+              </p>
+            </div>
+
             <div className="vp-modal__cards">
               {ENTRIES.map((entry) => {
                 const state = states[entry.id];
@@ -320,35 +347,8 @@ export default function VisitorProbe() {
                         <ol className="vp-card__hints">
                           <li>关闭浏览器的 HTTPS-Only / 严格安全模式后重试（入口使用非标准端口）</li>
                           <li>暂时停用广告拦截、隐私保护类插件（uBlock、AdGuard 等）</li>
-                          <li>若开着全局接管模式的网络工具，加一条直连规则放行本入口</li>
+                          <li>照上方提示加一条直连规则，再点「重新测试」</li>
                         </ol>
-                        <button
-                          type="button"
-                          className="vp-card__rules-toggle"
-                          onClick={() => setShowRules((v) => !v)}
-                        >
-                          {showRules ? '收起直连规则' : '查看直连分流规则'}
-                        </button>
-                        {showRules ? (
-                          <div className="vp-rules">
-                            {DIRECT_RULES.map((r) => (
-                              <div key={r.label} className="vp-rules__item">
-                                <span className="vp-rules__label">{r.label}</span>
-                                <code>{r.rule}</code>
-                                <button
-                                  type="button"
-                                  onClick={() => void copyRule(r.rule)}
-                                  aria-label={`复制 ${r.label} 规则`}
-                                >
-                                  {copiedRule === r.rule ? '已复制' : '复制'}
-                                </button>
-                              </div>
-                            ))}
-                            <p className="vp-rules__note">
-                              规则只放行本测速入口，不影响你其它任何分流配置。加完重新测试即可。
-                            </p>
-                          </div>
-                        ) : null}
                       </div>
                     ) : (
                       <>

@@ -173,6 +173,50 @@
   color: var(--po0-text);
 }
 
+/* ---- pre-test notice: make the probe endpoint bypass any global tunnel ---- */
+.vp-notice {
+  border: 1px solid var(--po0-line-strong);
+  border-radius: 12px;
+  background: var(--po0-bg-2);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.vp-notice__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.vp-notice__icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--po0-warn);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  margin-top: 1px;
+}
+
+.vp-notice__head b {
+  display: block;
+  font-size: 13px;
+  color: var(--po0-text-strong);
+  margin-bottom: 3px;
+}
+
+.vp-notice__head p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--po0-text-dim);
+}
+
 /* ---- entry cards ---- */
 .vp-modal__cards {
   display: grid;
