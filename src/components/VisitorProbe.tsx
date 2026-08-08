@@ -42,6 +42,15 @@ const SAMPLE_TIMEOUT_MS = 8000;
 const WARMUP_COUNT = 1;
 const EXIT_IP_TIMEOUT_MS = 6000;
 
+// 测量失败时给出的直连分流规则。入口走非标准端口，全局接管模式下
+// 需要显式放行，否则请求会被工具链吞掉。
+const DIRECT_RULES: { label: string; rule: string }[] = [
+  { label: 'Clash / Mihomo', rule: '- DOMAIN-SUFFIX,probe-east.kele.my,DIRECT' },
+  { label: 'Surge / Loon / Stash', rule: 'DOMAIN-SUFFIX,probe-east.kele.my,DIRECT' },
+  { label: 'Quantumult X', rule: 'host-suffix, probe-east.kele.my, direct' },
+  { label: 'sing-box', rule: '{ "domain_suffix": ["probe-east.kele.my"], "outbound": "direct" }' },
+];
+
 type SampleState = {
   status: 'idle' | 'running' | 'done' | 'error';
   samples: number[];
@@ -121,6 +130,30 @@ export default function VisitorProbe() {
   });
   const [chainEntryId, setChainEntryId] = useState<string>(enabledEntries[0]?.id ?? 'east');
   const [chainCheckId, setChainCheckId] = useState<string>('');
+  const [showRules, setShowRules] = useState(false);
+  const [copiedRule, setCopiedRule] = useState<string | null>(null);
+
+  const copyRule = useCallback(async (rule: string) => {
+    try {
+      await navigator.clipboard.writeText(rule);
+    } catch {
+      // 非安全上下文或权限被拒时回退到手动选中
+      const ta = document.createElement('textarea');
+      ta.value = rule;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+      } catch {
+        /* 复制不可用时用户仍可手动选中文本 */
+      }
+      document.body.removeChild(ta);
+    }
+    setCopiedRule(rule);
+    setTimeout(() => setCopiedRule((cur) => (cur === rule ? null : cur)), 1600);
+  }, []);
   const runningRef = useRef(false);
   const startedRef = useRef(false);
 
@@ -282,7 +315,41 @@ export default function VisitorProbe() {
                     ) : state.status === 'idle' ? (
                       <p className="vp-card__pending">等待测试…</p>
                     ) : state.status === 'error' ? (
-                      <p className="vp-card__error">测量失败 —— 可能被浏览器插件或网络策略拦截</p>
+                      <div className="vp-card__fail">
+                        <p className="vp-card__error">测量失败 —— 请求没能到达入口</p>
+                        <ol className="vp-card__hints">
+                          <li>关闭浏览器的 HTTPS-Only / 严格安全模式后重试（入口使用非标准端口）</li>
+                          <li>暂时停用广告拦截、隐私保护类插件（uBlock、AdGuard 等）</li>
+                          <li>若开着全局接管模式的网络工具，加一条直连规则放行本入口</li>
+                        </ol>
+                        <button
+                          type="button"
+                          className="vp-card__rules-toggle"
+                          onClick={() => setShowRules((v) => !v)}
+                        >
+                          {showRules ? '收起直连规则' : '查看直连分流规则'}
+                        </button>
+                        {showRules ? (
+                          <div className="vp-rules">
+                            {DIRECT_RULES.map((r) => (
+                              <div key={r.label} className="vp-rules__item">
+                                <span className="vp-rules__label">{r.label}</span>
+                                <code>{r.rule}</code>
+                                <button
+                                  type="button"
+                                  onClick={() => void copyRule(r.rule)}
+                                  aria-label={`复制 ${r.label} 规则`}
+                                >
+                                  {copiedRule === r.rule ? '已复制' : '复制'}
+                                </button>
+                              </div>
+                            ))}
+                            <p className="vp-rules__note">
+                              规则只放行本测速入口，不影响你其它任何分流配置。加完重新测试即可。
+                            </p>
+                          </div>
+                        ) : null}
+                      </div>
                     ) : (
                       <>
                         <div className={`vp-card__num ${m === null ? '' : m < 50 ? 'good' : m < 100 ? 'mid' : 'bad'}`}>
