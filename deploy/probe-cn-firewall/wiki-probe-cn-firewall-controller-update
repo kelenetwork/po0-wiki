@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly apnic_url='https://ftp.apnic.net/stats/apnic/delegated-apnic-latest'
+readonly ipv4_url='https://raw.githubusercontent.com/gaoyifan/china-operator-ip/ip-lists/china.txt'
+readonly ipv6_url='https://raw.githubusercontent.com/gaoyifan/china-operator-ip/ip-lists/china6.txt'
 readonly state_dir='/var/lib/wiki-probe-cn-firewall-controller'
 readonly generator='/usr/local/libexec/wiki-probe-cn-firewall-generate'
 readonly remote_apply='/usr/local/libexec/wiki-probe-cn-firewall-remote-apply'
@@ -41,8 +42,11 @@ trap cleanup EXIT
 
 curl --fail --location --silent --show-error \
   --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 120 \
-  "$apnic_url" --output "$work_dir/delegated-apnic-latest"
-python3 "$generator" "$work_dir/delegated-apnic-latest" "$work_dir/rules.nft"
+  "$ipv4_url" --output "$work_dir/china.txt"
+curl --fail --location --silent --show-error \
+  --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 120 \
+  "$ipv6_url" --output "$work_dir/china6.txt"
+python3 "$generator" "$work_dir/china.txt" "$work_dir/china6.txt" "$work_dir/rules.nft"
 nft --check --file "$work_dir/rules.nft"
 
 # The key has no passphrase and is never copied to either entry node.
@@ -50,14 +54,30 @@ eval "$(ssh-agent -s)" >/dev/null
 agent_started=true
 ssh-add "$identity_file" >/dev/null
 
+update_target() {
+  local host=$1
+  local attempt
+  for attempt in 1 2 3; do
+    if scp -P 22 \
+      -o StrictHostKeyChecking=yes \
+      -o BatchMode=yes \
+      -o ConnectTimeout=20 \
+      -o ConnectionAttempts=1 \
+      "$work_dir/rules.nft" "root@$host:/root/wiki-probe-cn-rules.pending.nft"; then
+      if "$run_remote_bash" "$host" 22 "$remote_apply"; then
+        return 0
+      fi
+    fi
+    printf 'Target %s update attempt %s/3 failed\n' "$host" "$attempt" >&2
+    if ((attempt < 3)); then
+      sleep $((attempt * 5))
+    fi
+  done
+  return 1
+}
+
 for host in "${targets[@]}"; do
-  scp -P 22 \
-    -o StrictHostKeyChecking=yes \
-    -o BatchMode=yes \
-    -o ConnectTimeout=15 \
-    -o ConnectionAttempts=1 \
-    "$work_dir/rules.nft" "root@$host:/root/wiki-probe-cn-rules.pending.nft"
-  "$run_remote_bash" "$host" 22 "$remote_apply"
+  update_target "$host"
 done
 
 install -m 0644 "$work_dir/rules.nft" "$state_dir/rules.nft"

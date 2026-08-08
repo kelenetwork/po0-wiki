@@ -33,8 +33,8 @@ install -m 0755 "$source_dir/wiki-probe-cn-firewall-apply" /usr/local/sbin/wiki-
 install -m 0644 "$source_dir/wiki-probe-cn-firewall.service" /etc/systemd/system/wiki-probe-cn-firewall.service
 
 # Clean up the short-lived per-node updater from the initial deployment. CN
-# entry nodes cannot reliably reach APNIC; BeroDE centrally refreshes and
-# pushes the list to both nodes instead.
+# Entry nodes cannot reliably reach GitHub; BeroDE centrally refreshes the
+# maintained CIDR lists and pushes them to both nodes instead.
 systemctl disable --now wiki-probe-cn-firewall-update.timer >/dev/null 2>&1 || true
 rm -f /etc/systemd/system/wiki-probe-cn-firewall-update.timer \
   /etc/systemd/system/wiki-probe-cn-firewall-update.service \
