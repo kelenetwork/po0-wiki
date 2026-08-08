@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
+	"net"
 	"net/http"
 	"time"
 )
@@ -22,16 +24,31 @@ func startProbeListener(cfg Config) {
 		return
 	}
 
-	mux := http.NewServeMux()
-	handler := func(w http.ResponseWriter, r *http.Request) {
+	setCommonHeaders := func(w http.ResponseWriter) {
 		h := w.Header()
 		h.Set("Access-Control-Allow-Origin", "*")
 		h.Set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
 		h.Set("Access-Control-Max-Age", "86400")
 		h.Set("Timing-Allow-Origin", "*")
 		h.Set("Cache-Control", "no-store")
+	}
+
+	mux := http.NewServeMux()
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		setCommonHeaders(w)
 		w.WriteHeader(http.StatusNoContent)
 	}
+	// /ip echoes the client IP as seen by this entry node, so visitors can
+	// confirm the measurement really went direct (not through a proxy).
+	mux.HandleFunc("/ip", func(w http.ResponseWriter, r *http.Request) {
+		setCommonHeaders(w)
+		host, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			host = r.RemoteAddr
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{"ip": host})
+	})
 	mux.HandleFunc("/probe", handler)
 	mux.HandleFunc("/", handler)
 

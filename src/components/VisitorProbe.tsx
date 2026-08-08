@@ -3,19 +3,17 @@ import { usePublicProbeSnapshot } from './probeSnapshot';
 import './VisitorProbe.css';
 
 /**
- * 访客延迟自测：浏览器直接向入口探测端点发 HTTPS 请求测 RTT，
- * 再叠加 probe-hub 的「入口 → 出口」实时数据，预估整条链路延迟。
- *
- * 端点域名只存在于代码/网络层，UI 上永远只显示入口标签（不露 IP/域名）。
+ * 访客延迟自测（弹窗版）：
+ * - LG 页只放一个轻量入口条，不抢 LG 工具的视觉焦点
+ * - 弹窗内：入口卡实测 RTT + 出口 IP 回显（确认直连）+ 链路下拉单条查询
+ * - UI 上永远只显示入口标签，不露 IP/域名（端点域名只存在于网络层）
  */
 
 type EntryDef = {
   id: string;
   label: string;
   tag: string;
-  /** probe-hub 中对应的 source id，用于叠加第二段链路 */
   sourceId: string;
-  /** 浏览器探测端点（不在 UI 中展示） */
   endpoint: string;
   enabled: boolean;
 };
@@ -26,7 +24,7 @@ const ENTRIES: EntryDef[] = [
     label: '华东入口',
     tag: 'EAST · BGP',
     sourceId: 'SHBGP',
-    endpoint: 'https://probe-east.kele.my:2053/probe',
+    endpoint: 'https://probe-east.kele.my:2053',
     enabled: true,
   },
   {
@@ -35,7 +33,7 @@ const ENTRIES: EntryDef[] = [
     tag: 'SOUTH · BGP',
     sourceId: 'src-rfc-ctc',
     endpoint: '',
-    enabled: false, // 官方机器到位后开启
+    enabled: false,
   },
 ];
 
@@ -47,15 +45,7 @@ type SampleState = {
   status: 'idle' | 'running' | 'done' | 'error';
   samples: number[];
   failed: number;
-  error?: string;
-};
-
-type EntryResult = {
-  median: number | null;
-  min: number | null;
-  jitter: number | null;
-  ok: number;
-  total: number;
+  exitIp?: string;
 };
 
 function median(values: number[]): number {
@@ -64,33 +54,21 @@ function median(values: number[]): number {
   return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 
-function computeResult(state: SampleState): EntryResult {
+function statsOf(state: SampleState) {
   const s = state.samples;
-  if (s.length === 0) {
-    return { median: null, min: null, jitter: null, ok: 0, total: state.samples.length + state.failed };
-  }
+  if (s.length === 0) return { median: null as number | null, min: null as number | null, jitter: null as number | null, ok: 0 };
   let minV = s[0];
   for (let i = 1; i < s.length; i++) if (s[i] < minV) minV = s[i];
   const med = median(s);
-  const deviations = s.map((v) => Math.abs(v - med));
-  const jitter = deviations.length ? median(deviations) : 0;
-  return { median: med, min: minV, jitter, ok: s.length, total: s.length + state.failed };
+  const jitter = median(s.map((v) => Math.abs(v - med)));
+  return { median: med, min: minV, jitter, ok: s.length };
 }
 
-async function measureOnce(endpoint: string): Promise<number | null> {
+async function fetchWithTimeout(url: string, ms: number): Promise<Response | null> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), SAMPLE_TIMEOUT_MS);
-  const url = `${endpoint}?t=${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const start = performance.now();
+  const timer = setTimeout(() => controller.abort(), ms);
   try {
-    await fetch(url, {
-      method: 'GET',
-      mode: 'cors',
-      cache: 'no-store',
-      credentials: 'omit',
-      signal: controller.signal,
-    });
-    return performance.now() - start;
+    return await fetch(url, { mode: 'cors', cache: 'no-store', credentials: 'omit', signal: controller.signal });
   } catch {
     return null;
   } finally {
@@ -98,12 +76,22 @@ async function measureOnce(endpoint: string): Promise<number | null> {
   }
 }
 
-function qualityFor(ms: number | null): { cls: string; text: string } {
-  if (ms === null) return { cls: 'na', text: '无法完成测量 —— 可能被浏览器插件或网络策略拦截' };
-  if (ms < 20) return { cls: 'good', text: '延迟优秀 —— 非常适合作为你的主力入口' };
-  if (ms < 50) return { cls: 'good', text: '延迟良好 —— 日常使用体验稳定' };
-  if (ms < 100) return { cls: 'mid', text: '延迟一般 —— 可用，但可能不是最近的入口' };
-  return { cls: 'bad', text: '延迟偏高 —— 你的位置可能离该入口较远' };
+async function measureOnce(base: string): Promise<number | null> {
+  const url = `${base}/probe?t=${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const start = performance.now();
+  const resp = await fetchWithTimeout(url, SAMPLE_TIMEOUT_MS);
+  return resp ? performance.now() - start : null;
+}
+
+async function fetchExitIp(base: string): Promise<string | undefined> {
+  const resp = await fetchWithTimeout(`${base}/ip?t=${Date.now()}`, SAMPLE_TIMEOUT_MS);
+  if (!resp) return undefined;
+  try {
+    const data = (await resp.json()) as { ip?: string };
+    return data.ip || undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function fmtMs(v: number | null | undefined, digits = 1): string {
@@ -111,20 +99,30 @@ function fmtMs(v: number | null | undefined, digits = 1): string {
   return v.toFixed(digits);
 }
 
+function qualityText(ms: number): string {
+  if (ms < 20) return '延迟优秀 —— 非常适合作为你的主力入口';
+  if (ms < 50) return '延迟良好 —— 日常使用体验稳定';
+  if (ms < 100) return '延迟一般 —— 可用，但可能不是最近的入口';
+  return '延迟偏高 —— 你的位置可能离该入口较远';
+}
+
 export default function VisitorProbe() {
   const { snapshot } = usePublicProbeSnapshot();
   const enabledEntries = useMemo(() => ENTRIES.filter((e) => e.enabled), []);
+  const [open, setOpen] = useState(false);
   const [states, setStates] = useState<Record<string, SampleState>>(() => {
     const init: Record<string, SampleState> = {};
     for (const e of ENTRIES) init[e.id] = { status: 'idle', samples: [], failed: 0 };
     return init;
   });
   const [chainEntryId, setChainEntryId] = useState<string>(enabledEntries[0]?.id ?? 'east');
+  const [chainCheckId, setChainCheckId] = useState<string>('');
   const runningRef = useRef(false);
+  const startedRef = useRef(false);
 
   const runEntry = useCallback(async (entry: EntryDef) => {
     setStates((prev) => ({ ...prev, [entry.id]: { status: 'running', samples: [], failed: 0 } }));
-    // 预热：吃掉 DNS + TCP + TLS 握手，不计入样本
+    const exitIp = await fetchExitIp(entry.endpoint);
     for (let i = 0; i < WARMUP_COUNT; i++) await measureOnce(entry.endpoint);
     const samples: number[] = [];
     let failed = 0;
@@ -132,19 +130,11 @@ export default function VisitorProbe() {
       const v = await measureOnce(entry.endpoint);
       if (v === null) failed += 1;
       else samples.push(v);
-      setStates((prev) => ({
-        ...prev,
-        [entry.id]: { status: 'running', samples: [...samples], failed },
-      }));
+      setStates((prev) => ({ ...prev, [entry.id]: { status: 'running', samples: [...samples], failed, exitIp } }));
     }
     setStates((prev) => ({
       ...prev,
-      [entry.id]: {
-        status: samples.length > 0 ? 'done' : 'error',
-        samples,
-        failed,
-        error: samples.length > 0 ? undefined : '所有请求均失败',
-      },
+      [entry.id]: { status: samples.length > 0 ? 'done' : 'error', samples, failed, exitIp },
     }));
   }, []);
 
@@ -152,26 +142,36 @@ export default function VisitorProbe() {
     if (runningRef.current) return;
     runningRef.current = true;
     try {
-      for (const entry of enabledEntries) {
-        await runEntry(entry);
-      }
+      for (const entry of enabledEntries) await runEntry(entry);
     } finally {
       runningRef.current = false;
     }
   }, [enabledEntries, runEntry]);
 
+  // 弹窗首次打开时自动测一轮
   useEffect(() => {
-    // 进入页面自动跑一轮（仅启用的入口）
-    void runAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (open && !startedRef.current) {
+      startedRef.current = true;
+      void runAll();
+    }
+  }, [open, runAll]);
+
+  // ESC 关闭
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
 
   const anyRunning = Object.values(states).some((s) => s.status === 'running');
 
-  // 链路预估：选中入口 → probe-hub 中该 source 的所有出口 check
   const chainEntry = ENTRIES.find((e) => e.id === chainEntryId) ?? enabledEntries[0];
-  const chainResult = chainEntry ? computeResult(states[chainEntry.id]) : null;
-  const chainChecks = useMemo(() => {
+  const chainStats = chainEntry ? statsOf(states[chainEntry.id]) : null;
+
+  const chainOptions = useMemo(() => {
     if (!chainEntry) return [];
     return snapshot.checks
       .filter((c) => c.source_id === chainEntry.sourceId && c.latency_ms > 0)
@@ -179,179 +179,186 @@ export default function VisitorProbe() {
         const target = snapshot.targets.find((t) => t.id === c.target_id);
         return {
           id: c.id,
-          targetName: target?.display_name || c.display_name,
-          targetRegion: target?.region || '',
+          name: target?.display_name || c.display_name,
+          region: target?.region || '',
           latency: c.latency_ms,
-          status: c.status,
         };
       })
       .sort((a, b) => a.latency - b.latency);
   }, [snapshot, chainEntry]);
 
+  useEffect(() => {
+    // 入口切换 / 数据更新后，默认选延迟最低的一条
+    if (chainOptions.length > 0 && !chainOptions.some((o) => o.id === chainCheckId)) {
+      setChainCheckId(chainOptions[0].id);
+    }
+  }, [chainOptions, chainCheckId]);
+
+  const selectedChain = chainOptions.find((o) => o.id === chainCheckId) ?? null;
+
+  // 入口条上的摘要：已完成的最低中位数
+  const summary = useMemo(() => {
+    const done = enabledEntries
+      .map((e) => ({ e, st: statsOf(states[e.id]), status: states[e.id].status }))
+      .filter((x) => x.status === 'done' && x.st.median !== null);
+    if (done.length === 0) return null;
+    const best = done.reduce((a, b) => ((a.st.median ?? 1e9) <= (b.st.median ?? 1e9) ? a : b));
+    return { label: best.e.label, ms: best.st.median as number };
+  }, [states, enabledEntries]);
+
   return (
-    <section className="visitor-probe" aria-label="访客延迟自测">
-      <header className="visitor-probe__head">
-        <div>
-          <p className="visitor-probe__kicker">Visitor Probe · 访客自测</p>
-          <h3>测测你到 Po0 入口的延迟</h3>
-          <p className="visitor-probe__sub">
-            从你当前的网络直接向入口发起测量（HTTPS 往返，非 ICMP），并结合入口到出口的实时探测数据预估整条链路。
-          </p>
+    <>
+      <div className="vp-bar">
+        <div className="vp-bar__text">
+          <span className="vp-bar__dot" />
+          <span>
+            <b>访客自测</b> · 测测你到 Po0 入口的实际延迟
+            {summary ? (
+              <em className="vp-bar__summary">
+                （上次：{summary.label} {fmtMs(summary.ms)}ms）
+              </em>
+            ) : null}
+          </span>
         </div>
-        <button
-          type="button"
-          className="visitor-probe__run"
-          onClick={() => void runAll()}
-          disabled={anyRunning}
-        >
-          {anyRunning ? '测试中…' : '▶ 重新测试'}
+        <button type="button" className="vp-bar__btn" onClick={() => setOpen(true)}>
+          开始测试
         </button>
-      </header>
+      </div>
 
-      <div className="visitor-probe__targets">
-        {ENTRIES.map((entry) => {
-          const state = states[entry.id];
-          const result = computeResult(state);
-          const quality = entry.enabled ? qualityFor(state.status === 'done' ? result.median : state.status === 'error' ? null : result.median) : null;
-          const heights = state.samples.map((v) => {
-            const max = Math.max(...state.samples, 1);
-            return Math.max(18, Math.round((v / max) * 100));
-          });
-          const medianV = result.median;
-          return (
-            <article key={entry.id} className={`visitor-probe__card${entry.enabled ? '' : ' is-pending'}`}>
-              <div className="visitor-probe__card-head">
-                <span className="visitor-probe__name">
-                  <i className={entry.enabled ? 'on' : 'off'} />
-                  {entry.label}
-                </span>
-                <span className="visitor-probe__tag">{entry.tag}</span>
+      {open ? (
+        <div className="vp-modal" role="dialog" aria-modal="true" aria-label="访客延迟自测" onClick={(e) => e.target === e.currentTarget && setOpen(false)}>
+          <div className="vp-modal__panel">
+            <header className="vp-modal__head">
+              <div>
+                <p className="vp-modal__kicker">Visitor Probe</p>
+                <h3>你到 Po0 入口的延迟</h3>
               </div>
+              <div className="vp-modal__actions">
+                <button type="button" className="vp-modal__rerun" onClick={() => void runAll()} disabled={anyRunning}>
+                  {anyRunning ? '测试中…' : '重新测试'}
+                </button>
+                <button type="button" className="vp-modal__close" onClick={() => setOpen(false)} aria-label="关闭">
+                  ✕
+                </button>
+              </div>
+            </header>
 
-              {!entry.enabled ? (
-                <p className="visitor-probe__pending">待接入 —— 官方机器上线后开放测试</p>
-              ) : state.status === 'idle' ? (
-                <p className="visitor-probe__pending">等待测试…</p>
-              ) : state.status === 'error' ? (
-                <p className="visitor-probe__error">测量失败：{state.error}</p>
-              ) : (
-                <>
-                  <div
-                    className={`visitor-probe__bignum ${
-                      medianV === null ? '' : medianV < 50 ? 'good' : medianV < 100 ? 'mid' : 'bad'
-                    }`}
-                  >
-                    {state.status === 'running' && state.samples.length === 0 ? (
-                      <span className="visitor-probe__spinner">测量中…</span>
+            <div className="vp-modal__cards">
+              {ENTRIES.map((entry) => {
+                const state = states[entry.id];
+                const st = statsOf(state);
+                const m = st.median;
+                return (
+                  <article key={entry.id} className={`vp-card${entry.enabled ? '' : ' is-pending'}`}>
+                    <div className="vp-card__head">
+                      <span className="vp-card__name">
+                        <i className={entry.enabled ? 'on' : 'off'} />
+                        {entry.label}
+                      </span>
+                      <span className="vp-card__tag">{entry.tag}</span>
+                    </div>
+                    {!entry.enabled ? (
+                      <p className="vp-card__pending">待接入 —— 官方机器上线后开放</p>
+                    ) : state.status === 'idle' ? (
+                      <p className="vp-card__pending">等待测试…</p>
+                    ) : state.status === 'error' ? (
+                      <p className="vp-card__error">测量失败 —— 可能被浏览器插件或网络策略拦截</p>
                     ) : (
                       <>
-                        {fmtMs(medianV)}
-                        <small>ms</small>
+                        <div className={`vp-card__num ${m === null ? '' : m < 50 ? 'good' : m < 100 ? 'mid' : 'bad'}`}>
+                          {state.status === 'running' && state.samples.length === 0 ? (
+                            <span className="vp-card__wait">测量中…</span>
+                          ) : (
+                            <>
+                              {fmtMs(m)}
+                              <small>ms</small>
+                            </>
+                          )}
+                        </div>
+                        <div className="vp-card__meta">
+                          <span>
+                            最低 <b>{fmtMs(st.min)}</b>
+                          </span>
+                          <span>
+                            抖动 <b>±{fmtMs(st.jitter)}</b>
+                          </span>
+                          <span>
+                            样本 <b>{st.ok}/{SAMPLE_COUNT}</b>
+                          </span>
+                        </div>
+                        {state.exitIp ? (
+                          <div className="vp-card__exit">
+                            入口看到你的 IP：<code>{state.exitIp}</code>
+                            <span className="vp-card__exit-hint">与你的宽带出口一致 = 直连测量有效；若是代理 IP 说明请求被代理接管</span>
+                          </div>
+                        ) : null}
+                        {state.status === 'done' && m !== null ? (
+                          <span className={`vp-card__quality ${m < 50 ? 'good' : m < 100 ? 'mid' : 'bad'}`}>{qualityText(m)}</span>
+                        ) : null}
                       </>
                     )}
-                  </div>
-                  <div className="visitor-probe__meta">
-                    <span>
-                      最低 <b>{fmtMs(result.min)}</b>
-                    </span>
-                    <span>
-                      抖动 <b>±{fmtMs(result.jitter)}</b>
-                    </span>
-                    <span>
-                      样本{' '}
-                      <b>
-                        {result.ok}/{state.status === 'running' ? SAMPLE_COUNT : result.total}
-                      </b>
-                    </span>
-                  </div>
-                  <div className="visitor-probe__spark" aria-hidden="true">
-                    {Array.from({ length: SAMPLE_COUNT }).map((_, i) => (
-                      <span
-                        key={i}
-                        className={heights[i] !== undefined && state.samples[i] > (medianV ?? 0) * 1.5 ? 'hi' : ''}
-                        style={{ height: `${heights[i] ?? 4}%`, opacity: heights[i] === undefined ? 0.25 : 1 }}
-                      />
-                    ))}
-                  </div>
-                  {state.status === 'done' && quality ? (
-                    <span className={`visitor-probe__quality ${quality.cls}`}>{quality.text}</span>
-                  ) : null}
-                </>
-              )}
-            </article>
-          );
-        })}
-      </div>
-
-      <div className="visitor-probe__chain">
-        <div className="visitor-probe__chain-head">
-          <div>
-            <h4>整条链路预估</h4>
-            <p>你的实测延迟 + 入口→出口的后端实时探测数据叠加</p>
-          </div>
-          {enabledEntries.length > 1 && (
-            <div className="visitor-probe__chain-switch" role="tablist" aria-label="选择入口">
-              {enabledEntries.map((e) => (
-                <button
-                  key={e.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={chainEntryId === e.id}
-                  className={chainEntryId === e.id ? 'on' : ''}
-                  onClick={() => setChainEntryId(e.id)}
-                >
-                  {e.label}
-                </button>
-              ))}
+                  </article>
+                );
+              })}
             </div>
-          )}
-        </div>
 
-        {!chainEntry || chainResult?.median == null ? (
-          <p className="visitor-probe__chain-empty">先完成上方的入口延迟测试，再查看链路预估。</p>
-        ) : chainChecks.length === 0 ? (
-          <p className="visitor-probe__chain-empty">该入口暂无出口探测数据。</p>
-        ) : (
-          <div className="visitor-probe__chain-rows">
-            {chainChecks.map((chk) => {
-              const total = (chainResult.median ?? 0) + chk.latency;
-              return (
-                <div className="visitor-probe__chain-row" key={chk.id}>
-                  <div className="visitor-probe__hop">
+            <div className="vp-chain">
+              <div className="vp-chain__pickers">
+                <h4>链路预估</h4>
+                {enabledEntries.length > 1 ? (
+                  <select value={chainEntryId} onChange={(e) => setChainEntryId(e.target.value)} aria-label="选择入口">
+                    {enabledEntries.map((e) => (
+                      <option key={e.id} value={e.id}>
+                        {e.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : null}
+                <select value={chainCheckId} onChange={(e) => setChainCheckId(e.target.value)} aria-label="选择出口线路">
+                  {chainOptions.length === 0 ? <option value="">暂无出口探测数据</option> : null}
+                  {chainOptions.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.name}（{fmtMs(o.latency, 0)}ms）
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {chainEntry && selectedChain && chainStats?.median != null ? (
+                <div className="vp-chain__row">
+                  <div className="vp-chain__hop">
                     <span className="lbl">你</span>
-                    <span className="sub">本机网络</span>
                   </div>
-                  <div className="visitor-probe__link">
-                    <span className="ms">{fmtMs(chainResult.median)}ms 实测</span>
+                  <div className="vp-chain__link">
+                    <span className="ms">{fmtMs(chainStats.median)}ms 实测</span>
                     <div className="line" />
                   </div>
-                  <div className="visitor-probe__hop">
+                  <div className="vp-chain__hop">
                     <span className="lbl">{chainEntry.label}</span>
-                    <span className="sub">{chainEntry.tag.split(' ')[0]}</span>
                   </div>
-                  <div className="visitor-probe__link">
-                    <span className="ms est">≈{fmtMs(chk.latency)}ms 探测</span>
+                  <div className="vp-chain__link">
+                    <span className="ms est">≈{fmtMs(selectedChain.latency)}ms 探测</span>
                     <div className="line" />
                   </div>
-                  <div className="visitor-probe__hop">
-                    <span className="lbl">{chk.targetName}</span>
-                    <span className="sub">{chk.targetRegion}</span>
+                  <div className="vp-chain__hop">
+                    <span className="lbl">{selectedChain.name}</span>
                   </div>
-                  <div className="visitor-probe__total">
+                  <div className="vp-chain__total">
                     <span className="t1">Total est.</span>
-                    <span className="t2">≈{fmtMs(total, 0)}ms</span>
+                    <span className="t2">≈{fmtMs((chainStats.median ?? 0) + selectedChain.latency, 0)}ms</span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              ) : (
+                <p className="vp-chain__empty">完成入口测试后即可查看链路预估。</p>
+              )}
 
-        <p className="visitor-probe__note">
-          <b>说明：</b>
-          你的延迟为浏览器 HTTPS 往返实测（略高于 ICMP ping 1–3ms）；入口→出口段来自后端探针近期均值；总延迟为两段叠加的估算，实际体验受晚高峰、协议开销等影响。
-        </p>
-      </div>
-    </section>
+              <p className="vp-chain__note">
+                你的延迟为浏览器 HTTPS 往返实测（略高于 ICMP ping 1–3ms）；入口→出口来自后端探针近期均值；总延迟为估算，实际受晚高峰与协议开销影响。
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
