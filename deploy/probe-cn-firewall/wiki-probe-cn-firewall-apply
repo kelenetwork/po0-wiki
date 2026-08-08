@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+rules_file=${1:-/etc/wiki-probe-cn-firewall/rules.nft}
+[[ -r "$rules_file" ]] || {
+  printf 'Rules file is not readable: %s\n' "$rules_file" >&2
+  exit 66
+}
+
+transaction=$(mktemp)
+trap 'rm -f "$transaction"' EXIT
+
+if nft list table inet wiki_probe_cn >/dev/null 2>&1; then
+  printf '%s\n' 'delete table inet wiki_probe_cn' >"$transaction"
+fi
+cat "$rules_file" >>"$transaction"
+
+nft --check --file "$transaction"
+nft --file "$transaction"
+nft list table inet wiki_probe_cn >/dev/null

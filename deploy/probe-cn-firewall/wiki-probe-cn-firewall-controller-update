@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly apnic_url='https://ftp.apnic.net/stats/apnic/delegated-apnic-latest'
+readonly state_dir='/var/lib/wiki-probe-cn-firewall-controller'
+readonly generator='/usr/local/libexec/wiki-probe-cn-firewall-generate'
+readonly remote_apply='/usr/local/libexec/wiki-probe-cn-firewall-remote-apply'
+readonly run_remote_bash='/root/.openclaw/workspace/tools/run-remote-bash'
+readonly identity_file='/root/.openclaw/secrets/fleet/keys/po0-official-2026.key'
+readonly -a targets=('43.142.145.131' '106.52.236.170')
+
+for cmd in curl python3 nft ssh-agent ssh-add scp flock; do
+  command -v "$cmd" >/dev/null 2>&1 || {
+    printf 'Missing dependency: %s\n' "$cmd" >&2
+    exit 69
+  }
+done
+for path in "$generator" "$remote_apply" "$run_remote_bash" "$identity_file"; do
+  [[ -r "$path" ]] || {
+    printf 'Required file is not readable: %s\n' "$path" >&2
+    exit 66
+  }
+done
+
+install -d -m 0755 "$state_dir"
+exec 9>"$state_dir/update.lock"
+flock -n 9 || {
+  printf '%s\n' 'Another firewall update is already running' >&2
+  exit 75
+}
+
+work_dir=$(mktemp -d "$state_dir/update.XXXXXX")
+agent_started=false
+cleanup() {
+  rm -rf "$work_dir"
+  if [[ "$agent_started" == true ]]; then
+    ssh-agent -k >/dev/null 2>&1 || true
+  fi
+}
+trap cleanup EXIT
+
+curl --fail --location --silent --show-error \
+  --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 120 \
+  "$apnic_url" --output "$work_dir/delegated-apnic-latest"
+python3 "$generator" "$work_dir/delegated-apnic-latest" "$work_dir/rules.nft"
+nft --check --file "$work_dir/rules.nft"
+
+# The key has no passphrase and is never copied to either entry node.
+eval "$(ssh-agent -s)" >/dev/null
+agent_started=true
+ssh-add "$identity_file" >/dev/null
+
+for host in "${targets[@]}"; do
+  scp -P 22 \
+    -o StrictHostKeyChecking=yes \
+    -o BatchMode=yes \
+    -o ConnectTimeout=15 \
+    -o ConnectionAttempts=1 \
+    "$work_dir/rules.nft" "root@$host:/root/wiki-probe-cn-rules.pending.nft"
+  "$run_remote_bash" "$host" 22 "$remote_apply"
+done
+
+install -m 0644 "$work_dir/rules.nft" "$state_dir/rules.nft"
+date --iso-8601=seconds >"$state_dir/last-success"
+printf 'CONTROLLER_UPDATE_COMPLETE targets=%s\n' "${#targets[@]}"

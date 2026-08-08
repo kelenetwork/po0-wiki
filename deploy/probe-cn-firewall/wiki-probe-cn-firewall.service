@@ -1,0 +1,12 @@
+[Unit]
+Description=Restrict Po0 visitor probe to mainland China IP ranges
+After=local-fs.target nftables.service
+Before=wiki-probe-agent.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/wiki-probe-cn-firewall-apply
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

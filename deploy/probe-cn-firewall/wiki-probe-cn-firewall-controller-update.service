@@ -1,0 +1,8 @@
+[Unit]
+Description=Refresh and deploy mainland China IP ranges for Po0 visitor probes
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/wiki-probe-cn-firewall-controller-update
