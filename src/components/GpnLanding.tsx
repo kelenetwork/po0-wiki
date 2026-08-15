@@ -113,17 +113,17 @@ export default function GpnLanding() {
           <div className="gpn-prereq">
             <div className="gpn-pcard gpn-rv">
               <span className="gpn-badge">限制 1</span>
-              <h3>🖥 VPS 仅支持 KFC 网段</h3>
+              <h3>VPS 仅支持 KFC 网段</h3>
               <p>网关必须部署在 <b>KFCHOST 的机器 / 网段</b>上，内网卡流量才能到达。其他厂商的 VPS 目前不可用。</p>
             </div>
             <div className="gpn-pcard gpn-rv">
               <span className="gpn-badge">限制 2</span>
-              <h3>📶 仅支持浙江联通卡</h3>
+              <h3>仅支持浙江联通卡</h3>
               <p>5GPN 内网卡目前仅支持<b>浙江联通</b>，需要自行办理；办卡后在 KFCHOST 控制台绑定即可接入。</p>
             </div>
             <div className="gpn-pcard gpn-rv">
               <span className="gpn-badge">前提 3</span>
-              <h3>🌐 一个自有域名</h3>
+              <h3>一个自有域名</h3>
               <p>用于签发 TLS 证书与手机接入，需要能修改 DNS A 记录；Cloudflare 必须使用灰云直连。</p>
             </div>
           </div>
@@ -136,12 +136,12 @@ export default function GpnLanding() {
           <h2 className="gpn-rv">一套清楚、可控的服务端策略</h2>
           <p className="gpn-desc gpn-rv">不碰系统定位，不安装根证书，也不解密用户流量；只处理加密 DNS 决策与网关转发。</p>
           <div className="gpn-grid">
-            <div className="gpn-card gpn-rv"><div className="gpn-ic">📱</div><h3>手机零代理客户端</h3><p>iOS 装一张系统描述文件，Android 使用系统私人 DNS。没有代理 App、订阅导入或常驻 VPN 图标。</p></div>
-            <div className="gpn-card gpn-rv"><div className="gpn-ic">📶</div><h3>iOS Wi-Fi 零影响</h3><p>蜂窝 DNS 描述文件只在蜂窝网络启用，连接家庭或公司 Wi-Fi 后自动停用。</p></div>
-            <div className="gpn-card gpn-rv"><div className="gpn-ic">🧭</div><h3>国内外有序分流</h3><p>域名规则、GEOIP 与自定义策略按 first-match 执行；国内手机直连，国外进入指定出口。</p></div>
-            <div className="gpn-card gpn-rv"><div className="gpn-ic">🛡️</div><h3>DNS 广告拦截<span className="gpn-new">v0.13.1</span></h3><p>anti-AD 规则、白名单、最近命中与高频域名一体化；规则每 24 小时刷新。</p></div>
-            <div className="gpn-card gpn-rv"><div className="gpn-ic">🌐</div><h3>多出口热切换</h3><p>本机公网或 mihomo 节点均可作为国外出口，切换前先做真实端到端验证。</p></div>
-            <div className="gpn-card gpn-rv"><div className="gpn-ic">🩺</div><h3>管理与逐层诊断</h3><p>Bot 与内网 Web 共用同一套动作；策略、出口、连接、应用层故障可以逐层定位。</p></div>
+            <div className="gpn-card gpn-rv"><div className="gpn-ic">APP</div><h3>手机零代理客户端</h3><p>iOS 装一张系统描述文件，Android 使用系统私人 DNS。没有代理 App、订阅导入或常驻 VPN 图标。</p></div>
+            <div className="gpn-card gpn-rv"><div className="gpn-ic">iOS</div><h3>iOS Wi-Fi 零影响</h3><p>蜂窝 DNS 描述文件只在蜂窝网络启用，连接家庭或公司 Wi-Fi 后自动停用。</p></div>
+            <div className="gpn-card gpn-rv"><div className="gpn-ic">DNS</div><h3>国内外有序分流</h3><p>域名规则、GEOIP 与自定义策略按 first-match 执行；国内手机直连，国外进入指定出口。</p></div>
+            <div className="gpn-card gpn-rv"><div className="gpn-ic">AD</div><h3>DNS 广告拦截<span className="gpn-new">v0.13.1</span></h3><p>anti-AD 规则、白名单、最近命中与高频域名一体化；规则每 24 小时刷新。</p></div>
+            <div className="gpn-card gpn-rv"><div className="gpn-ic">NET</div><h3>多出口热切换</h3><p>本机公网或 mihomo 节点均可作为国外出口，切换前先做真实端到端验证。</p></div>
+            <div className="gpn-card gpn-rv"><div className="gpn-ic">OPS</div><h3>管理与逐层诊断</h3><p>Bot 与内网 Web 共用同一套动作；策略、出口、连接、应用层故障可以逐层定位。</p></div>
           </div>
         </div>
       </section>
@@ -183,7 +183,7 @@ export default function GpnLanding() {
           <p className="gpn-desc gpn-rv">iOS 只有一张蜂窝 DNS 描述文件；Android 使用系统私人 DNS。两者共享同一套规则、出口与广告拦截。</p>
           <div className="gpn-access-grid">
             <article className="gpn-access gpn-rv">
-              <h3>🍎 iPhone / iPad <span className="gpn-rec">仅蜂窝生效</span></h3>
+              <h3>iPhone / iPad <span className="gpn-rec">仅蜂窝生效</span></h3>
               <p>Bot → 客户端接入 → 获取 iOS 描述文件，随后在「VPN 与设备管理」安装。连接 Wi-Fi 后自动停用。</p>
               <div className="gpn-kv">
                 <div><b>系统要求</b><span>iOS / iPadOS 17+</span></div>
@@ -193,7 +193,7 @@ export default function GpnLanding() {
               </div>
             </article>
             <article className="gpn-access gpn-rv">
-              <h3>🤖 Android <span className="gpn-rec gpn-rec-mute">系统私人 DNS</span></h3>
+              <h3>Android <span className="gpn-rec gpn-rec-mute">系统私人 DNS</span></h3>
               <p>设置 → 网络和互联网 → 私人 DNS，选择指定主机名并填入网关域名。无需安装任何应用。</p>
               <div className="gpn-kv">
                 <div><b>系统要求</b><span>Android 9+</span></div>
