@@ -253,6 +253,7 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '指南', link: '/guide/getting-started' },
+      { text: '5GPN', link: '/5gpn' },
       { text: '服务状态', link: '/status' },
       { text: 'Looking Glass', link: '/looking-glass' },
     ],
@@ -308,6 +309,18 @@ export default defineConfig({
             { text: '怎么看延迟、丢包和路由波动', link: '/guide/notes/latency-packet-loss-routing' },
             { text: '使用前需要确认的限制', link: '/guide/notes/pre-use-limitations' },
             { text: '故障反馈应该提供哪些信息', link: '/guide/notes/troubleshooting-feedback' },
+          ],
+        },
+        {
+          text: '5GPN 网关',
+          items: [
+            { text: '5GPN 是什么 · 适合谁', link: '/guide/5gpn/what-is-5gpn' },
+            { text: '准备工作', link: '/guide/5gpn/prerequisites' },
+            { text: '一键安装部署', link: '/guide/5gpn/install' },
+            { text: 'iOS 接入：双模式', link: '/guide/5gpn/ios' },
+            { text: 'Android 接入：私人 DNS', link: '/guide/5gpn/android' },
+            { text: '出口与分流管理', link: '/guide/5gpn/egress-and-rules' },
+            { text: '诊断与常见问题', link: '/guide/5gpn/faq' },
           ],
         },
       ],
