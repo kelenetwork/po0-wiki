@@ -85,7 +85,7 @@ export default function GpnLanding() {
             没有 Clash，没有 VPN 图标，没有 tun。
           </p>
           <div className="gpn-cta">
-            <a className="gpn-btn-p" href="/guide/5gpn/quick-start">快速开始 →</a>
+            <a className="gpn-btn-p" href="/guide/5gpn/what-is-5gpn">快速开始 →</a>
             <a className="gpn-btn-s" href={GITHUB} target="_blank" rel="noreferrer">GitHub</a>
           </div>
           <div className="gpn-trust">
@@ -166,7 +166,7 @@ kelenetwork/5gpn-next/main/install.sh | sudo bash`}</pre>
           <div className="gpn-tabs gpn-rv">
             <div className="gpn-tabbar" role="tablist">
               <button type="button" role="tab" aria-selected={tab === 'dns'} className={tab === 'dns' ? 'on' : ''} onClick={() => setTab('dns')}>📡 蜂窝 DNS 模式</button>
-              <button type="button" role="tab" aria-selected={tab === 'relay'} className={tab === 'relay' ? 'on' : ''} onClick={() => setTab('relay')}>🔗 Relay 模式</button>
+              <button type="button" role="tab" aria-selected={tab === 'relay'} className={tab === 'relay' ? 'on' : ''} onClick={() => setTab('relay')}>🔗 Relay 模式（实验性）</button>
             </div>
             {tab === 'dns' ? (
               <div className="gpn-pane" role="tabpanel">
@@ -181,13 +181,13 @@ kelenetwork/5gpn-next/main/install.sh | sudo bash`}</pre>
               </div>
             ) : (
               <div className="gpn-pane" role="tabpanel">
-                <h3>Relay 模式 <span className="gpn-rec gpn-rec-mute">协议兼容优先</span></h3>
-                <p className="gpn-sub">iOS 原生 Network Relay，客户端主动携带目的地，协议覆盖最完整；但蜂窝与 Wi-Fi 同时生效。</p>
+                <h3>Relay 模式 <span className="gpn-rec gpn-rec-mute">实验性 · 谨慎使用</span></h3>
+                <p className="gpn-sub">iOS 原生 Network Relay，TCP 协议覆盖最完整；但蜂窝与 Wi-Fi 同时生效（会覆盖家内分流），且 UDP/QUIC 未支持，短视频 App 可能卡顿。日常请优先选蜂窝 DNS 模式。</p>
                 <div className="gpn-kv">
                   <div><b>Wi-Fi 影响</b><span>蜂窝 / Wi-Fi 同时生效</span></div>
-                  <div><b>国内流量</b><span>内置名单手机本地直连</span></div>
-                  <div><b>协议覆盖</b><span className="ok">完整 · 含无 SNI 协议</span></div>
-                  <div><b>WhatsApp</b><span className="ok">原生支持</span></div>
+                  <div><b>UDP / QUIC</b><span>未支持，短视频可能卡</span></div>
+                  <div><b>协议覆盖</b><span className="ok">TCP 完整 · 含无 SNI</span></div>
+                  <div><b>WhatsApp</b><span>IPv6 环境可能不可用</span></div>
                 </div>
               </div>
             )}
